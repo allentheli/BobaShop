@@ -161,6 +161,7 @@ const SYNTH = {
   },
   bell: (t) => { tone(t, 2093, 1.2, { gain: 0.25 }); tone(t, 3136, 0.8, { gain: 0.08 }); },
   hmm: (t) => { tone(t, 330, 0.18, { type: 'triangle', gain: 0.2 }); tone(t + 0.2, 262, 0.3, { type: 'triangle', gain: 0.2 }); },
+  aww: (t) => { tone(t, 523, 0.25, { type: 'triangle', gain: 0.16, slideTo: 440 }); tone(t + 0.25, 440, 0.45, { type: 'triangle', gain: 0.16, slideTo: 330 }); },
   sunset: (t) => [784, 659, 523, 392].forEach((f, i) => tone(t + i * 0.22, f, 0.5, { type: 'triangle', gain: 0.18 })),
   hop: (t) => tone(t, 400, 0.18, { type: 'sine', gain: 0.2, slideTo: 900 }),
   // The cleanup song: a short bouncy tune, played twice.

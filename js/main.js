@@ -15,7 +15,9 @@ import { startOpen } from './open.js';
 import { meetScreen } from './meet.js';
 import { beforeScreen } from './before.js';
 import { closingScreen } from './closing.js';
-import { loadSave, writeSave } from './storage.js';
+import { loadSave, writeSave, defaultSave } from './storage.js';
+import { openSettings } from './settings.js';
+import { addPauseButton } from './pause.js';
 
 const STAGE_W = 1180;
 const STAGE_H = 820;
@@ -55,7 +57,8 @@ document.documentElement.style.setProperty('--star-url', `url("${new URL(ICONS.s
 for (const ev of ['gesturestart', 'gesturechange', 'dblclick', 'contextmenu']) {
   document.addEventListener(ev, (e) => e.preventDefault(), { passive: false });
 }
-document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+// Scrolling is allowed only inside panels marked .scroll (the settings).
+document.addEventListener('touchmove', (e) => { if (!e.target.closest('.scroll')) e.preventDefault(); }, { passive: false });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) resume(); });
 
 // ---- Offline support --------------------------------------------------------
@@ -107,64 +110,58 @@ function titleScreen() {
       showPhase();
     }, { sound: null });
   }
-  onHold(parentBtn, () => { unlock(); parentPanel(); }, 3);
+  onHold(parentBtn, () => { unlock(); settingsPanel(root, { withDemo: true }); }, 3);
 }
 
-// ---- Parent panel (full settings arrive in milestone 3) ---------------------
+// ---- Parent settings and the pause menu ------------------------------------
 
-function parentPanel() {
-  const close = h('button', { class: 'btn small-btn' }, 'Close');
-  const demo = h('button', { class: 'btn small-btn' }, 'Play a demo shift (fast, by itself)');
-  const voice = h('button', { class: 'btn small-btn' }, `Voice: ${config.sound.voice ? 'on' : 'off'}`);
-  const LEVELS = [
-    'Tea and topping',
-    '+ cup size (small or large)',
-    '+ scoops of topping (1, 2 or 3)',
-    '+ ice (none, some, lots)',
-    '+ sugar (none, half, full)',
-    '+ fresh topping (1 coin more)',
-    '+ a longer line',
-    '+ freshly brewed tea (1 coin more)',
-  ];
-  const levelNote = h('p', { class: 'level-note' });
-  const levelBtns = LEVELS.map((_, i) => h('button', { class: 'btn level-btn' }, String(i + 1)));
-  const drawLevel = () => {
-    levelBtns.forEach((b, i) => b.classList.toggle('chosen', i + 1 === config.level));
-    levelNote.textContent = `Level ${config.level}: ${LEVELS.slice(0, config.level).join(' ')}`;
-  };
-  levelBtns.forEach((b, i) => onTap(b, () => {
-    save.settings.level = i + 1;
-    persist();
-    config = withSettings(save.settings);
-    drawLevel();
-  }));
-  drawLevel();
-  const panel = h('div', { class: 'parent-panel' },
-    h('div', { class: 'panel-card' },
-      h('h2', {}, 'Parents'),
-      h('div', { class: 'panel-label' }, 'Order level (each level adds one detail to the orders)'),
-      h('div', { class: 'level-row' }, ...levelBtns),
-      levelNote,
-      h('p', {}, 'A new level starts with the next day. Cups are counted from level 2 (6 small, 6 large). The rest of the settings come in milestone 3.'),
-      voice, demo, close));
-  app.querySelector('.screen').appendChild(panel);
-  onTap(close, () => panel.remove());
-  onTap(voice, () => {
-    save.settings.sound = { ...(save.settings.sound || {}), voice: !config.sound.voice };
-    persist();
-    config = withSettings(save.settings);
-    configureSound(config.sound);
-    voice.textContent = `Voice: ${config.sound.voice ? 'on' : 'off'}`;
+function reloadConfig() {
+  config = withSettings(save.settings);
+  configureSound(config.sound);
+}
+
+// host: the element the settings panel opens over.
+function settingsPanel(host, { onClose = () => {}, withDemo = false } = {}) {
+  openSettings({
+    host,
+    save,
+    getConfig: () => config,
+    dayRunning: !!save.day,
+    onChange: () => { persist(); reloadConfig(); },
+    onReset: (kind) => {
+      if (kind === 'day') save.day = null;
+      else save = defaultSave();
+      persist();
+      reloadConfig();
+      titleScreen();
+    },
+    onDemo: withDemo ? () => demoShift() : null,
+    onClose,
   });
-  onTap(demo, () => demoShift());
 }
+
+// What every pause menu needs. During the shift, closing the settings
+// restarts the shift screen from its save, so new settings apply at once.
+function pauseOptions({ restartOnSettings = false } = {}) {
+  return {
+    onHome: () => { persist(); titleScreen(); },
+    onSettings: (menuEl, stopScreen) => settingsPanel(menuEl, {
+      onClose: () => {
+        if (restartOnSettings) { if (stopScreen) stopScreen(); showPhase(); }
+      },
+    }),
+    getSoundOn: () => config.sound.voice && config.sound.volume > 0 && !soundMuted,
+    onToggleSound: () => { soundMuted = !soundMuted; setMuted(soundMuted); },
+  };
+}
+let soundMuted = false;
 
 // ---- The day ------------------------------------------------------------------
 
 function newDay() {
-  // The order level is fixed for the whole day, so changing it in the
-  // parent panel never changes a shift halfway.
-  save.day = { phase: 'meet', number: save.days + 1, startedAt: Date.now(), level: config.level };
+  // The order level and cup counts are fixed for the whole day, so
+  // changing them in the settings never changes a shift halfway.
+  save.day = { phase: 'meet', number: save.days + 1, startedAt: Date.now(), level: config.level, cups: { ...config.cups } };
   persist();
   showPhase();
 }
@@ -201,7 +198,8 @@ function showPhase() {
     case 'open':
       startOpen({
         app,
-        config: { ...structuredClone(config), bias: day.hint, level: day.level ?? config.level },
+        config: { ...structuredClone(config), bias: day.hint, level: day.level ?? config.level, cups: day.cups ?? config.cups },
+        pause: pauseOptions({ restartOnSettings: true }),
         speed: Number(params.get('speed')) || 1,
         restore: day.shift || null,
         onSave: (snapshot) => { day.shift = snapshot; persist(); },
@@ -233,7 +231,10 @@ function showPhase() {
       break;
     default:
       titleScreen();
+      return;
   }
+  // Every part of the day has a pause button (the shift adds its own).
+  if (day.phase !== 'open') addPauseButton(app.querySelector('.screen'), pauseOptions());
 }
 
 function finishDay(result) {

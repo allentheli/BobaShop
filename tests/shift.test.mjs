@@ -94,27 +94,54 @@ test('tips depend on how fast the drink is served', () => {
 });
 
 test('customers in line never leave when leaving is off', () => {
-  const { shift } = make({ arrivalEvery: 5, waitingCustomersLeave: false });
+  const { shift } = make({ arrivalEvery: 5, customersLeave: false });
   run(shift, 250);
   assert.equal(shift.people.filter((p) => p.leftBecause === 'gaveUp').length, 0);
 });
 
-test('customers in line leave when leaving is on, and no money is lost', () => {
-  const { shift } = make({ arrivalEvery: 5, waitingCustomersLeave: true });
+test('customers in line leave without paying when leaving is on', () => {
+  const { shift, config } = make({ arrivalEvery: 5, customersLeave: true });
   run(shift, 3);
   shift.ringUp(price(shift.counter.order, CONFIG.prices));
-  const before = shift.money;
   const left = [];
   shift.emit = (type, p) => { if (type === 'leave') left.push(p); };
-  run(shift, 200);
-  assert.ok(left.length > 0);
-  assert.equal(shift.money, before);
-  // A customer whose order was taken never leaves.
+  run(shift, config.patience.lineLeave + 10);
+  const fromLine = left.filter((p) => !p.refund);
+  assert.ok(fromLine.length > 0);
+  for (const p of fromLine) assert.equal(p.paidAt, null);
+});
+
+test('a paid customer who waits too long leaves and gets their coins back', () => {
+  const { shift, config } = make({ arrivalEvery: 1000, customersLeave: true });
+  run(shift, 3);
+  const c = shift.counter;
+  const due = price(c.order, CONFIG.prices);
+  shift.ringUp(due);
+  assert.equal(shift.money, due);
+  // Halfway: the bar is shrinking but they are still waiting.
+  run(shift, config.patience.waitWarn + 1);
+  assert.equal(shift.patienceOf(c).warn, true);
+  assert.ok(shift.patienceOf(c).left < 0.5);
+  run(shift, config.patience.waitLeave - config.patience.waitWarn);
+  assert.equal(c.place, 'gone');
+  assert.equal(c.refund, due);
+  assert.equal(shift.money, 0);
+  assert.equal(shift.refunds, due);
+  assert.equal(shift.served.length, 0);
+});
+
+test('nobody leaves when leaving is off', () => {
+  const { shift } = make({ arrivalEvery: 5, customersLeave: false });
+  run(shift, 3);
+  shift.ringUp(price(shift.counter.order, CONFIG.prices));
+  run(shift, 280);
   assert.equal(shift.waiting.length, 1);
+  assert.equal(shift.line.length, 3);
+  assert.equal(shift.refunds, 0);
 });
 
 test('at closing the line leaves, no one steps up, and waiting drinks can still be served', () => {
-  const { shift, config } = make({ arrivalEvery: 5 });
+  const { shift, config } = make({ arrivalEvery: 5, customersLeave: false });
   run(shift, 3);
   shift.ringUp(price(shift.counter.order, CONFIG.prices));
   run(shift, config.shiftLength);
@@ -149,7 +176,8 @@ test('higher levels put every detail in the orders', () => {
   const { shift } = make({ level: 6 });
   run(shift, 3);
   const o = shift.counter.order;
-  for (const k of ['tea', 'topping', 'size', 'scoops', 'ice', 'sugar', 'fresh']) assert.ok(o[k], k);
+  for (const k of ['tea', 'topping', 'size', 'extra', 'ice', 'sugar', 'fresh']) assert.ok(o[k], k);
+  assert.ok(shift.counter.pays > price(o, CONFIG.prices));
 });
 
 test('cups are counted and the shop sells out', () => {

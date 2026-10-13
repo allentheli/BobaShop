@@ -66,7 +66,7 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone }) {
     const wrongBtn = h('button', { class: 'btn big judge wrong-btn' }, icon('cross', 'judge-icon'), h('span', { class: 'label' }, t('ui.notRight')));
     const dots = h('div', { class: 'progress-dots' }, ...c.picks.map((_, k) =>
       h('span', { class: `dot ${k < i ? (c.results[k] ? 'good' : 'bad') : ''} ${k === i ? 'now' : ''}` })));
-    const custSpot = h('div', { class: 'inspect-cust' }, cust, h('div', { class: 'held-cup' }, icon(`tea.${pick.order.tea}`, 'held-cup-img')));
+    const custSpot = h('div', { class: 'inspect-cust' }, cust, h('div', { class: 'held-cup' }, icon(`cup.${pick.order.tea}`, 'held-cup-img')));
     main.replaceChildren(
       h('div', { class: 'inspect-head' }, h('div', { class: 'parent-label' }, t('ui.inspection')), dots),
       h('div', { class: 'inspect-body' },
@@ -139,6 +139,7 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone }) {
         h('span', {}, `${t('ui.fromSales')}: ${day.summary.sales}`),
         h('span', {}, `${t('ui.fromTips')}: ${day.summary.tips}`),
         h('span', {}, `${t('ui.bonus')}: ${money - day.summary.money}`),
+        day.summary.refunds ? h('span', { class: 'refund-note' }, `${t('ui.refunds')}: −${day.summary.refunds}`) : null,
         h('span', {}, `${t('ui.drinksServed')}: ${day.summary.drinks}`)),
       starRow,
       next);

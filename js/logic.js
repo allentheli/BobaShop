@@ -27,7 +27,7 @@ export function generateOrder(menu, opts = {}) {
   const choicesFor = (d) => {
     let opts2 = d.options;
     const owned = opts.owned && opts.owned[d.id];
-    if (owned) opts2 = opts2.filter((o) => owned.includes(o.id));
+    if (owned) opts2 = opts2.filter((o) => o.always || owned.includes(o.id));
     if (d.id === 'size' && opts.cupsLeft) {
       opts2 = opts2.filter((o) => (opts.cupsLeft[o.id] ?? 1) > 0);
     }
@@ -40,9 +40,14 @@ export function generateOrder(menu, opts = {}) {
       const choices = choicesFor(d);
       if (choices.length === 0) return null;
       const weights = choices.map((o) =>
-        opts.bias && opts.bias.detail === d.id && opts.bias.option === o.id ? (opts.bias.weight ?? 2) : 1,
+        (o.weight ?? 1) * (opts.bias && opts.bias.detail === d.id && opts.bias.option === o.id ? (opts.bias.weight ?? 2) : 1),
       );
       order[d.id] = choices[weightedIndex(weights, rng)].id;
+    }
+    // Details that only make sense with another one (no "extra topping"
+    // when there is no topping) fall back to their first option.
+    for (const d of details) {
+      if (d.onlyIf && order[d.onlyIf.detail] === d.onlyIf.not) order[d.id] = d.options[0].id;
     }
     return order;
   };
@@ -79,6 +84,7 @@ export function priceParts(order, prices) {
   const parts = [];
   if (order.size) parts.push({ id: order.size, coins: prices[order.size] });
   else parts.push({ id: 'base', coins: prices.base });
+  if (order.extra === 'yes') parts.push({ id: 'extra', coins: prices.extra });
   if (order.fresh === 'yes') parts.push({ id: 'fresh', coins: prices.fresh });
   if (order.brew === 'yes') parts.push({ id: 'brew', coins: prices.brew });
   return parts;
@@ -86,6 +92,12 @@ export function priceParts(order, prices) {
 
 export function price(order, prices) {
   return priceParts(order, prices).reduce((s, p) => s + p.coins, 0);
+}
+
+// Hard register: the customer pays with the smallest coin bigger than the
+// price, and the cashier works out the change.
+export function payWith(due, coins = [5, 10, 20]) {
+  return coins.find((c) => c > due) ?? Math.ceil((due + 1) / 10) * 10;
 }
 
 export function tipFor(secondsSinceOrder, tips) {
@@ -115,7 +127,7 @@ export function pickHint(menu, { owned = {}, weight = 2, rng = Math.random } = {
   const detailIds = ['tea', 'topping'];
   const d = detailIds[Math.floor(rng() * detailIds.length)];
   const options = menu.details.find((x) => x.id === d).options
-    .filter((o) => !owned[d] || owned[d].includes(o.id));
+    .filter((o) => !o.always && (!owned[d] || owned[d].includes(o.id)));
   if (options.length < 2) return null;
   return { detail: d, option: options[Math.floor(rng() * options.length)].id, weight };
 }

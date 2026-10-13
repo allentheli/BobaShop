@@ -19,13 +19,23 @@ A whole day runs from the title screen and back:
 
 **Saving:** the day is saved after every step. If the app is closed in the middle of a day, the title screen shows a big **Continue** button. **New day** starts over.
 
-**Parents:** hold the "Parents" button on the title screen for 3 seconds. There you can:
+**Pause:** during the day, hold the round pause button (top of the screen) for 1 second. The clock, the customers and their patience all freeze. From the pause menu you can keep playing, go Home (the day is saved, so Continue picks it up), turn the sound off, open the settings, or end the shift early (tap twice).
 
-- pick the **order level** (1 to 8). Level 1 is tea and topping only. Each level adds one detail: 2 cup size, 3 scoops, 4 ice, 5 sugar, 6 fresh topping, 7 a longer line, 8 freshly brewed tea (the manager brews a new pot for that drink; 1 coin more). A new level starts with the next day.
-- turn the voice on or off.
-- watch a demo shift that plays itself at high speed.
+**Customers who wait too long:** a patience bar over each customer's head shrinks from green to yellow to red. A customer in line who runs out of patience leaves without buying. A customer who already paid and runs out while waiting for their drink leaves and gets their coins back: a red "−3" floats over their head. Both can be switched off in the settings.
 
-From level 2, the app counts cups (6 small and 6 large). It never orders a size that has run out, and when every cup is used the shop is "sold out" and closes early, as a win.
+**Parent settings:** hold the "Parents" button on the title screen for 3 seconds, or open Settings from the pause menu.
+
+- **Order level** (1 to 8): 1 tea and topping, 2 cup size, 3 extra topping, 4 ice, 5 sugar, 6 fresh topping, 7 a longer line, 8 freshly brewed tea. Each detail can also be switched on or off by hand.
+- **Our cups:** type how many small and large cups you have. When all are used, the shop sells out and closes early.
+- **Shift length**, **what teas and toppings you have**, **drinks in progress** (1 or 2).
+- **Register:** easy (picture buttons), medium (type the total), hard (the customer pays with a bigger coin; type the change). Medium and hard show a price list next to the register.
+- **Call mode:** easy (the ticket travels with the cup), normal (only the manager holds the ticket), hard (customers only say hello; the order is pictures only).
+- **Waiting customers:** leave or not, and patience bars on or off.
+- **Lock an apron to a job**, **sound** volume and voice, a **demo shift**, and **reset** the day or everything.
+
+The order level and cup counts start with the next day. Everything else changes right away.
+
+The order pictures match the printed order ticket: the same pictures, on the same row colors and numbers (1 Cup, 2 Tea, 3 Topping, 4 Ice, 5 Sugar, 6 Notes). Freshly brewed tea is not on the ticket, so the cashier writes it on the Notes line.
 
 ## How to open it on the iPad
 

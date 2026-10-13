@@ -2,7 +2,7 @@
 // The same code will draw faces on kids' drawings in milestone 4, so the
 // body is always a plain picture and the face is always drawn by the app.
 //
-// Expressions: waiting, happy, impatient, unsure, silly.
+// Expressions: waiting, happy, impatient, unsure, silly, sad.
 
 const EYES = {
   open: `
@@ -40,6 +40,16 @@ EYES.silly = `
       <path d="M18 -10 L36 -4 M18 -10 L36 -16" stroke="#241a1a" stroke-width="4" stroke-linecap="round"/>
     </g>`;
 
+EYES.sad = `
+    <g class="eyes">
+      <ellipse cx="-27" cy="-8" rx="7" ry="8" fill="#241a1a"/>
+      <ellipse cx="27" cy="-8" rx="7" ry="8" fill="#241a1a"/>
+      <circle cx="-25" cy="-11" r="2.5" fill="#fff"/>
+      <circle cx="29" cy="-11" r="2.5" fill="#fff"/>
+      <path d="M-38 -20 Q-28 -26 -18 -22 M38 -20 Q28 -26 18 -22" fill="none" stroke="#241a1a" stroke-width="4" stroke-linecap="round"/>
+      <path d="M-34 4 Q-36 12 -33 14 Q-30 12 -32 4 Z" fill="#7fc8f5"/>
+    </g>`;
+
 const MOUTH_OPEN = '<ellipse class="m-open" cx="0" cy="26" rx="9" ry="8" fill="#5b1f2a" stroke="#241a1a" stroke-width="3"/>';
 
 const MOUTHS = {
@@ -47,6 +57,7 @@ const MOUTHS = {
   happy: '<path class="m-closed" d="M-18 18 Q0 42 18 18 Z" fill="#5b1f2a" stroke="#241a1a" stroke-width="3.5" stroke-linejoin="round"/><path class="m-closed" d="M-8 29 Q0 24 8 29 Q0 35 -8 29 Z" fill="#ff8fa3"/>',
   impatient: '<path class="m-closed" d="M-13 28 Q-6 23 0 28 Q6 33 13 28" fill="none" stroke="#241a1a" stroke-width="4" stroke-linecap="round"/>',
   silly: '<path class="m-closed" d="M-16 20 Q0 32 16 20" fill="none" stroke="#241a1a" stroke-width="4" stroke-linecap="round"/><path class="m-closed" d="M-2 26 Q6 44 14 26 Z" fill="#ff8fa3" stroke="#241a1a" stroke-width="3" stroke-linejoin="round"/>',
+  sad: '<path class="m-closed" d="M-12 30 Q0 20 12 30" fill="none" stroke="#241a1a" stroke-width="4" stroke-linecap="round"/>',
   unsure: '<ellipse class="m-closed" cx="3" cy="27" rx="5" ry="6" fill="#5b1f2a" stroke="#241a1a" stroke-width="3"/>',
 };
 

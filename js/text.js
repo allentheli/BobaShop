@@ -49,9 +49,12 @@ export function drinkPhrase(order) {
   let tea = menuWord('tea', order.tea);
   if (order.brew === 'yes') tea = P('brewed', { tea });
   let topping = menuWord('topping', order.topping);
-  if (order.fresh === 'yes') topping = P('fresh', { topping });
+  if (order.topping !== 'none') {
+    if (order.fresh === 'yes') topping = P('fresh', { topping });
+    if (order.extra === 'yes') topping = P('extra', { topping });
+  }
   let s = order.size ? P('sized', { size: menuWord('size', order.size), tea }) : P('unsized', { tea });
-  s += ' ' + (order.scoops ? P('toppingScoops', { scoops: menuWord('scoops', order.scoops), topping }) : P('topping', { topping }));
+  s += ' ' + P('topping', { topping });
   const extras = [];
   if (order.ice) extras.push(menuWord('ice', order.ice));
   if (order.sugar) extras.push(menuWord('sugar', order.sugar));

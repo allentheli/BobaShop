@@ -10,6 +10,7 @@ import { speak, play, stopSpeaking, resume } from './audio.js';
 import { createCharacter, setExpression, setTalking, act } from './character.js';
 import { h, icon, onTap, wait } from './ui.js';
 import { orderIcons } from './orderview.js';
+import { addPauseButton } from './pause.js';
 
 // Where characters stand, in stage pixels (the stage is 1180 x 820).
 // x, y is the point between the character's feet; s is the size.
@@ -26,7 +27,8 @@ const SLOTS = {
 // restore: a saved shift to pick up again (from Shift.toJSON).
 // onSave:  called with the shift's state every few seconds and after every
 //          change, so the shift survives the app being closed.
-export function startOpen({ app, config, demo = false, speed = 1, restore = null, onSave = () => {}, onFinish }) {
+// pause: { onHome, onSettings, getSoundOn, onToggleSound } for the pause menu.
+export function startOpen({ app, config, demo = false, speed = 1, restore = null, onSave = () => {}, onFinish, pause = null }) {
   const walkMs = config.anim.walk * 1000;
   const root = h('div', { class: 'screen open-screen' });
   const people = new Map();   // customer id -> { p, el, slot, busyUntil, mood, moodUntil }
@@ -38,7 +40,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
 
   const scene = h('div', { class: 'scene' },
     h('div', { class: 'wall' }),
-    h('div', { class: 'shelf shelf-1' }, icon('tea.milk', 'shelf-cup'), icon('tea.matcha', 'shelf-cup'), icon('tea.taro', 'shelf-cup')),
+    h('div', { class: 'shelf shelf-1' }, icon('cup.milk', 'shelf-cup'), icon('cup.matcha', 'shelf-cup'), icon('cup.taro', 'shelf-cup')),
     h('div', { class: 'floor' }),
     h('div', { class: 'door' }, h('div', { class: 'door-window' }), h('div', { class: 'door-knob' })),
   );
@@ -73,22 +75,32 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   const bubbleItems = h('div', { class: 'order-items' });
   const repeatBtn = h('button', { class: 'btn round repeat', 'aria-label': t('ui.repeat') }, icon('speaker'));
   const bubble = h('div', { class: 'order-bubble hidden' }, bubbleNum, bubbleItems, repeatBtn);
+  if (config.callMode === 'hard') repeatBtn.classList.add('hidden');
 
-  // Register on the counter.
+  // Register on the counter. Three modes (config.registerMode):
+  //   easy    tap a picture button for each priced part; the register adds up
+  //   medium  add up the prices and type the total on the number pad
+  //   hard    the customer pays with a bigger coin; type the change
+  const mode = ['easy', 'medium', 'hard'].includes(config.registerMode) ? config.registerMode : 'easy';
   const partsRow = h('div', { class: 'reg-parts' });
   const trayCoins = h('div', { class: 'tray-coins' });
   const trayNum = h('div', { class: 'tray-num' }, '0');
   const clearBtn = h('button', { class: 'btn round reg-clear', 'aria-label': t('ui.clear') }, icon('clear'));
   const ringBtn = h('button', { class: 'btn round reg-ring', 'aria-label': t('ui.ringUp') }, icon('check'));
   const drawer = h('div', { class: 'drawer' }, h('div', { class: 'drawer-coins' }));
-  const register = h('div', { class: 'register disabled' },
-    partsRow,
+  const keypad = h('div', { class: 'keypad' });
+  const register = h('div', { class: `register disabled mode-${mode}` },
+    mode === 'easy' ? partsRow : keypad,
     h('div', { class: 'tray' }, trayCoins, trayNum),
     clearBtn, ringBtn, drawer);
-
+  // The price list, on the counter next to the register (medium and hard).
+  const priceBoard = h('div', { class: `price-board ${mode === 'easy' ? 'hidden' : ''}` });
+  // In hard mode the customer's coin shows in the order bubble.
+  const paidCoin = h('div', { class: 'paid-coin hidden' }, icon('coin', 'paid-coin-img'), h('span', { class: 'paid-coin-num' }));
   const finishBtn = h('button', { class: 'btn big finish hidden' }, h('span', { class: 'moon' }), h('span', { class: 'label' }, t('ui.finish')));
 
-  const counter = h('div', { class: 'counter' }, register, finishBtn);
+  const counter = h('div', { class: 'counter' }, priceBoard, register, finishBtn);
+  bubble.insertBefore(paidCoin, repeatBtn);
   const popupLayer = h('div', { class: 'popups' });
 
   root.append(top, scene, bubble, counter, popupLayer);
@@ -97,6 +109,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   // ---- Register ------------------------------------------------------------
 
   let regParts = [];
+  let typed = '';
   let regBusy = false;
   const details = activeDetails(MENU, config.level, config.enabledDetails).map((d) => d.id);
   const partDefs = [];
@@ -106,6 +119,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   } else {
     partDefs.push({ id: 'base', coins: config.prices.base, cls: 'cup-base', icon: 'drink' });
   }
+  if (details.includes('extra')) partDefs.push({ id: 'extra', coins: config.prices.extra, cls: 'extra', icon: 'extra.yes' });
   if (details.includes('fresh')) partDefs.push({ id: 'fresh', coins: config.prices.fresh, cls: 'fresh', icon: 'fresh.yes' });
   if (details.includes('brew')) partDefs.push({ id: 'brew', coins: config.prices.brew, cls: 'brew', icon: 'brew.yes' });
 
@@ -114,6 +128,14 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     const btn = h('button', { class: `btn part ${part.cls}` }, icon(part.icon, 'part-img'), coins, h('span', { class: 'part-price' }, String(part.coins)));
     onTap(btn, () => addPart(part), { sound: 'coin', gap: 200 });
     partsRow.appendChild(btn);
+    priceBoard.appendChild(h('div', { class: 'price-row' }, icon(part.icon, 'price-img'),
+      h('span', { class: 'price-plus' }, part.id === 'small' || part.id === 'large' || part.id === 'base' ? '' : '+'),
+      h('span', { class: 'price-num' }, String(part.coins)), icon('coin', 'price-coin')));
+  }
+  for (const n of [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]) {
+    const k = h('button', { class: 'btn key' }, String(n));
+    onTap(k, () => typeDigit(n), { sound: 'tap', gap: 120 });
+    keypad.appendChild(k);
   }
   onTap(clearBtn, () => clearRegister());
   onTap(ringBtn, () => ringUp(), { sound: null });
@@ -125,22 +147,35 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     drawTray();
   }
 
-  function clearRegister() {
-    regParts = [];
+  function typeDigit(n) {
+    if (regBusy || !counterReady()) return;
+    typed = typed.length >= 2 ? String(n) : (typed === '0' ? String(n) : typed + n);
     drawTray();
   }
 
+  function clearRegister() {
+    regParts = [];
+    typed = '';
+    drawTray();
+  }
+
+  // What the register shows: the total in easy and medium, the change in hard.
+  function regValue() {
+    return mode === 'easy' ? regParts.reduce((s, p) => s + p.coins, 0) : Number(typed || 0);
+  }
+
   function drawTray() {
-    const total = regParts.reduce((s, p) => s + p.coins, 0);
-    trayNum.textContent = String(total);
-    trayCoins.replaceChildren(...Array.from({ length: Math.min(total, 14) }, () => icon('coin', 'tray-coin')));
-    ringBtn.classList.toggle('ready', total > 0);
+    const v = regValue();
+    trayNum.textContent = mode === 'easy' || typed !== '' ? String(v) : '';
+    trayCoins.replaceChildren(...Array.from({ length: Math.min(v, 14) }, () => icon('coin', 'tray-coin')));
+    ringBtn.classList.toggle('ready', mode === 'easy' ? v > 0 : typed !== '');
   }
 
   async function ringUp() {
     const c = shift.counter;
-    if (regBusy || !c || !counterReady() || regParts.length === 0) return;
-    const total = regParts.reduce((s, p) => s + p.coins, 0);
+    if (regBusy || !c || !counterReady()) return;
+    if (mode === 'easy' ? regParts.length === 0 : typed === '') return;
+    const total = mode === 'hard' ? c.pays - regValue() : regValue();
     regBusy = true;
     const ok = shift.ringUp(total);
     if (!ok) {
@@ -166,6 +201,20 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     register.classList.remove('open-drawer');
     clearRegister();
     regBusy = false;
+  }
+
+  // For the demo: put the right answer into the register (or a wrong one).
+  function botEnter(order, wrong) {
+    clearRegister();
+    if (mode === 'easy') {
+      regParts = priceParts(order, config.prices).map((x) => partDefs.find((d) => d.id === x.id));
+      if (wrong) regParts.push(partDefs[0]);
+    } else {
+      const due = price(order, config.prices);
+      const v = mode === 'hard' ? shift.counter.pays - due : due;
+      typed = String(wrong ? v + 1 : v);
+    }
+    drawTray();
   }
 
   function counterReady() {
@@ -195,11 +244,11 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     }
   }
 
-  function flyCoins(fromEl, n) {
+  function flyCoins(fromEl, n, toEl = money.querySelector('.money-coin')) {
     const stage = app.getBoundingClientRect();
     const scale = stage.width / 1180;
     const a = fromEl.getBoundingClientRect();
-    const b = money.querySelector('.money-coin').getBoundingClientRect();
+    const b = toEl.getBoundingClientRect();
     for (let i = 0; i < Math.min(n, 8); i++) {
       const c = icon('coin', 'fly-coin');
       const x0 = (a.left + a.width / 2 - stage.left) / scale + (i - n / 2) * 18;
@@ -215,6 +264,14 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
       }, 30);
       setTimeout(() => { c.remove(); play('coin'); }, 800 + i * 70);
     }
+  }
+
+  // A customer who leaves after paying gets their coins back: a red "-3"
+  // over their head, and coins fly from the money bar to them.
+  function showRefund(v, n) {
+    const pop = h('div', { class: 'refund-pop' }, h('span', {}, `−${n}`), icon('coin', 'refund-coin'));
+    v.el.appendChild(pop);
+    flyCoins(money.querySelector('.money-coin'), Math.min(n, 5), v.el.querySelector('.char-body'));
   }
 
   // ---- Characters ----------------------------------------------------------
@@ -266,8 +323,9 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     const el = createCharacter(p.type);
     const wish = h('div', { class: 'wish' }, icon(option(MENU, 'topping', p.order.topping).icon, 'wish-icon'));
     const tag = h('div', { class: 'tag' });
-    const cup = h('div', { class: 'held-cup' }, icon(`tea.${p.order.tea}`, 'held-cup-img'));
-    el.append(wish, tag, cup);
+    const cup = h('div', { class: 'held-cup' }, icon(`cup.${p.order.tea}`, 'held-cup-img'));
+    const bar = h('div', { class: 'patience' }, h('div', { class: 'patience-fill' }));
+    el.append(wish, tag, bar, cup);
     el.dataset.place = p.place;
     chars.appendChild(el);
     const v = { p, el, slot: null, busyUntil: 0, mood: null, moodUntil: 0, arrived: false };
@@ -298,11 +356,21 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
       let mood = 'waiting';
       if (v.mood && performance.now() < v.moodUntil) mood = v.mood;
       else if (p.place === 'served') mood = 'happy';
-      else if (p.place === 'gone') mood = p.leftBecause === 'gaveUp' ? 'impatient' : 'happy';
-      else if (p.place === 'line' && p.placeTime > config.patience.impatientAfter) mood = 'impatient';
-      else if (p.place === 'waiting' && p.placeTime > config.patience.waitingSpotImpatientAfter) mood = 'impatient';
+      else if (p.place === 'gone') mood = p.leftBecause === 'gaveUp' ? 'sad' : 'happy';
+      const pat = shift.patienceOf(p);
+      if (mood === 'waiting' && pat && pat.warn) mood = 'impatient';
       setExpression(el, mood);
-      el.classList.toggle('tapping', mood === 'impatient' && p.place === 'line');
+      el.classList.toggle('tapping', mood === 'impatient');
+
+      // The patience bar: green, then yellow at the warning, then red.
+      const showBar = !!(pat && config.customersLeave && config.patienceBar);
+      el.classList.toggle('has-bar', showBar);
+      if (showBar) {
+        const fill = el.querySelector('.patience-fill');
+        fill.style.width = `${Math.round(pat.left * 100)}%`;
+        const color = pat.left > 0.5 && !pat.warn ? 'green' : pat.left > 0.2 ? 'yellow' : 'red';
+        if (fill.dataset.color !== color) fill.dataset.color = color;
+      }
       el.classList.toggle('servable', p.place === 'waiting' && performance.now() > v.busyUntil);
     }
   }
@@ -320,7 +388,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     const slot = SLOTS.waiting[p.spot];
     const serveBtn = h('button', { class: 'btn serve-btn' }, icon('bell', 'bell-icon'), h('span', { class: 'label' }, t('ui.serve')));
     const noBtn = h('button', { class: 'btn round serve-no', 'aria-label': t('ui.cancel') }, '✕');
-    popup = h('div', { class: 'serve-popup', style: { left: `${Math.min(slot.x, 1180 - 130)}px` } },
+    popup = h('div', { class: 'serve-popup', 'data-id': String(p.id), style: { left: `${Math.min(slot.x, 1180 - 130)}px` } },
       h('div', { class: 'serve-num' }, String(p.number)), serveBtn, noBtn);
     popupLayer.appendChild(popup);
     onTap(serveBtn, () => { closePopup(); serve(p); }, { sound: null });
@@ -368,7 +436,9 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     showBubble(p);
     p.sentence = orderSentence(p.order);
     await sayAs(p, line('say.greet', { name: customerName(p.type.id).name }));
-    await sayAs(p, p.sentence);
+    // In hard call mode the customer only says hello: the order is pictures only.
+    if (config.callMode !== 'hard') await sayAs(p, p.sentence);
+    if (mode === 'hard' && shift.counter === p) await sayAs(p, line('say.payWith', { n: p.pays }));
   }
 
   function showBubble(p) {
@@ -376,13 +446,15 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     const items = orderIcons(p.order, { width: 600 });
     bubble.classList.toggle('wide', items.length > 2);
     bubbleItems.replaceChildren(...items);
+    paidCoin.classList.toggle('hidden', mode !== 'hard');
+    if (mode === 'hard') paidCoin.querySelector('.paid-coin-num').textContent = String(p.pays);
     bubble.classList.remove('hidden');
     bubble.classList.remove('pop'); void bubble.offsetWidth; bubble.classList.add('pop');
   }
 
   onTap(repeatBtn, () => {
     const c = shift.counter;
-    if (c && c.sentence) sayAs(c, c.sentence);
+    if (c && c.sentence && config.callMode !== 'hard') sayAs(c, c.sentence);
   }, { sound: null });
 
   // ---- Shift events ----------------------------------------------------------
@@ -403,7 +475,14 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
         break;
       case 'leave': {
         const v = people.get(p.id);
-        if (v) { act(v.el, 'wave'); v.el.classList.remove('tapping'); }
+        if (v) { act(v.el, 'wave'); v.el.classList.remove('tapping', 'has-bar'); }
+        if (popup && popup.dataset.id === String(p.id)) closePopup();
+        if (p.leftBecause === 'gaveUp') {
+          play('aww');
+          if (v) setMood(v, 'sad', 4000);
+          if (p.refund && v) showRefund(v, p.refund);
+          sayAs(p, line(p.refund ? 'say.leaveRefund' : 'say.leaveLine'));
+        }
         layout();
         scheduleRemoval(p.id);
         break;
@@ -429,16 +508,21 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
 
   onTap(finishBtn, () => finish());
 
-  function finish() {
-    if (finished) return;
+  // Stop everything on this screen (timers, sound, the loop).
+  function stop() {
+    if (finished) return false;
     finished = true;
     cancelAnimationFrame(raf);
     clearInterval(botTimer);
+    clearInterval(saveTimer);
     stopSpeaking();
     document.removeEventListener('visibilitychange', onVisibility);
-    clearInterval(saveTimer);
     if (wakeLock) wakeLock.release().catch(() => {});
-    onFinish(shift.summary());
+    return true;
+  }
+
+  function finish() {
+    if (stop()) onFinish(shift.summary());
   }
 
   // ---- Clock -----------------------------------------------------------------
@@ -457,10 +541,11 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
 
   let last = performance.now();
   let raf = 0;
+  let paused = false;
   function frame(now) {
     const dt = Math.min(0.25, (now - last) / 1000);
     last = now;
-    if (!document.hidden && !finished) {
+    if (!document.hidden && !finished && !paused) {
       shift.tick(dt * speed);
       layout();
       drawMoney();
@@ -488,10 +573,9 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
       if (finished) return;
       const c = shift.counter;
       if (c && counterReady() && !regBusy) {
-        const parts = priceParts(c.order, config.prices).map((x) => partDefs.find((d) => d.id === x.id));
-        clearRegister();
-        if (!mistakeMade && Math.random() < 0.2) { mistakeMade = true; regParts = [partDefs[0], partDefs[0]]; } else regParts = parts;
-        drawTray();
+        const wrong = !mistakeMade && Math.random() < 0.2;
+        if (wrong) mistakeMade = true;
+        botEnter(c.order, wrong);
         ringUp();
       }
       for (const p of shift.waiting) {
@@ -522,8 +606,20 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     shift = new Shift(opts);
     speak(line('say.shopOpen'), { pitch: BOSS.voice.pitch, rate: BOSS.voice.rate });
   }
+  if (pause) {
+    addPauseButton(root, {
+      onPause: () => { paused = true; root.classList.add('is-paused'); saveNow(); },
+      onResume: () => { paused = false; root.classList.remove('is-paused'); last = performance.now(); },
+      onHome: () => { saveNow(); stop(); pause.onHome(); },
+      onEndShift: () => { paused = false; finish(); },
+      onSettings: (menuEl) => pause.onSettings(menuEl, () => { saveNow(); stop(); }),
+      getSoundOn: pause.getSoundOn,
+      onToggleSound: pause.onToggleSound,
+    });
+  }
+
   // Expose for checking in the browser console and automated runs.
-  window.__boba = { shift, finish, price: (o) => price(o, config.prices) };
+  window.__boba = { shift, finish, stop, price: (o) => price(o, config.prices) };
   keepAwake();
   drawTray();
   raf = requestAnimationFrame(frame);

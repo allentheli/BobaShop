@@ -63,3 +63,21 @@ Choices made while building that the build instructions did not settle. One line
 - Sold out closes the shop with a cheerful fanfare instead of the sunset sound.
 - Level 7's longer line holds 5 customers (`longLine` in `config.js`).
 - Level 8 (added at Allen's request): some customers ask for freshly brewed tea. It costs 1 coin more (`prices.brew`), has its own register button, and shows as a sparkly teapot right after the tea picture. The app does not track the pots; brewing happens at the table.
+
+## Milestone 3
+
+- The menu now matches the printed order ticket (Allen's design): toppings include "none"; "extra topping" (one more scoop than the cup calls for) replaced 1 to 3 scoops; sugar is none, some or lots; milk tea is red. Level 3 is now extra topping.
+- Each order picture sits on a tile with its ticket row's color and number, so "no ice" and "no sugar" (the same dashed face on the ticket) cannot be mixed up.
+- No extra or fresh topping is ever ordered with "no topping". "No topping" can always be ordered, even if the family has only some toppings.
+- Extra topping costs 1 coin more, like fresh topping and freshly brewed tea (`prices` in `config.js`).
+- Yes/no notes (extra, fresh, freshly brewed) come up about a third of the time, so most orders stay simple.
+- Cups: any number from 0 to 99 of each size, typed in or set with + and −. Order numbers keep counting with the cups (the printed tickets have a blank number circle).
+- Customers leaving (Allen's decision, changing the original "nothing is lost" rule): leaving is on by default. A customer in line leaves after 100 seconds without paying. A paid customer leaves after 3 minutes in a waiting spot and gets their coins back, shown as a red "−3" over their head with coins flying back. Their tip is lost too. Cups already used stay used.
+- Patience bars (Allen's decision, changing the "no harsh countdown" rule): a bar over each waiting customer, green then yellow at the warning point then a pulsing red. No numbers. It can be hidden in the settings.
+- A sad face with a tear and a soft "aww" sound when a customer leaves; never a frown at the team.
+- The pause button needs a 1-second hold. It freezes the clock and every customer's patience. "End the shift" needs a second tap.
+- Settings opened during a shift take effect when the settings close (the shift restarts from its save, in the same state). The order level and cup counts wait for the next day.
+- Hard register: the customer pays with the smallest coin bigger than the price (5, 10 or 20), shown in the order bubble, and says it aloud.
+- Medium and hard registers have a number pad with two-digit entry and a price list next to the register.
+- Hard call mode hides the repeat button; the customer only says hello.
+- The printable sheet is Allen's own design, so the app does not make one.

@@ -5,7 +5,7 @@
 //   line -> counter -> waiting -> served -> gone
 //   line -> gone (leaves when the shop closes, or runs out of patience)
 
-import { generateOrder, price, tipFor, activeDetails, useCup, soldOut } from './logic.js';
+import { generateOrder, price, tipFor, activeDetails, useCup, soldOut, payWith } from './logic.js';
 
 let nextId = 1;
 
@@ -30,6 +30,7 @@ export class Shift {
     this.registerMistakes = 0;
     this.rungUp = 0;
     this.closedBecause = null;
+    this.refunds = 0;
 
     // Cups are counted only when orders name a size. A cup is used when
     // its order is rung up.
@@ -38,7 +39,8 @@ export class Shift {
   }
 
   get lineLimit() {
-    return this.config.level >= 7 ? this.config.longLine : this.config.lineLength;
+    const on = (this.config.enabledDetails || {}).longLine;
+    return (on !== undefined ? on : this.config.level >= 7) ? this.config.longLine : this.config.lineLength;
   }
 
   // Cups not yet promised to a customer who is in line or ordering.
@@ -68,9 +70,20 @@ export class Shift {
       if (this.line.length < this.lineLimit) this.arrive();
     }
 
-    if (!this.closed && this.config.waitingCustomersLeave) {
-      for (const p of this.line) {
-        if (p.placeTime >= this.config.patience.leaveAfter) this.leave(p, 'gaveUp');
+    if (this.config.customersLeave) {
+      const pat = this.config.patience;
+      if (!this.closed) {
+        for (const p of this.line) if (p.placeTime >= pat.lineLeave) this.leave(p, 'gaveUp');
+      }
+      // A paid customer who waits too long for their drink leaves, and the
+      // shop gives back what they paid.
+      for (const p of this.waiting) {
+        if (p.placeTime >= pat.waitLeave) {
+          p.refund = p.price;
+          this.sales -= p.price;
+          this.refunds += p.price;
+          this.leave(p, 'gaveUp');
+        }
       }
     }
 
@@ -116,6 +129,7 @@ export class Shift {
     if (!next) return;
     this.move(next, 'counter');
     next.number = this.nextOrderNumber++;
+    next.pays = payWith(price(next.order, this.config.prices), this.config.payCoins);
     this.emit('stepUp', next);
   }
 
@@ -187,6 +201,16 @@ export class Shift {
     p.placeTime = 0;
   }
 
+  // How much patience a customer has left, from 1 (full) to 0, and whether
+  // they are past the warning point. Customers at the counter or served
+  // have no bar.
+  patienceOf(p) {
+    const pat = this.config.patience;
+    if (p.place === 'line') return { left: Math.max(0, 1 - p.placeTime / pat.lineLeave), warn: p.placeTime >= pat.lineWarn };
+    if (p.place === 'waiting') return { left: Math.max(0, 1 - p.placeTime / pat.waitLeave), warn: p.placeTime >= pat.waitWarn };
+    return null;
+  }
+
   // True when nothing more can happen except pressing Finish.
   get allDone() {
     return this.closed && !this.counter && this.waiting.length === 0;
@@ -211,6 +235,7 @@ export class Shift {
       rungUp: this.rungUp,
       cupsLeft: this.cupsLeft,
       closedBecause: this.closedBecause,
+      refunds: this.refunds,
     };
   }
 
@@ -218,7 +243,7 @@ export class Shift {
   // as the first kind.
   static restore(data, opts) {
     const s = new Shift(opts);
-    for (const k of ['time', 'closed', 'nextArrival', 'nextOrderNumber', 'lastOrder', 'sales', 'tips', 'registerMistakes', 'rungUp', 'cupsLeft', 'closedBecause']) {
+    for (const k of ['time', 'closed', 'nextArrival', 'nextOrderNumber', 'lastOrder', 'sales', 'tips', 'registerMistakes', 'rungUp', 'cupsLeft', 'closedBecause', 'refunds']) {
       if (data[k] !== undefined) s[k] = data[k];
     }
     s.served = (data.served || []).slice();
@@ -239,6 +264,7 @@ export class Shift {
       registerMistakes: this.registerMistakes,
       rungUp: this.rungUp,
       soldOut: this.closedBecause === 'soldOut',
+      refunds: this.refunds,
       served: this.served.slice(),
     };
   }

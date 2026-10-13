@@ -10,7 +10,9 @@ export const CONFIG = {
   arrivalEvery: 35,          // seconds between new customers
   firstArrivalAt: 2,         // the first customer walks in right after opening
 
-  prices: { base: 3, small: 3, large: 5, fresh: 1, brew: 1 },   // fresh = fresh topping, brew = freshly brewed tea
+  // base = a drink with no size (level 1). extra = extra topping,
+  // fresh = fresh topping, brew = freshly brewed tea; each adds to the price.
+  prices: { base: 3, small: 3, large: 5, extra: 1, fresh: 1, brew: 1 },
 
   // Tip by seconds since the order was rung up.
   tips: [
@@ -21,12 +23,18 @@ export const CONFIG = {
   inspection: { drinks: 3, bonus: 1 },
   starGoals: [10, 18, 26],
 
+  // How long customers wait, in seconds. A patience bar over their heads
+  // shrinks as they wait. Only when `customersLeave` is on do they leave.
   patience: {
-    impatientAfter: 45,      // a customer in line starts tapping a foot
-    leaveAfter: 100,         // only used when waitingCustomersLeave is on
-    waitingSpotImpatientAfter: 150,
+    lineWarn: 45,            // in line: the bar turns yellow and a foot taps
+    lineLeave: 100,          // in line: they leave (they have not paid yet)
+    waitWarn: 120,           // in a waiting spot, after paying
+    waitLeave: 180,          // in a waiting spot: they leave and get their money back
   },
-  waitingCustomersLeave: false,
+  customersLeave: true,
+  patienceBar: true,
+
+  payCoins: [5, 10, 20],     // coins a customer pays with on the hard register
 
   level: 1,                  // order level, 1 to 8
   registerMode: 'easy',      // easy | medium | hard

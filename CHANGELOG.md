@@ -1,5 +1,14 @@
 # Changelog
 
+## Milestone 3: settings and difficulty (October 13, 2026)
+
+- Changed: the menu and pictures now match the printed order ticket (no topping, extra topping, sugar some or lots, red milk tea), with ticket row colors and numbers on screen.
+- New: a full parent settings screen: order level and individual details, cup counts you type in, shift length, teas and toppings you have, register and call modes, drinks in progress, waiting customers, apron job locks, sound, demo, and reset.
+- New: medium register (type the total) and hard register (type the change), with a price list.
+- New: call modes. In hard mode customers only say hello.
+- New: patience bars over waiting customers. Customers who wait too long leave; paid ones get a refund shown as a red "−3".
+- New: pause button with a menu: keep playing, home, sound, settings, end the shift.
+
 ## Order levels (October 13, 2026)
 
 - New: order levels 1 to 7 in the parent panel. Customers now say and show cup size, scoops, ice, sugar and fresh at the higher levels.

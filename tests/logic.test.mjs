@@ -40,7 +40,8 @@ test('only owned flavors and toppings are ordered', () => {
   for (let i = 0; i < 200; i++) {
     const o = generateOrder(MENU, { level: 1, owned: { tea: ['taro'], topping: ['pearls', 'hearts'] }, rng });
     assert.equal(o.tea, 'taro');
-    assert.ok(['pearls', 'hearts'].includes(o.topping));
+    // "No topping" is always possible: it needs no pieces.
+    assert.ok(['none', 'pearls', 'hearts'].includes(o.topping));
   }
 });
 
@@ -83,6 +84,7 @@ test('prices', () => {
   assert.equal(price({ size: 'small', fresh: 'no' }, p), 3);
   assert.equal(price({ size: 'small', brew: 'yes' }, p), 4);
   assert.equal(price({ size: 'large', fresh: 'yes', brew: 'yes' }, p), 7);
+  assert.equal(price({ size: 'large', extra: 'yes', fresh: 'yes', brew: 'yes' }, p), 8);
   assert.deepEqual(priceParts({ size: 'small', fresh: 'yes' }, p).map((x) => x.id), ['small', 'fresh']);
 });
 
@@ -119,13 +121,40 @@ test('cup counting', () => {
 test('the spoken order names every detail', async () => {
   const { orderSentence, drinkPhrase } = await import('../js/text.js');
   assert.equal(drinkPhrase({ tea: 'milk', topping: 'pearls' }), 'milk tea with boba pearls');
+  assert.equal(drinkPhrase({ tea: 'milk', topping: 'none' }), 'milk tea with no topping');
   assert.equal(
-    drinkPhrase({ tea: 'taro', topping: 'pearls', size: 'large', scoops: '3', ice: 'lots', sugar: 'half', fresh: 'yes' }),
-    'a large taro with three scoops of fresh boba pearls, lots of ice and half sugar');
+    drinkPhrase({ tea: 'taro', topping: 'pearls', size: 'large', extra: 'yes', ice: 'lots', sugar: 'some', fresh: 'yes' }),
+    'a large taro with extra fresh boba pearls, lots of ice and some sugar');
   assert.equal(
-    drinkPhrase({ tea: 'milk', topping: 'jelly', size: 'small', brew: 'yes', fresh: 'no' }),
+    drinkPhrase({ tea: 'milk', topping: 'jelly', size: 'small', brew: 'yes', fresh: 'no', extra: 'no' }),
     'a small freshly brewed milk tea with coconut jelly');
   assert.ok(orderSentence({ tea: 'matcha', topping: 'jelly', size: 'small', ice: 'none' }).includes('a small matcha with coconut jelly, no ice'));
+});
+
+test('no extra or fresh topping when there is no topping', () => {
+  const rng = seeded(21);
+  let none = 0;
+  for (let i = 0; i < 500; i++) {
+    const o = generateOrder(MENU, { level: 8, rng });
+    if (o.topping === 'none') { none++; assert.equal(o.extra, 'no'); assert.equal(o.fresh, 'no'); }
+  }
+  assert.ok(none > 50);
+});
+
+test('notes like fresh and extra come up less often than not', () => {
+  const rng = seeded(4);
+  let fresh = 0;
+  for (let i = 0; i < 2000; i++) if (generateOrder(MENU, { level: 6, rng }).fresh === 'yes') fresh++;
+  assert.ok(fresh / 2000 < 0.3, `fresh share ${fresh / 2000}`);
+});
+
+test('hard register: the customer pays with a bigger coin', async () => {
+  const { payWith } = await import('../js/logic.js');
+  assert.equal(payWith(3), 5);
+  assert.equal(payWith(5), 10);
+  assert.equal(payWith(8), 10);
+  assert.equal(payWith(10), 20);
+  assert.equal(payWith(25), 30);
 });
 
 test('every detail option has a picture', async () => {
