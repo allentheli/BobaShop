@@ -161,3 +161,16 @@ test('every detail option has a picture', async () => {
   const { ICONS } = await import('../js/assets.js');
   for (const d of MENU.details) for (const o of d.options) if (o.icon) assert.ok(ICONS[o.icon], o.icon);
 });
+
+test('every shop song is four bars of notes the player understands', async () => {
+  const { SONGS, songSteps, noteFreq } = await import('../js/music.js');
+  assert.ok(Math.abs(noteFreq('A4') - 440) < 0.01);
+  assert.ok(Math.abs(noteFreq('C4') - 261.63) < 0.01);
+  for (const s of SONGS) {
+    const steps = songSteps(s);
+    assert.equal(steps.length, 32, s.id);
+    const tokens = s.notes.replace(/\|/g, ' ').split(/\s+/).filter((x) => x && x !== '-');
+    assert.ok(tokens.every((x) => noteFreq(x)), s.id);
+    assert.ok(steps.some((x) => x.bass), s.id);
+  }
+});

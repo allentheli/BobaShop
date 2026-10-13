@@ -11,6 +11,8 @@ import { createCharacter, setExpression, setTalking, act } from './character.js'
 import { h, icon, onTap, wait } from './ui.js';
 import { orderIcons } from './orderview.js';
 import { addPauseButton } from './pause.js';
+import { playMusic, stopMusic, setMusicSpeed } from './music.js';
+import { openRadio } from './radio.js';
 
 // Where characters stand, in stage pixels (the stage is 1180 x 820).
 // x, y is the point between the character's feet; s is the size.
@@ -28,7 +30,8 @@ const SLOTS = {
 // onSave:  called with the shift's state every few seconds and after every
 //          change, so the shift survives the app being closed.
 // pause: { onHome, onSettings, getSoundOn, onToggleSound } for the pause menu.
-export function startOpen({ app, config, demo = false, speed = 1, restore = null, onSave = () => {}, onFinish, pause = null }) {
+// music: { song, onPick(id) } for the shop radio.
+export function startOpen({ app, config, demo = false, speed = 1, restore = null, onSave = () => {}, onFinish, pause = null, music = null }) {
   const walkMs = config.anim.walk * 1000;
   const root = h('div', { class: 'screen open-screen' });
   const people = new Map();   // customer id -> { p, el, slot, busyUntil, mood, moodUntil }
@@ -46,6 +49,20 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   );
   const chars = h('div', { class: 'chars' });
   scene.appendChild(chars);
+
+  // The shop radio on the wall: the manager or cashier can change the music.
+  const radioBtn = h('button', { class: 'btn wall-radio', 'aria-label': 'Music' }, icon('radio'));
+  let song = (music && music.song) || 'off';
+  scene.appendChild(radioBtn);
+  onTap(radioBtn, () => openRadio(root, {
+    current: song,
+    onPick: (id) => { song = id; if (music) music.onPick(id); },
+    onClose: () => radioBtn.classList.toggle('playing', song !== 'off'),
+  }));
+  function startMusic() {
+    radioBtn.classList.toggle('playing', song !== 'off');
+    if (song !== 'off' && !demo) playMusic(song); else stopMusic();
+  }
 
   // Clock: the sun crosses the shop window.
   const sun = h('div', { class: 'sun' });
@@ -167,7 +184,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   function drawTray() {
     const v = regValue();
     trayNum.textContent = mode === 'easy' || typed !== '' ? String(v) : '';
-    trayCoins.replaceChildren(...Array.from({ length: Math.min(v, 14) }, () => icon('coin', 'tray-coin')));
+    trayCoins.replaceChildren(...Array.from({ length: Math.min(v, 10) }, () => icon('coin', 'tray-coin')));
     ringBtn.classList.toggle('ready', mode === 'easy' ? v > 0 : typed !== '');
   }
 
@@ -292,13 +309,33 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     v.moodUntil = performance.now() + ms;
   }
 
+  // Waiting spots: two side by side normally; when more drinks can be in
+  // progress (busy or chaos), rows of three, the back rows smaller.
+  function waitingSlot(i) {
+    if (config.drinksInProgress <= 2) return SLOTS.waiting[i];
+    // Rows of four; each row further back is higher, smaller and shifted
+    // half a place, so every face and number stays visible.
+    const rows = [{ y: 648, s: 0.6, dx: 0 }, { y: 553, s: 0.5, dx: 52 }, { y: 470, s: 0.42, dx: 26 }];
+    const row = Math.floor(i / 4) % rows.length;
+    const lap = Math.floor(i / 12);   // in chaos, extra customers squeeze in
+    const r = rows[row];
+    return { x: 765 + (i % 4) * 105 + r.dx + lap * 18, y: r.y - lap * 10, s: r.s };
+  }
+
+  // Places in line: five set places, then everyone else crowds the door.
+  function lineSlot(i) {
+    if (i < SLOTS.line.length) return SLOTS.line[i];
+    const k = i - SLOTS.line.length;
+    return { x: 60 + (k % 4) * 45, y: 540 - Math.floor(k / 4) * 18, s: 0.5 };
+  }
+
   function slotFor(p) {
     switch (p.place) {
-      case 'line': return { key: `line${shift.line.indexOf(p)}`, ...SLOTS.line[Math.min(shift.line.indexOf(p), SLOTS.line.length - 1)] };
+      case 'line': return { key: `line${shift.line.indexOf(p)}`, ...lineSlot(shift.line.indexOf(p)) };
       case 'counter': return { key: 'counter', ...SLOTS.counter };
-      case 'waiting': return { key: `wait${p.spot}`, ...SLOTS.waiting[p.spot] };
+      case 'waiting': return { key: `wait${p.spot}`, ...waitingSlot(p.spot) };
       case 'served': {
-        const w = SLOTS.waiting[p.spot];
+        const w = waitingSlot(p.spot);
         return { key: `pickup${p.spot}`, x: w.x, y: w.y + SLOTS.pickup.dy, s: SLOTS.pickup.s };
       }
       default: return { key: 'door', ...SLOTS.door };
@@ -385,7 +422,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     if (p.place !== 'waiting' || performance.now() < v.busyUntil) return;
     play('tap');
     closePopup();
-    const slot = SLOTS.waiting[p.spot];
+    const slot = waitingSlot(p.spot);
     const serveBtn = h('button', { class: 'btn serve-btn' }, icon('bell', 'bell-icon'), h('span', { class: 'label' }, t('ui.serve')));
     const noBtn = h('button', { class: 'btn round serve-no', 'aria-label': t('ui.cancel') }, '✕');
     popup = h('div', { class: 'serve-popup', 'data-id': String(p.id), style: { left: `${Math.min(slot.x, 1180 - 130)}px` } },
@@ -512,6 +549,8 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   function stop() {
     if (finished) return false;
     finished = true;
+    stopMusic();
+    setMusicSpeed(1);
     cancelAnimationFrame(raf);
     clearInterval(botTimer);
     clearInterval(saveTimer);
@@ -550,6 +589,8 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
       layout();
       drawMoney();
       drawSun();
+      // The music speeds up a little as the sun sets.
+      setMusicSpeed(shift.progress > 0.75 && !shift.closed ? 1 + (shift.progress - 0.75) * 0.6 : 1);
       finishBtn.classList.toggle('pulse', shift.allDone);
     }
     raf = requestAnimationFrame(frame);
@@ -608,8 +649,8 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   }
   if (pause) {
     addPauseButton(root, {
-      onPause: () => { paused = true; root.classList.add('is-paused'); saveNow(); },
-      onResume: () => { paused = false; root.classList.remove('is-paused'); last = performance.now(); },
+      onPause: () => { paused = true; root.classList.add('is-paused'); saveNow(); stopMusic(); },
+      onResume: () => { paused = false; root.classList.remove('is-paused'); last = performance.now(); startMusic(); },
       onHome: () => { saveNow(); stop(); pause.onHome(); },
       onEndShift: () => { paused = false; finish(); },
       onSettings: (menuEl) => pause.onSettings(menuEl, () => { saveNow(); stop(); }),
@@ -621,6 +662,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   // Expose for checking in the browser console and automated runs.
   window.__boba = { shift, finish, stop, price: (o) => price(o, config.prices) };
   keepAwake();
+  startMusic();
   drawTray();
   raf = requestAnimationFrame(frame);
   if (demo) startBot();

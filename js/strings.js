@@ -57,7 +57,10 @@ export const STRINGS = {
       skip: 'Skip (hold)',
       howTo: 'How to make',
       gotIt: 'Got it!',
+      music: 'Music',
     },
+
+    songs: { bubbly: 'Bubbly pop', sunny: 'Sunny day', rainy: 'Rainy cafe', dragon: 'Dragon dance', off: 'No music' },
 
     jobs: {
       cashier: 'Cashier',
@@ -102,6 +105,7 @@ export const STRINGS = {
     aprons: { pink: 'Pink', blue: 'Blue', yellow: 'Yellow', green: 'Green', orange: 'Orange', purple: 'Purple' },
 
     checklist: {
+      music: 'Pick the music on the radio.',
       tickets: 'Stack the order tickets.',
       register: 'Try the register.',
       brew: 'Brew the first pot of each tea.',
@@ -204,6 +208,7 @@ export const STRINGS = {
       bossBefore: 'Let\'s get the shop ready! Do your list, then tap Ready.',
       hintTea: ['{tea} is today\'s special!', 'I think lots of people will want {tea} today.'],
       hintTopping: ['Everybody loves {topping} today. Make extra!', 'Lots of customers want {topping} today!'],
+      pickMusic: 'Cashier, you can pick the music for our shop! Tap the radio.',
       allReady: 'Everyone is ready. Let\'s open the shop!',
       bossClosing: 'Great work today! Time to check some drinks.',
       inspectOrder: 'Let\'s check order {n}.',

@@ -23,6 +23,10 @@ A whole day runs from the title screen and back:
 
 **Skipping:** hold **Skip** (top right) during Meet the boss or Before opening to go straight to the shop. In the settings, "Before the shift" can be set to Full, Jobs only (no how-to cards), or Skip to the shop.
 
+**Music:** the cashier picks the shop's music on the radio during Before opening (the radio picture on the cashier's list). Tapping a song plays it, so kids choose by listening. During the shift, the manager or cashier can change it by tapping the radio on the wall. The music gets quieter whenever someone talks, speeds up a little as the sun sets, and stops when paused. Settings has music on/off and volume. The four songs are made by the app; any of them can be replaced by a recorded file in `js/music.js`.
+
+**Crowd:** in the settings, Normal (3 in line, 2 drinks at once), Busy (faster, 5 in line, 3 drinks), or Chaos (customers keep pouring in with no limit, like Overcooked).
+
 **Pause:** during the day, hold the round pause button (top of the screen) for 1 second. The clock, the customers and their patience all freeze. From the pause menu you can keep playing, go Home (the day is saved, so Continue picks it up), turn the sound off, open the settings, or end the shift early (tap twice).
 
 **Customers who wait too long:** a patience bar over each customer's head shrinks from green to yellow to red. A customer in line who runs out of patience leaves without buying. A customer who already paid and runs out while waiting for their drink leaves and gets their coins back: a red "−3" floats over their head. Both can be switched off in the settings.

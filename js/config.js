@@ -34,6 +34,15 @@ export const CONFIG = {
   customersLeave: true,
   patienceBar: true,
 
+  // How busy the shop gets. 'busy' and 'chaos' change the arrivals and
+  // limits below; in chaos there is no limit on customers waiting.
+  crowd: 'normal',
+  crowds: {
+    normal: {},
+    busy: { arrivalEvery: 22, lineLength: 5, longLine: 6, drinksInProgress: 3 },
+    chaos: { arrivalEvery: 12, firstArrivalAt: 1, lineLength: 99, longLine: 99, drinksInProgress: 99 },
+  },
+
   payCoins: [5, 10, 20],     // coins a customer pays with on the hard register
 
   // Before the shift: 'full' (meet the boss, jobs, how-to cards, checklists),
@@ -45,6 +54,7 @@ export const CONFIG = {
   callMode: 'normal',        // easy | normal | hard
 
   sound: { volume: 0.8, voice: true },
+  music: { on: true, volume: 0.6, song: 'bubbly' },   // song: the first day's pick
 
   // Timings for the on-screen show, in real seconds.
   anim: {

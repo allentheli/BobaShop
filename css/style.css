@@ -345,7 +345,7 @@ img { -webkit-user-drag: none; }
 .mini-coin { width: 20px; height: 20px; }
 .part-price { position: absolute; right: 10px; top: 6px; font-size: 22px; font-weight: 900; opacity: .6; }
 .tray { flex: 1; height: 116px; border-radius: 20px; background: #f6efe6; display: flex; align-items: center; padding: 0 14px; gap: 10px; }
-.tray-coins { flex: 1; display: flex; flex-wrap: wrap; gap: 3px; align-content: center; }
+.tray-coins { flex: 1; display: flex; flex-wrap: wrap; gap: 3px; align-content: center; max-height: 110px; overflow: hidden; }
 .tray-coin { width: 32px; height: 32px; animation: pop-in .25s; }
 .reg-parts:has(.part:nth-child(3)) + .tray .tray-coin { width: 22px; height: 22px; }
 .tray-num { font-size: 58px; font-weight: 900; min-width: 60px; text-align: right; }
@@ -665,3 +665,20 @@ img { -webkit-user-drag: none; }
 .skip-arrows { width: 26px; height: 20px; background: var(--ink); clip-path: polygon(0 0, 50% 50%, 50% 0, 100% 50%, 50% 100%, 50% 50%, 0 100%); }
 .howto-again { display: flex; align-items: center; gap: 10px; padding: 8px 18px 8px 8px; border-radius: 24px; min-height: 96px; font-size: 20px; font-weight: 800; }
 .howto-thumb { width: 60px; height: 80px; border-radius: 8px; }
+
+/* Shop radio */
+.radio-panel { position: absolute; inset: 0; z-index: 995; background: rgba(42, 31, 51, .55); display: flex; align-items: center; justify-content: center; }
+.radio-card { position: relative; background: #fff; border-radius: 36px; padding: 26px 34px 30px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.radio-big { width: 110px; height: 110px; animation: bob 1.2s ease-in-out infinite; }
+.song-grid { display: grid; grid-template-columns: repeat(5, 150px); gap: 16px; }
+.song-btn { height: 180px; border-radius: 28px; background: #f6efe6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 10px; }
+.song-btn.chosen { background: #d8f3e2; box-shadow: 0 0 0 6px var(--mint), 0 6px 0 rgba(59,42,74,.25); }
+.song-icon { width: 104px; height: 104px; }
+.song-btn.chosen .song-icon { animation: bob .6s ease-in-out infinite; }
+.song-name { font-size: 15px; font-weight: 800; opacity: .65; }
+.radio-done { position: absolute; right: -24px; top: -24px; background: var(--mint); box-shadow: 0 6px 0 var(--mint-deep); }
+.wall-radio { position: absolute; left: 870px; top: 150px; width: 96px; height: 96px; min-width: 0; min-height: 0; padding: 8px; border-radius: 24px; background: rgba(255,255,255,.75); z-index: 5; }
+.wall-radio img { width: 100%; height: 100%; }
+.wall-radio.playing img { animation: radio-bounce .5s ease-in-out infinite; }
+@keyframes radio-bounce { 50% { transform: translateY(-4px) rotate(-3deg); } }
+.radio-item { box-shadow: 0 0 0 4px #ffd23f; }

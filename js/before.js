@@ -10,10 +10,11 @@ import { createCharacter, setExpression, act } from './character.js';
 import { h, icon, onTap, wait, apronSvg } from './ui.js';
 import { bossSayer } from './meet.js';
 import { JOB_ICONS } from './assets.js';
+import { openRadio } from './radio.js';
 
 // day: { aprons, jobs, hint, ready }
 // onReady(list) whenever a Ready button changes; onDone() when all are ready.
-export function beforeScreen({ app, day, onReady, onDone, onHowTo = null }) {
+export function beforeScreen({ app, day, onReady, onDone, onHowTo = null, onSong = () => {} }) {
   const boss = createCharacter(BOSS);
   const ready = new Set(day.ready || []);
   const hintIcon = day.hint ? (day.hint.detail === 'tea' ? `tea.${day.hint.option}` : `topping.${day.hint.option}`) : null;
@@ -22,10 +23,15 @@ export function beforeScreen({ app, day, onReady, onDone, onHowTo = null }) {
     const color = APRONS.find((x) => x.id === a).color;
     const job = day.jobs[a];
     const items = CHECKLISTS[job].map((item) => {
-      const b = h('button', { class: 'btn check-item' }, icon(ICONS[item] ? item : 'ticket', 'check-icon'));
+      const iconKey = item === 'music' ? 'radio' : (ICONS[item] ? item : 'ticket');
+      const b = h('button', { class: `btn check-item ${item === 'music' ? 'radio-item' : ''}` }, icon(iconKey, 'check-icon'));
       onTap(b, () => {
         stopSpeaking();
         b.classList.add('seen');
+        if (item === 'music') {
+          openRadio(app.querySelector('.screen'), { current: day.song, onPick: (id) => { day.song = id; onSong(id); } });
+          return;
+        }
         speak(line(`checklist.${item}`), { pitch: BOSS.voice.pitch, rate: BOSS.voice.rate });
       });
       return b;
@@ -85,6 +91,7 @@ export function beforeScreen({ app, day, onReady, onDone, onHowTo = null }) {
   (async () => {
     await say(line('say.bossBefore'));
     if (day.hint) await say(hintSentence(day.hint));
+    if (Object.values(day.jobs).some((j) => CHECKLISTS[j].includes('music'))) await say(line('say.pickMusic'));
     if (ready.size === day.aprons.length && alive() && !finishing) allReady();
   })();
 }

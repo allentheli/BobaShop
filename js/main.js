@@ -19,6 +19,7 @@ import { loadSave, writeSave, defaultSave } from './storage.js';
 import { openSettings } from './settings.js';
 import { addPauseButton, addSkipButton } from './pause.js';
 import { howtoScreen } from './howto.js';
+import { configureMusic, stopMusic } from './music.js';
 import { cardsFor } from './tutorial.js';
 
 const STAGE_W = 1180;
@@ -84,6 +85,7 @@ function bossSay(el, text) {
 
 function titleScreen() {
   stopSpeaking();
+  stopMusic();
   const hasDay = !!save.day;
   const startBtn = h('button', { class: `btn big start-btn ${hasDay ? 'secondary' : ''}` }, h('span', { class: 'play-tri' }), h('span', { class: 'label' }, t(hasDay ? 'ui.newDay' : 'ui.start')));
   const continueBtn = hasDay ? h('button', { class: 'btn big continue-btn' }, h('span', { class: 'play-tri' }), h('span', { class: 'label' }, t('ui.continueDay'))) : null;
@@ -120,6 +122,7 @@ function titleScreen() {
 function reloadConfig() {
   config = withSettings(save.settings);
   configureSound(config.sound);
+  configureMusic(config.music);
 }
 
 // host: the element the settings panel opens over.
@@ -163,7 +166,7 @@ let soundMuted = false;
 function newDay() {
   // The order level and cup counts are fixed for the whole day, so
   // changing them in the settings never changes a shift halfway.
-  save.day = { phase: 'meet', number: save.days + 1, startedAt: Date.now(), level: config.level, cups: { ...config.cups } };
+  save.day = { phase: 'meet', number: save.days + 1, startedAt: Date.now(), level: config.level, cups: { ...config.cups }, song: save.lastSong || config.music.song };
   if (config.setup === 'skip') skipToShop();
   else { persist(); showPhase(); }
 }
@@ -213,13 +216,15 @@ function showPhase() {
         onReady: (list) => { day.ready = list; persist(); },
         onDone: () => setPhase('open'),
         onHowTo: () => { day.howto = { card: 0, step: 0 }; setPhase('howto'); },
+        onSong: (id) => { save.lastSong = id; persist(); },
       });
       break;
     case 'open':
       startOpen({
         app,
-        config: { ...structuredClone(config), bias: day.hint, level: day.level ?? config.level, cups: day.cups ?? config.cups },
+        config: { ...structuredClone(config), ...(config.crowds[config.crowd] || {}), bias: day.hint, level: day.level ?? config.level, cups: day.cups ?? config.cups },
         pause: pauseOptions({ restartOnSettings: true }),
+        music: { song: day.song || 'off', onPick: (id) => { day.song = id; save.lastSong = id; persist(); } },
         speed: Number(params.get('speed')) || 1,
         restore: day.shift || null,
         onSave: (snapshot) => { day.shift = snapshot; persist(); },
@@ -288,7 +293,7 @@ function demoShift() {
   setMuted(true);
   startOpen({
     app,
-    config: structuredClone(config),
+    config: { ...structuredClone(config), ...(config.crowds[config.crowd] || {}) },
     demo: true,
     speed: config.demo.speed,
     onFinish: (summary) => {
@@ -334,6 +339,7 @@ function dayTotalScreen(sum, { demo = false } = {}) {
 // ---- Start -------------------------------------------------------------------
 
 configureSound(config.sound);
+configureMusic(config.music);
 titleScreen();
 if (params.has('demo')) {
   unlock();

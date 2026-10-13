@@ -85,3 +85,6 @@ Choices made while building that the build instructions did not settle. One line
 - Cards and lines follow the day: no ice or sugar cards until those levels, "how much" only explains sizes, extra and fresh when they are in the orders, and only the toppings the family has.
 - Skip (hold 1 second) on Meet the boss and Before opening goes straight to the shop. A skipped day gives no jobs, so the job rotation waits for the next full day.
 - "Before the shift" setting: Full (default), Jobs only, or Skip to the shop.
+- Music (Allen's idea that a child picks it): the cashier (or the front counter at 2 players) has the radio on their Before opening list; the radio on the shop wall lets anyone change it during the shift. The choice is remembered for the next day.
+- The four songs are written as notes and played by the app (free, offline). The music only plays during the shift and while choosing, so the other screens stay calm. It ducks to about a third while anyone talks.
+- Crowd setting (Allen's "Overcooked" request): Busy and Chaos override arrivals, line length and drinks in progress. In Chaos the limit is 99, waiting customers stand in staggered rows of four, and extra customers crowd the door.

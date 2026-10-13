@@ -224,3 +224,25 @@ test('level 7 has a longer line', () => {
   run(shift, 30);
   assert.equal(shift.line.length, config.longLine);
 });
+
+test('chaos: no limit on customers in line or waiting for drinks', () => {
+  const { shift } = make({ ...CONFIG.crowds.chaos, customersLeave: false });
+  for (let t = 0; t < 200; t += 0.5) {
+    shift.tick(0.5);
+    if (shift.counter) shift.ringUp(price(shift.counter.order, CONFIG.prices));
+  }
+  // Nobody is served, so customers pile up.
+  assert.ok(shift.waiting.length > 10, `waiting ${shift.waiting.length}`);
+  const spots = shift.waiting.map((p) => p.spot);
+  assert.equal(new Set(spots).size, spots.length);
+});
+
+test('busy: three drinks in progress and a longer line', () => {
+  const { shift } = make({ ...CONFIG.crowds.busy, customersLeave: false });
+  for (let t = 0; t < 200; t += 0.5) {
+    shift.tick(0.5);
+    if (shift.counter) shift.ringUp(price(shift.counter.order, CONFIG.prices));
+  }
+  assert.equal(shift.waiting.length, 3);
+  assert.equal(shift.line.length, 5);
+});

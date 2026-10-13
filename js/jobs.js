@@ -17,15 +17,16 @@ export const JOB_SETS = {
   2: ['front', 'maker'],
 };
 
-// Picture checklists for Before opening. Each item is an icon key in
+// Picture checklists for Before opening. ('music' opens the shop radio,
+// so the cashier picks the day's music.) Each item is an icon key in
 // js/assets.js and a spoken line in js/strings.js (checklist.<item>).
 export const CHECKLISTS = {
-  cashier: ['tickets', 'register'],
+  cashier: ['music', 'tickets', 'register'],
   manager: ['brew', 'rail'],
   topping: ['batch'],
   tea: ['cups', 'bowls', 'lids'],
   maker: ['batch', 'cups', 'bowls', 'lids'],
-  front: ['tickets', 'register', 'brew', 'rail'],
+  front: ['music', 'tickets', 'register', 'brew', 'rail'],
 };
 
 // Give each apron a job.

@@ -50,6 +50,13 @@ export const ICONS = {
   'badge.perfectRegister': 'assets/icons/badge-register.svg',
   'badge.neverRanOut': 'assets/icons/badge-bowl.svg',
   'badge.empty': 'assets/icons/badge-empty.svg',
+  // Shop radio (songs are in js/music.js).
+  radio: 'assets/icons/radio.svg',
+  'music.bubbly': 'assets/icons/music-bubbly.svg',
+  'music.sunny': 'assets/icons/music-sunny.svg',
+  'music.rainy': 'assets/icons/music-rainy.svg',
+  'music.dragon': 'assets/icons/music-dragon.svg',
+  'music.off': 'assets/icons/music-off.svg',
 };
 
 // The picture (or pictures) for each job.

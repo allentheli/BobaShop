@@ -18,7 +18,17 @@ export function configureSound({ volume: v, voice }) {
   if (master) master.gain.value = volume;
 }
 
-export function setMuted(m) { muted = m; if (m) stopSpeaking(); }
+export function setMuted(m) { muted = m; if (m) stopSpeaking(); muteListeners.forEach((f) => f(m)); }
+export function isMuted() { return muted; }
+const muteListeners = [];
+export function onMuteChange(f) { muteListeners.push(f); }
+
+// For the music player (js/music.js): the shared audio context, and a way
+// to hear when someone starts or stops talking, so the music can get quieter.
+export function audioOut() { return ctx ? { ctx, master } : null; }
+const talkListeners = [];
+export function onTalking(f) { talkListeners.push(f); }
+function setTalkingState(on) { talkListeners.forEach((f) => f(on)); }
 
 export function unlock() {
   try {
@@ -96,6 +106,7 @@ function pump() {
   if (speaking || queue.length === 0) return;
   const item = queue.shift();
   speaking = true;
+  setTalkingState(true);
   const u = new SpeechSynthesisUtterance(item.text);
   if (chosenVoice) u.voice = chosenVoice;
   u.lang = chosenVoice ? chosenVoice.lang : 'en-US';
@@ -108,6 +119,7 @@ function pump() {
     finished = true;
     clearTimeout(guard);
     speaking = false;
+    if (queue.length === 0) setTalkingState(false);
     item.done();
     pump();
   };
@@ -122,6 +134,7 @@ export function stopSpeaking() {
   queue.length = 0;
   if ('speechSynthesis' in window) speechSynthesis.cancel();
   speaking = false;
+  setTalkingState(false);
 }
 
 // --- Sound effects ------------------------------------------------------
