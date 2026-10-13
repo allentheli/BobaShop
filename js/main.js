@@ -17,7 +17,9 @@ import { beforeScreen } from './before.js';
 import { closingScreen } from './closing.js';
 import { loadSave, writeSave, defaultSave } from './storage.js';
 import { openSettings } from './settings.js';
-import { addPauseButton } from './pause.js';
+import { addPauseButton, addSkipButton } from './pause.js';
+import { howtoScreen } from './howto.js';
+import { cardsFor } from './tutorial.js';
 
 const STAGE_W = 1180;
 const STAGE_H = 820;
@@ -162,8 +164,15 @@ function newDay() {
   // The order level and cup counts are fixed for the whole day, so
   // changing them in the settings never changes a shift halfway.
   save.day = { phase: 'meet', number: save.days + 1, startedAt: Date.now(), level: config.level, cups: { ...config.cups } };
-  persist();
-  showPhase();
+  if (config.setup === 'skip') skipToShop();
+  else { persist(); showPhase(); }
+}
+
+// Skip the jobs, the how-to cards and the checklists: straight to the shop.
+function skipToShop() {
+  const day = save.day;
+  if (!day.hint) day.hint = pickHint(MENU, { owned: config.owned, weight: config.hintWeight });
+  setPhase('open');
 }
 
 function setPhase(phase) {
@@ -183,9 +192,19 @@ function showPhase() {
           Object.assign(day, team, {
             hint: pickHint(MENU, { owned: config.owned, weight: config.hintWeight }),
             ready: [],
+            howto: { card: 0, step: 0 },
           });
-          setPhase('before');
+          setPhase(config.setup === 'jobs' ? 'before' : 'howto');
         },
+      });
+      break;
+    case 'howto':
+      howtoScreen({
+        app,
+        cards: cardsFor(MENU, { level: day.level ?? config.level, enabled: config.enabledDetails, owned: config.owned }),
+        at: day.howto || { card: 0, step: 0 },
+        onProgress: (at) => { day.howto = at; persist(); },
+        onDone: () => setPhase('before'),
       });
       break;
     case 'before':
@@ -193,6 +212,7 @@ function showPhase() {
         app, day,
         onReady: (list) => { day.ready = list; persist(); },
         onDone: () => setPhase('open'),
+        onHowTo: () => { day.howto = { card: 0, step: 0 }; setPhase('howto'); },
       });
       break;
     case 'open':
@@ -235,6 +255,8 @@ function showPhase() {
   }
   // Every part of the day has a pause button (the shift adds its own).
   if (day.phase !== 'open') addPauseButton(app.querySelector('.screen'), pauseOptions());
+  // Jobs, how-to cards and checklists can be skipped (hold Skip).
+  if (day.phase === 'meet' || day.phase === 'before') addSkipButton(app.querySelector('.screen'), () => skipToShop());
 }
 
 function finishDay(result) {
@@ -250,8 +272,11 @@ function finishDay(result) {
     drinks: day.summary.drinks,
   });
   if (save.history.length > 100) save.history.shift();
-  save.rotation.byCount[day.players] = day.jobs;
-  save.rotation.lastDecorator = day.decorator;
+  // Jobs rotate only when the team got jobs today (not when skipped).
+  if (day.jobs && day.players) {
+    save.rotation.byCount[day.players] = day.jobs;
+    save.rotation.lastDecorator = day.decorator;
+  }
   save.day = null;
   persist();
   titleScreen();

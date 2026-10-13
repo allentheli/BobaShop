@@ -8,6 +8,10 @@ import { price, pickHint, pickInspection, badgesFor } from '../js/logic.js';
 import { assignJobs, nextDecorator, JOB_SETS, APRONS } from '../js/jobs.js';
 import { loadSave, writeSave, defaultSave } from '../js/storage.js';
 import { jobSentence } from '../js/text.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 function seeded(seed = 1) {
   let s = seed;
@@ -131,4 +135,25 @@ test('saving and loading the save record', () => {
   assert.equal(back.day.phase, 'open');
   mem.set('bobashop.save.v1', '{broken');
   assert.deepEqual(loadSave(storage), defaultSave());
+});
+
+test('the how-to cards follow the day\'s order details and toppings', async () => {
+  const { cardsFor, CARDS } = await import('../js/tutorial.js');
+  const { STRINGS } = await import('../js/strings.js');
+  const ids = (cards) => cards.map((c) => c.id);
+  // Level 1: no ice or sugar cards, and "how much" only explains "none".
+  const l1 = cardsFor(MENU, { level: 1 });
+  assert.deepEqual(ids(l1), ['boba', 'jelly', 'hearts', 'howmuch', 'tea', 'finish']);
+  assert.deepEqual(l1.find((c) => c.id === 'howmuch').steps.map((s) => s.index), [4]);
+  // Level 6: every card, and every "how much" line.
+  const l6 = cardsFor(MENU, { level: 6 });
+  assert.deepEqual(ids(l6), ['boba', 'jelly', 'hearts', 'howmuch', 'tea', 'ice', 'sugar', 'finish']);
+  assert.equal(l6.find((c) => c.id === 'howmuch').steps.length, 5);
+  // Only the toppings the family has.
+  assert.deepEqual(ids(cardsFor(MENU, { level: 1, owned: { topping: ['hearts'] } })).slice(0, 2), ['hearts', 'howmuch']);
+  // Every step has a spoken line, and every card a picture.
+  for (const c of CARDS) {
+    assert.equal(STRINGS.en.tutorial[c.id].length, c.steps.length, c.id);
+    assert.ok(fs.existsSync(path.join(root, `assets/cards/${c.id}.jpg`)), c.id);
+  }
 });

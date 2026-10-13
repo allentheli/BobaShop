@@ -449,7 +449,7 @@ img { -webkit-user-drag: none; }
 .goal-coin { width: 50px; height: 50px; }
 
 /* Before opening */
-.before-top { position: absolute; left: 0; right: 0; top: 0; height: 230px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; }
+.before-top { position: absolute; left: 0; right: 0; top: 0; height: 230px; display: flex; align-items: center; justify-content: space-between; padding: 40px 40px 0; }
 .boss-mini { width: 170px; height: 221px; position: relative; }
 .boss-mini .char { transform: scale(.85); transform-origin: 0 0; }
 .hint-card { display: flex; align-items: center; gap: 8px; padding: 10px 26px; border-radius: 36px; min-height: 140px; border: 5px solid #ffd23f; }
@@ -640,3 +640,28 @@ img { -webkit-user-drag: none; }
 .danger { min-height: 64px; padding: 0 24px; font-size: 20px; font-weight: 800; background: #ffe1e1; border-radius: 20px; }
 .danger.armed { background: #ff8a8a; color: #fff; }
 .refund-note { color: #e0434f; }
+
+/* How to make: the station cards */
+.howto-screen { background: linear-gradient(#e6f6f3, #fff1d6); }
+.howto-boss { position: absolute; left: 30px; top: 30px; }
+.howto-title { position: absolute; left: 30px; top: 270px; width: 200px; text-align: center; }
+.howto-dots { position: absolute; left: 30px; top: 320px; width: 200px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.howto-card { position: absolute; left: 330px; top: 20px; width: 585px; height: 780px; border-radius: 30px; overflow: hidden; box-shadow: 0 10px 0 rgba(59,42,74,.15); background: #fff; cursor: pointer; }
+.howto-card.flip { animation: card-in .45s cubic-bezier(.3, 1.4, .6, 1); }
+@keyframes card-in { from { transform: translateX(80px) rotate(4deg); opacity: 0; } }
+.howto-img { width: 100%; height: 100%; display: block; }
+.howto-glow {
+  position: absolute; left: 3%; right: 3%; border-radius: 22px; border: 6px solid #ffd23f;
+  box-shadow: 0 0 0 2000px rgba(42, 31, 51, .38), 0 0 26px 6px rgba(255, 210, 63, .8);
+  transition: top .45s cubic-bezier(.4, 0, .3, 1), height .45s cubic-bezier(.4, 0, .3, 1);
+}
+.howto-controls { position: absolute; right: 40px; top: 300px; display: flex; flex-direction: column; gap: 30px; }
+.howto-back { width: 110px; height: 110px; background: #f1e6da; }
+.howto-back .arrow { display: block; margin: 0 auto; width: 0; height: 0; border-right: 46px solid var(--ink); border-top: 30px solid transparent; border-bottom: 30px solid transparent; transform: translateX(-6px); }
+.howto-done { position: absolute; left: 30px; bottom: 30px; width: 240px; min-height: 100px; padding: 0; justify-content: center; font-size: 30px; background: var(--mint); color: #fff; box-shadow: 0 8px 0 var(--mint-deep); }
+
+/* Skip button (hold) */
+.skip-btn { position: absolute; right: 96px; top: 20px; height: 62px; min-height: 0; padding: 0 18px; border-radius: 31px; z-index: 960; background: rgba(255,255,255,.9); display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 800; overflow: hidden; }
+.skip-arrows { width: 26px; height: 20px; background: var(--ink); clip-path: polygon(0 0, 50% 50%, 50% 0, 100% 50%, 50% 100%, 50% 50%, 0 100%); }
+.howto-again { display: flex; align-items: center; gap: 10px; padding: 8px 18px 8px 8px; border-radius: 24px; min-height: 96px; font-size: 20px; font-weight: 800; }
+.howto-thumb { width: 60px; height: 80px; border-radius: 8px; }

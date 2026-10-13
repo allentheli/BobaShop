@@ -81,3 +81,7 @@ Choices made while building that the build instructions did not settle. One line
 - Medium and hard registers have a number pad with two-digit entry and a price list next to the register.
 - Hard call mode hides the repeat button; the customer only says hello.
 - The printable sheet is Allen's own design, so the app does not make one.
+- How-to cards (Allen's request): the station cards are cut from Allen's printed sheet (`assets/cards/`), so they look exactly the same. The boss reads one line per lit-up part of the card. They play after jobs are given, before the checklists, and can be watched again from Before opening.
+- Cards and lines follow the day: no ice or sugar cards until those levels, "how much" only explains sizes, extra and fresh when they are in the orders, and only the toppings the family has.
+- Skip (hold 1 second) on Meet the boss and Before opening goes straight to the shop. A skipped day gives no jobs, so the job rotation waits for the next full day.
+- "Before the shift" setting: Full (default), Jobs only, or Skip to the shop.

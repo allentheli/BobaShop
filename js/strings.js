@@ -54,6 +54,9 @@ export const STRINGS = {
       endShift: 'End the shift',
       endShiftSure: 'Tap again to end',
       refunds: 'Refunds',
+      skip: 'Skip (hold)',
+      howTo: 'How to make',
+      gotIt: 'Got it!',
     },
 
     jobs: {
@@ -121,6 +124,64 @@ export const STRINGS = {
       extras: ', {list}',
       and: ' and ',
       comma: ', ',
+    },
+
+    // The boss reads these over the station cards (js/tutorial.js), one
+    // line per lit-up part of the card.
+    tutorial: {
+      intro: 'Let\'s learn how to make everything! Watch the cards.',
+      outro: 'Now you know how! Let\'s get the shop ready.',
+      station: { topping: 'First, the topping station.', tea: 'Now the tea station.' },
+      boba: [
+        'Boba pearls use the black dough.',
+        'Step one. Roll a long snake.',
+        'Step two. Cut it into small pieces.',
+        'Step three. Roll each piece into a ball.',
+      ],
+      jelly: [
+        'Coconut jelly uses the white dough.',
+        'Step one. Roll it flat.',
+        'Step two. Cut lines both ways.',
+        'Step three. Pull the cubes apart.',
+      ],
+      hearts: [
+        'Gummy hearts use the red dough.',
+        'Step one. Roll it flat.',
+        'Step two. Press the heart cutter.',
+        'Step three. Lift the hearts out.',
+      ],
+      howmuch: [
+        'How much topping? A small cup gets one scoop.',
+        'A large cup gets two scoops.',
+        'Extra topping means one more scoop.',
+        'Fresh means make new ones right now.',
+        'None means no topping at all.',
+      ],
+      tea: [
+        'The topping goes in the cup first.',
+        'Milk tea is red. Matcha is green. Taro is purple.',
+        'Step one. Pick the cup. A small cup gets one sheet. A large cup gets two sheets.',
+        'Step two. Scrunch the sheet into a loose ball.',
+        'Step three. Push it into the cup.',
+      ],
+      ice: [
+        'Count the ice cubes into the cup.',
+        'None means no ice.',
+        'Some means two ice cubes.',
+        'Lots means four ice cubes.',
+      ],
+      sugar: [
+        'Count the sugar into the cup.',
+        'None means no sugar.',
+        'Some means one sugar.',
+        'Lots means two sugars.',
+      ],
+      finish: [
+        'Wait for the manager to say it is right.',
+        'Step one. Put the lid on.',
+        'Step two. Push the straw in.',
+        'Step three. Set it on the pickup shelf.',
+      ],
     },
 
     menu: {

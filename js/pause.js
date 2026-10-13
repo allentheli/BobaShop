@@ -57,3 +57,12 @@ export function addPauseButton(host, { onPause = () => {}, onResume = () => {}, 
   onHold(btn, open, 1);
   return { open, close, button: btn };
 }
+
+// A "Skip" button (hold for one second) that jumps ahead, for example
+// straight to the shop.
+export function addSkipButton(host, onSkip) {
+  const btn = h('button', { class: 'btn skip-btn', 'aria-label': t('ui.skip') }, h('span', { class: 'skip-arrows' }), h('span', { class: 'skip-label' }, t('ui.skip')));
+  host.appendChild(btn);
+  onHold(btn, () => { stopSpeaking(); onSkip(); }, 1);
+  return btn;
+}

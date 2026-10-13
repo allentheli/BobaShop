@@ -8,6 +8,8 @@
 - New: call modes. In hard mode customers only say hello.
 - New: patience bars over waiting customers. Customers who wait too long leave; paid ones get a refund shown as a red "−3".
 - New: pause button with a menu: keep playing, home, sound, settings, end the shift.
+- New: "How to make" tutorial with the station cards from the printed sheet, read aloud step by step.
+- New: Skip (hold) to go straight to the shop, and a "Before the shift" setting (full, jobs only, skip).
 
 ## Order levels (October 13, 2026)
 

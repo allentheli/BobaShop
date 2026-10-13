@@ -144,6 +144,8 @@ export function openSettings({ host, save, getConfig, onChange, onReset, onDemo 
         choices(LEVELS.map((_, i) => [i + 1, String(i + 1)]), custom ? null : c.level, (v) => { st.level = v; st.enabledDetails = {}; onChange(); draw(); }),
         h('p', { class: 'settings-note strong' }, custom ? 'Custom: the details below are switched on by hand.' : `Level ${c.level}: ${LEVELS.slice(0, c.level).join(' ')}`),
         toggles),
+      section('Before the shift', 'Full: meet the boss, jobs, the how-to cards and the checklists. Jobs only: no how-to cards. Skip: straight to the shop. (During the day you can also hold Skip.)',
+        choices([['full', 'Full'], ['jobs', 'Jobs only'], ['skip', 'Skip to the shop']], c.setup, (v) => set('setup', v))),
       section('Our cups', `How many cups of each size are on the table. When every cup is used, the shop sells out and closes early. Cups are counted when orders have a size.${nextDay}`,
         h('div', { class: 'cup-row' },
           h('div', { class: 'cup-field' }, h('span', {}, 'Small'), stepper(c.cups.small, 0, 99, (v) => set('cups', { ...c.cups, small: v }))),

@@ -17,6 +17,12 @@ function pick(v, rng) {
   return Array.isArray(v) ? v[Math.floor(rng() * v.length)] : v;
 }
 
+// A list of lines (for example one per tutorial step), or [].
+export function lookupList(path) {
+  const v = lookup(path);
+  return Array.isArray(v) ? v : [];
+}
+
 // On-screen label.
 export function t(path, vars = {}) {
   const v = lookup(path);

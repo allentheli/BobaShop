@@ -13,7 +13,7 @@ import { JOB_ICONS } from './assets.js';
 
 // day: { aprons, jobs, hint, ready }
 // onReady(list) whenever a Ready button changes; onDone() when all are ready.
-export function beforeScreen({ app, day, onReady, onDone }) {
+export function beforeScreen({ app, day, onReady, onDone, onHowTo = null }) {
   const boss = createCharacter(BOSS);
   const ready = new Set(day.ready || []);
   const hintIcon = day.hint ? (day.hint.detail === 'tea' ? `tea.${day.hint.option}` : `topping.${day.hint.option}`) : null;
@@ -47,8 +47,12 @@ export function beforeScreen({ app, day, onReady, onDone }) {
 
   const hintCard = hintIcon ? h('button', { class: 'btn hint-card' }, icon('star', 'hint-star'), icon(hintIcon, 'hint-icon')) : null;
 
+  // Watch the how-to cards again.
+  const howToBtn = onHowTo ? h('button', { class: 'btn howto-again' }, h('img', { class: 'howto-thumb', src: 'assets/cards/boba.jpg', alt: '' }), h('span', {}, t('ui.howTo'))) : null;
+  if (howToBtn) onTap(howToBtn, () => { stopSpeaking(); onHowTo(); });
+
   const root = h('div', { class: 'screen before-screen' },
-    h('div', { class: 'before-top' }, h('div', { class: 'boss-mini' }, boss), hintCard, sign),
+    h('div', { class: 'before-top' }, h('div', { class: 'boss-mini' }, boss), hintCard, howToBtn, sign),
     h('div', { class: 'before-cols' }, ...columns));
   app.replaceChildren(root);
   const alive = () => root.isConnected;

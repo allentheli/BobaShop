@@ -3,7 +3,7 @@
 // background when there is a connection, so updates show on the next launch.
 // Bump VERSION when files are added or removed.
 
-const VERSION = 'boba-m3-1';
+const VERSION = 'boba-m3-2';
 const FILES = [
   './',
   'index.html',
@@ -11,6 +11,14 @@ const FILES = [
   'assets/app/icon-180.png',
   'assets/app/icon-192.png',
   'assets/app/icon-512.png',
+  'assets/cards/boba.jpg',
+  'assets/cards/finish.jpg',
+  'assets/cards/hearts.jpg',
+  'assets/cards/howmuch.jpg',
+  'assets/cards/ice.jpg',
+  'assets/cards/jelly.jpg',
+  'assets/cards/sugar.jpg',
+  'assets/cards/tea.jpg',
   'assets/characters/bao.svg',
   'assets/characters/boss.svg',
   'assets/characters/mochi.svg',
@@ -66,6 +74,7 @@ const FILES = [
   'js/character.js',
   'js/closing.js',
   'js/config.js',
+  'js/howto.js',
   'js/jobs.js',
   'js/logic.js',
   'js/main.js',
@@ -79,6 +88,7 @@ const FILES = [
   'js/storage.js',
   'js/strings.js',
   'js/text.js',
+  'js/tutorial.js',
   'js/ui.js',
 ];
 

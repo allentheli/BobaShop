@@ -19,6 +19,10 @@ A whole day runs from the title screen and back:
 
 **Saving:** the day is saved after every step. If the app is closed in the middle of a day, the title screen shows a big **Continue** button. **New day** starts over.
 
+**How to make:** after jobs are given out, the boss walks the team through the station cards from the printed sheet (boba pearls, coconut jelly, gummy hearts, how much topping, tea, ice, sugar, finish the drink). Each step lights up on the card as the boss reads it. Cards for things not in today's orders (like ice at level 1) are left out. The arrows go back and forward, tapping the card repeats a step, and "Got it!" moves on. Before opening also has a "How to make" button to watch them again.
+
+**Skipping:** hold **Skip** (top right) during Meet the boss or Before opening to go straight to the shop. In the settings, "Before the shift" can be set to Full, Jobs only (no how-to cards), or Skip to the shop.
+
 **Pause:** during the day, hold the round pause button (top of the screen) for 1 second. The clock, the customers and their patience all freeze. From the pause menu you can keep playing, go Home (the day is saved, so Continue picks it up), turn the sound off, open the settings, or end the shift early (tap twice).
 
 **Customers who wait too long:** a patience bar over each customer's head shrinks from green to yellow to red. A customer in line who runs out of patience leaves without buying. A customer who already paid and runs out while waiting for their drink leaves and gets their coins back: a red "−3" floats over their head. Both can be switched off in the settings.

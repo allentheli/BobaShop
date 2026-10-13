@@ -36,6 +36,10 @@ export const CONFIG = {
 
   payCoins: [5, 10, 20],     // coins a customer pays with on the hard register
 
+  // Before the shift: 'full' (meet the boss, jobs, how-to cards, checklists),
+  // 'jobs' (no how-to cards) or 'skip' (straight to the shop).
+  setup: 'full',
+
   level: 1,                  // order level, 1 to 8
   registerMode: 'easy',      // easy | medium | hard
   callMode: 'normal',        // easy | normal | hard
