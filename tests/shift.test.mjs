@@ -226,7 +226,7 @@ test('level 7 has a longer line', () => {
 });
 
 test('chaos: no limit on customers in line or waiting for drinks', () => {
-  const { shift } = make({ ...CONFIG.crowds.chaos, customersLeave: false });
+  const { shift } = make({ ...CONFIG.crowds.chaos, drinksInProgress: 99, customersLeave: false });
   for (let t = 0; t < 200; t += 0.5) {
     shift.tick(0.5);
     if (shift.counter) shift.ringUp(price(shift.counter.order, CONFIG.prices));
@@ -237,8 +237,8 @@ test('chaos: no limit on customers in line or waiting for drinks', () => {
   assert.equal(new Set(spots).size, spots.length);
 });
 
-test('busy: three drinks in progress and a longer line', () => {
-  const { shift } = make({ ...CONFIG.crowds.busy, customersLeave: false });
+test('busy crowd with three drinks in progress: a longer line', () => {
+  const { shift } = make({ ...CONFIG.crowds.busy, drinksInProgress: 3, customersLeave: false });
   for (let t = 0; t < 200; t += 0.5) {
     shift.tick(0.5);
     if (shift.counter) shift.ringUp(price(shift.counter.order, CONFIG.prices));

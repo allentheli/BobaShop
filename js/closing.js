@@ -58,7 +58,7 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone }) {
 
     const pick = c.picks[i];
     const type = CUSTOMERS.find((x) => x.id === pick.type) || CUSTOMERS[0];
-    const cust = createCharacter(type);
+    const cust = createCharacter(type, { look: pick.look || null });
     const items = orderIcons(pick.order, { width: 500, max: 100 });
     const sentence = orderSentence(pick.order);
     const repeat = h('button', { class: 'btn round repeat' }, icon('speaker'));

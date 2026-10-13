@@ -157,3 +157,32 @@ test('the how-to cards follow the day\'s order details and toppings', async () =
     assert.ok(fs.existsSync(path.join(root, `assets/cards/${c.id}.jpg`)), c.id);
   }
 });
+
+test('visitors get their own look, kept through the day', async () => {
+  const { makeLook } = await import('../js/logic.js');
+  const { ACCESSORIES } = await import('../js/assets.js');
+  const { STRINGS } = await import('../js/strings.js');
+  const rng = seeded(12);
+  const looks = Array.from({ length: 300 }, () => makeLook(CUSTOMERS[0], ACCESSORIES, rng, 4));
+  for (const l of looks) {
+    for (const slot of ['head', 'eyes', 'neck']) if (l[slot]) assert.equal(ACCESSORIES[l[slot]].slot, slot);
+    assert.ok(CUSTOMERS[0].hues.includes(l.hue));
+    assert.ok(l.name >= 0 && l.name < 4);
+  }
+  // Plenty of variety: hats, glasses and plain faces all show up.
+  assert.ok(looks.some((l) => l.head) && looks.some((l) => !l.head) && looks.some((l) => l.eyes));
+  // Every kind of customer has a picture and four names.
+  for (const c of CUSTOMERS) {
+    assert.ok(fs.existsSync(path.join(root, c.body)), c.id);
+    assert.equal(STRINGS.en.customers[c.id].names.length, 4, c.id);
+  }
+  for (const a of Object.values(ACCESSORIES)) assert.ok(fs.existsSync(path.join(root, a.file)), a.file);
+  // A shift gives each visitor a look, and the served record keeps it.
+  const shift = new Shift({ config: structuredClone(CONFIG), menu: MENU, customers: CUSTOMERS, looks: { accessories: ACCESSORIES, nameCount: 4 } });
+  for (let t = 0; t < 10; t += 0.5) shift.tick(0.5);
+  const c = shift.counter;
+  assert.ok(c.look);
+  shift.ringUp(price(c.order, CONFIG.prices));
+  shift.serve(c.id);
+  assert.deepEqual(shift.served[0].look, c.look);
+});

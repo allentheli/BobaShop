@@ -3,9 +3,9 @@
 
 import { Shift } from './shift.js';
 import { MENU, option } from './menu.js';
-import { CUSTOMERS, BOSS, ICONS } from './assets.js';
+import { CUSTOMERS, BOSS, ICONS, ACCESSORIES } from './assets.js';
 import { activeDetails, priceParts, price, starsFor } from './logic.js';
-import { t, line, customerName, orderSentence } from './text.js';
+import { t, line, visitorName, orderSentence } from './text.js';
 import { speak, play, stopSpeaking, resume } from './audio.js';
 import { createCharacter, setExpression, setTalking, act } from './character.js';
 import { h, icon, onTap, wait } from './ui.js';
@@ -357,7 +357,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   }
 
   function addPerson(p, { instant = false } = {}) {
-    const el = createCharacter(p.type);
+    const el = createCharacter(p.type, { look: p.look });
     const wish = h('div', { class: 'wish' }, icon(option(MENU, 'topping', p.order.topping).icon, 'wish-icon'));
     const tag = h('div', { class: 'tag' });
     const cup = h('div', { class: 'held-cup' }, icon(`cup.${p.order.tea}`, 'held-cup-img'));
@@ -472,7 +472,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     register.classList.remove('disabled');
     showBubble(p);
     p.sentence = orderSentence(p.order);
-    await sayAs(p, line('say.greet', { name: customerName(p.type.id).name }));
+    await sayAs(p, line('say.greet', { name: visitorName(p.type.id, p.look) }));
     // In hard call mode the customer only says hello: the order is pictures only.
     if (config.callMode !== 'hard') await sayAs(p, p.sentence);
     if (mode === 'hard' && shift.counter === p) await sayAs(p, line('say.payWith', { n: p.pays }));
@@ -635,7 +635,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   }
   const saveTimer = setInterval(saveNow, 2000);
 
-  const opts = { config, menu: MENU, customers: CUSTOMERS, onEvent };
+  const opts = { config, menu: MENU, customers: CUSTOMERS, onEvent, looks: { accessories: ACCESSORIES, nameCount: 4 } };
   if (restore) {
     // Pick up a saved shift: everyone is put straight back in place, and
     // the customer at the counter orders again.

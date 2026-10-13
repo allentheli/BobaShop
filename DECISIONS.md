@@ -87,4 +87,7 @@ Choices made while building that the build instructions did not settle. One line
 - "Before the shift" setting: Full (default), Jobs only, or Skip to the shop.
 - Music (Allen's idea that a child picks it): the cashier (or the front counter at 2 players) has the radio on their Before opening list; the radio on the shop wall lets anyone change it during the shift. The choice is remembered for the next day.
 - The four songs are written as notes and played by the app (free, offline). The music only plays during the shift and while choosing, so the other screens stay calm. It ducks to about a third while anyone talks.
-- Crowd setting (Allen's "Overcooked" request): Busy and Chaos override arrivals, line length and drinks in progress. In Chaos the limit is 99, waiting customers stand in staggered rows of four, and extra customers crowd the door.
+- Crowd setting (Allen's "Overcooked" request): Busy and Chaos change how fast customers arrive and how long the line can grow (no limit in Chaos; extra customers crowd the door).
+- Drinks in progress is a slider: 1 to 5, or Chaos (stored as 99, no limit). From 3 up, waiting customers stand in staggered rows of four.
+- More customers (Allen's request): four new animals (bunny, panda, frog, penguin) and accessories drawn as separate pictures in `assets/accessories/`, placed by each character's head, face and neck points in `js/assets.js`. A visitor's look (hat about half the time, glasses a third, neckwear a third, fur color and name) is picked when they arrive and saved with them.
+- Kids' drawings (milestone 4) will use the same head, face and neck points, so they can wear accessories too.

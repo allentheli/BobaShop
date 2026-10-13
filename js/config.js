@@ -34,13 +34,15 @@ export const CONFIG = {
   customersLeave: true,
   patienceBar: true,
 
-  // How busy the shop gets. 'busy' and 'chaos' change the arrivals and
-  // limits below; in chaos there is no limit on customers waiting.
+  // How busy the shop gets: how fast customers arrive and how long the
+  // line may grow. In chaos there is no limit on the line. (How many
+  // drinks can be in progress is its own setting, `drinksInProgress`,
+  // from 1 to 5, or 99 for no limit.)
   crowd: 'normal',
   crowds: {
     normal: {},
-    busy: { arrivalEvery: 22, lineLength: 5, longLine: 6, drinksInProgress: 3 },
-    chaos: { arrivalEvery: 12, firstArrivalAt: 1, lineLength: 99, longLine: 99, drinksInProgress: 99 },
+    busy: { arrivalEvery: 22, lineLength: 5, longLine: 6 },
+    chaos: { arrivalEvery: 12, firstArrivalAt: 1, lineLength: 99, longLine: 99 },
   },
 
   payCoins: [5, 10, 20],     // coins a customer pays with on the hard register

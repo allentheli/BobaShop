@@ -682,3 +682,19 @@ img { -webkit-user-drag: none; }
 .wall-radio.playing img { animation: radio-bounce .5s ease-in-out infinite; }
 @keyframes radio-bounce { 50% { transform: translateY(-4px) rotate(-3deg); } }
 .radio-item { box-shadow: 0 0 0 4px #ffd23f; }
+
+/* Accessories on customers */
+.acc { position: absolute; pointer-events: none; }
+.acc-head { transform: translate(-50%, -100%); }
+.acc-neck { transform: translate(-50%, -50%); }
+.acc-eyes { aspect-ratio: 1; transform: translate(-50%, -50%); }
+
+/* Drinks in progress slider */
+.drinks-slider { margin-top: 10px; width: 640px; }
+.drinks-value { font-size: 24px; font-weight: 900; margin-bottom: 6px; }
+.drinks-range { -webkit-appearance: none; appearance: none; width: 100%; height: 56px; background: transparent; touch-action: pan-x; }
+.drinks-range::-webkit-slider-runnable-track { height: 14px; border-radius: 7px; background: linear-gradient(90deg, #d8f3e2, #ffc9a8 80%, #ff8a8a); }
+.drinks-range::-webkit-slider-thumb { -webkit-appearance: none; width: 48px; height: 48px; margin-top: -17px; border-radius: 50%; background: var(--mint); border: 5px solid #fff; box-shadow: 0 3px 0 var(--mint-deep), 0 0 0 2px var(--mint-deep); }
+.drinks-range::-moz-range-track { height: 14px; border-radius: 7px; background: linear-gradient(90deg, #d8f3e2, #ffc9a8 80%, #ff8a8a); }
+.drinks-range::-moz-range-thumb { width: 40px; height: 40px; border-radius: 50%; background: var(--mint); border: 5px solid #fff; }
+.drinks-ticks { display: flex; justify-content: space-between; font-size: 18px; font-weight: 800; opacity: .6; padding: 0 6px; }

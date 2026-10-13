@@ -1,3 +1,5 @@
+import { ACCESSORIES } from './assets.js';
+
 // A character on screen: a body picture with eyes and a mouth drawn on top.
 // The same code will draw faces on kids' drawings in milestone 4, so the
 // body is always a plain picture and the face is always drawn by the app.
@@ -70,19 +72,45 @@ function faceSvg(expression) {
     ${expression === 'happy' ? BLUSH : ''}${eyes}${mouth}${MOUTH_OPEN}</svg>`;
 }
 
-export function createCharacter(rec, { expression = 'waiting' } = {}) {
+// look (optional): { head, eyes, neck, hue } from makeLook() in js/logic.js.
+export function createCharacter(rec, { expression = 'waiting', look = null } = {}) {
   const el = document.createElement('div');
   el.className = 'char';
   el.dataset.who = rec.id;
+  const hue = look && look.hue ? `filter:hue-rotate(${look.hue}deg)` : '';
   el.innerHTML = `
     <div class="char-body">
-      <img class="char-img" src="${rec.body}" alt="" draggable="false">
+      <img class="char-img" src="${rec.body}" alt="" draggable="false" style="${hue}">
       <div class="face-slot" style="left:${rec.face.x * 100}%;top:${rec.face.y * 100}%;width:${rec.face.w * 100}%"></div>
+      ${look ? accessoriesHtml(rec, look) : ''}
     </div>`;
   // Blink at a random rhythm so a line of customers does not blink together.
   el.style.setProperty('--blink-delay', `${(Math.random() * 4).toFixed(2)}s`);
   setExpression(el, expression);
   return el;
+}
+
+// Hats sit on the head (anchored at their bottom), glasses over the face,
+// and bow ties or scarves at the neck.
+function accessoriesHtml(rec, look) {
+  let out = '';
+  const head = rec.head || { x: 0.5, y: 0.12, w: 0.64 };
+  const neck = rec.neck || { x: 0.5, y: 0.6, w: 0.6 };
+  const a = (id) => ACCESSORIES[id];
+  if (look.neck && a(look.neck)) {
+    const x = a(look.neck);
+    out += `<img class="acc acc-neck" src="${x.file}" alt="" style="left:${neck.x * 100}%;top:${neck.y * 100}%;width:${neck.w * x.w * 100}%">`;
+  }
+  if (look.eyes && a(look.eyes)) {
+    out += `<img class="acc acc-eyes" src="${a(look.eyes).file}" alt="" style="left:${rec.face.x * 100}%;top:${rec.face.y * 100}%;width:${rec.face.w * 100}%">`;
+  }
+  if (look.head && a(look.head)) {
+    const x = a(look.head);
+    const left = (head.x + (x.dx || 0) * head.w) * 100;
+    const top = (head.y + (x.dy || 0)) * 100;
+    out += `<img class="acc acc-head" src="${x.file}" alt="" style="left:${left}%;top:${top}%;width:${head.w * x.w * 100}%">`;
+  }
+  return out;
 }
 
 export function setExpression(el, expression) {

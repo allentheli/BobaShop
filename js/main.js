@@ -4,9 +4,9 @@
 // app can be closed at any point and continued on the next launch.
 
 import { CONFIG } from './config.js';
-import { BOSS, CUSTOMERS, ICONS } from './assets.js';
+import { BOSS, CUSTOMERS, ICONS, ACCESSORIES } from './assets.js';
 import { MENU } from './menu.js';
-import { starsFor, pickHint, pickInspection } from './logic.js';
+import { starsFor, pickHint, pickInspection, makeLook } from './logic.js';
 import { t, line } from './text.js';
 import { unlock, speak, stopSpeaking, configureSound, setMuted, play, resume } from './audio.js';
 import { createCharacter, setTalking, act, setExpression } from './character.js';
@@ -93,7 +93,9 @@ function titleScreen() {
   const root = h('div', { class: `screen title-screen ${hasDay ? 'has-day' : ''}` },
     h('div', { class: 'awning' }),
     h('div', { class: 'title-sign' }, icon('drink', 'title-cup'), h('h1', {}, t('ui.appName')), icon('drink', 'title-cup flip')),
-    h('div', { class: 'title-friends' }, ...CUSTOMERS.map((c) => createCharacter(c, { expression: 'happy' }))),
+    // Three random friends wave from the title screen, dressed up.
+    h('div', { class: 'title-friends' }, ...[...CUSTOMERS].sort(() => Math.random() - 0.5).slice(0, 3)
+      .map((c) => createCharacter(c, { expression: 'happy', look: makeLook(c, ACCESSORIES) }))),
     continueBtn,
     startBtn,
     h('div', { class: 'sound-hint' }, t('ui.soundHint')),

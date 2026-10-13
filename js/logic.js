@@ -155,3 +155,19 @@ export function badgesFor({ results = [], rungUp = 0, mistakes = 0, ranOut = nul
   if (ranOut === false) badges.push('neverRanOut');
   return badges;
 }
+
+// A visitor's look: a random hat, glasses and neckwear (or none), maybe a
+// different fur color, and one of their kind's names. Kept with the
+// customer so they look the same all day (and at the closing inspection).
+export function makeLook(type, accessories = {}, rng = Math.random, nameCount = 1) {
+  const bySlot = (slot) => Object.keys(accessories).filter((k) => accessories[k].slot === slot);
+  const maybe = (chance, list) => (list.length && rng() < chance ? list[Math.floor(rng() * list.length)] : null);
+  const hues = type.hues || [0];
+  return {
+    head: maybe(0.55, bySlot('head')),
+    eyes: maybe(0.3, bySlot('eyes')),
+    neck: maybe(0.35, bySlot('neck')),
+    hue: hues[Math.floor(rng() * hues.length)],
+    name: Math.floor(rng() * nameCount),
+  };
+}

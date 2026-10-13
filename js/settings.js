@@ -78,6 +78,20 @@ export function openSettings({ host, save, getConfig, onChange, onReset, onDemo 
     return h('div', { class: 'stepper' }, minus, input, plus);
   }
 
+  // A slider from 1 to 5, then Chaos (no limit, stored as 99).
+  function drinksSlider(value) {
+    const stops = [1, 2, 3, 4, 5, 99];
+    const at = Math.max(0, stops.indexOf(value));
+    const range = h('input', { class: 'drinks-range', type: 'range', min: '0', max: String(stops.length - 1), step: '1', value: String(at) });
+    const label = h('div', { class: 'drinks-value' });
+    const show = (i) => { label.textContent = stops[i] === 99 ? 'Chaos! No limit' : `${stops[i]} at once`; };
+    show(at);
+    range.addEventListener('input', () => show(Number(range.value)));
+    range.addEventListener('change', () => set('drinksInProgress', stops[Number(range.value)]));
+    const ticks = h('div', { class: 'drinks-ticks' }, ...stops.map((n) => h('span', {}, n === 99 ? 'Chaos' : String(n))));
+    return h('div', { class: 'drinks-slider' }, label, range, ticks);
+  }
+
   function draw() {
     const c = getConfig();
     const nextDay = dayRunning ? ' Starts with the next day.' : '';
@@ -159,10 +173,10 @@ export function openSettings({ host, save, getConfig, onChange, onReset, onDemo 
         choices([['easy', 'Easy'], ['medium', 'Medium'], ['hard', 'Hard']], c.registerMode, (v) => set('registerMode', v))),
       section('Call mode (manager)', 'Easy: the ticket travels with the cup and the makers read it. Normal: only the manager holds the ticket and calls each step. Hard: customers only say hello, so the order is pictures only and the manager calls every step.',
         choices([['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard']], c.callMode, (v) => set('callMode', v))),
-      section('Crowd', 'Normal: up to 3 in line and 2 drinks at once. Busy: customers come faster, up to 5 in line and 3 drinks at once. Chaos: customers keep pouring in with no limit. Busy and chaos replace the "drinks in progress" choice below.',
+      section('Crowd', 'How fast customers come in. Normal: up to 3 in line. Busy: faster, up to 5 in line. Chaos: customers keep pouring in, with no limit on the line.',
         choices([['normal', 'Normal'], ['busy', 'Busy'], ['chaos', 'Chaos!']], c.crowd, (v) => set('crowd', v))),
-      section('Drinks in progress at once', 'How many paid customers can wait for their drink.',
-        choices([[1, '1'], [2, '2']], c.drinksInProgress, (v) => set('drinksInProgress', v))),
+      section('Drinks in progress at once', 'How many paid customers can wait for their drink at the same time. Chaos: no limit.',
+        drinksSlider(c.drinksInProgress)),
       section('Waiting customers', 'When on, customers who wait too long leave. One who already paid gets their coins back.',
         choices([[true, 'Customers leave'], [false, 'Nobody leaves']], c.customersLeave, (v) => set('customersLeave', v)),
         choices([[true, 'Show patience bars'], [false, 'Hide patience bars']], c.patienceBar, (v) => set('patienceBar', v))),

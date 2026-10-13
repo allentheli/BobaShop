@@ -5,12 +5,14 @@
 //   line -> counter -> waiting -> served -> gone
 //   line -> gone (leaves when the shop closes, or runs out of patience)
 
-import { generateOrder, price, tipFor, activeDetails, useCup, soldOut, payWith } from './logic.js';
+import { generateOrder, price, tipFor, activeDetails, useCup, soldOut, payWith, makeLook } from './logic.js';
 
 let nextId = 1;
 
 export class Shift {
-  constructor({ config, menu, customers, rng = Math.random, onEvent = () => {} }) {
+  // looks: { accessories, nameCount } so each visitor gets their own look.
+  constructor({ config, menu, customers, rng = Math.random, onEvent = () => {}, looks = null }) {
+    this.looks = looks;
     this.config = config;
     this.menu = menu;
     this.customerTypes = customers;
@@ -106,7 +108,8 @@ export class Shift {
     });
     if (!order) return null;   // every cup is already promised
     this.lastOrder = order;
-    const p = { id: nextId++, type, order, place: 'line', placeTime: 0, number: null, paidAt: null };
+    const look = this.looks ? makeLook(type, this.looks.accessories, this.rng, this.looks.nameCount) : null;
+    const p = { id: nextId++, type, look, order, place: 'line', placeTime: 0, number: null, paidAt: null };
     this.people.push(p);
     this.emit('arrive', p);
     return p;
@@ -170,7 +173,7 @@ export class Shift {
     p.tip = tip;
     this.tips += tip;
     this.move(p, 'served');
-    this.served.push({ number: p.number, order: p.order, type: p.type.id, price: p.price, tip });
+    this.served.push({ number: p.number, order: p.order, type: p.type.id, look: p.look, price: p.price, tip });
     this.emit('served', p);
     return p;
   }

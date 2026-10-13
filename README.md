@@ -25,7 +25,11 @@ A whole day runs from the title screen and back:
 
 **Music:** the cashier picks the shop's music on the radio during Before opening (the radio picture on the cashier's list). Tapping a song plays it, so kids choose by listening. During the shift, the manager or cashier can change it by tapping the radio on the wall. The music gets quieter whenever someone talks, speeds up a little as the sun sets, and stops when paused. Settings has music on/off and volume. The four songs are made by the app; any of them can be replaced by a recorded file in `js/music.js`.
 
-**Crowd:** in the settings, Normal (3 in line, 2 drinks at once), Busy (faster, 5 in line, 3 drinks), or Chaos (customers keep pouring in with no limit, like Overcooked).
+**Crowd:** in the settings, Normal (up to 3 in line), Busy (faster, up to 5 in line), or Chaos (customers keep pouring in with no limit, like Overcooked).
+
+**Drinks in progress at once:** a slider from 1 to 5, or Chaos for no limit on paid customers waiting for drinks.
+
+**Customers:** seven kinds of visitors (cat, bear, dragon, bunny, panda, frog, penguin). Each visitor gets a random look: maybe a hat (crown, party hat, flower, bow, beanie, cap), glasses (round, sunglasses, hearts), a bow tie or scarf, sometimes a different fur color, and one of four names. They keep their look all day, including at the inspection.
 
 **Pause:** during the day, hold the round pause button (top of the screen) for 1 second. The clock, the customers and their patience all freeze. From the pause menu you can keep playing, go Home (the day is saved, so Continue picks it up), turn the sound off, open the settings, or end the shift early (tap twice).
 

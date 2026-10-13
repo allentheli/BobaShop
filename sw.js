@@ -3,11 +3,22 @@
 // background when there is a connection, so updates show on the next launch.
 // Bump VERSION when files are added or removed.
 
-const VERSION = 'boba-m3-3';
+const VERSION = 'boba-m3-4';
 const FILES = [
   './',
   'index.html',
   'manifest.webmanifest',
+  'assets/accessories/beanie.svg',
+  'assets/accessories/bow.svg',
+  'assets/accessories/bowtie.svg',
+  'assets/accessories/cap.svg',
+  'assets/accessories/crown.svg',
+  'assets/accessories/flower.svg',
+  'assets/accessories/glasses-heart.svg',
+  'assets/accessories/glasses-round.svg',
+  'assets/accessories/glasses-sun.svg',
+  'assets/accessories/party.svg',
+  'assets/accessories/scarf.svg',
   'assets/app/icon-180.png',
   'assets/app/icon-192.png',
   'assets/app/icon-512.png',
@@ -21,7 +32,11 @@ const FILES = [
   'assets/cards/tea.jpg',
   'assets/characters/bao.svg',
   'assets/characters/boss.svg',
+  'assets/characters/dumpling.svg',
+  'assets/characters/hop.svg',
   'assets/characters/mochi.svg',
+  'assets/characters/momo.svg',
+  'assets/characters/pebble.svg',
   'assets/characters/taro.svg',
   'assets/icons/badge-bowl.svg',
   'assets/icons/badge-day.svg',

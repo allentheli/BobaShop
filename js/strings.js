@@ -262,10 +262,15 @@ export const STRINGS = {
       noStars: 'Good try, team! Let\'s go for a star next time!',
     },
 
+    // Each kind of customer has a few names; a visitor gets one of them.
     customers: {
-      mochi: { name: 'Mochi', full: 'Mochi the cat' },
-      bao: { name: 'Bao', full: 'Bao the bear' },
-      taro: { name: 'Taro', full: 'Taro the dragon' },
+      mochi: { name: 'Mochi', full: 'Mochi the cat', names: ['Mochi', 'Sesame', 'Peaches', 'Biscuit'] },
+      bao: { name: 'Bao', full: 'Bao the bear', names: ['Bao', 'Honey', 'Bun', 'Maple'] },
+      taro: { name: 'Taro', full: 'Taro the dragon', names: ['Taro', 'Ember', 'Ube', 'Sparkle'] },
+      momo: { name: 'Momo', full: 'Momo the bunny', names: ['Momo', 'Clover', 'Cotton', 'Daisy'] },
+      dumpling: { name: 'Dumpling', full: 'Dumpling the panda', names: ['Dumpling', 'Bamboo', 'Oreo', 'Mimi'] },
+      hop: { name: 'Hop', full: 'Hop the frog', names: ['Hop', 'Lily', 'Pickles', 'Bean'] },
+      pebble: { name: 'Pebble', full: 'Pebble the penguin', names: ['Pebble', 'Snowy', 'Waddles', 'Ice Cube'] },
     },
   },
 };

@@ -45,6 +45,12 @@ export function customerName(id) {
   return lookup(`customers.${id}`) || { name: id, full: id };
 }
 
+// The name a visitor goes by (each kind of customer has a few names).
+export function visitorName(id, look) {
+  const c = customerName(id);
+  return (look && c.names && c.names[look.name % c.names.length]) || c.name;
+}
+
 // The spoken order, with every detail the order has.
 export function orderSentence(order, rng = Math.random) {
   return line('say.order', { drink: drinkPhrase(order) }, rng);

@@ -10,7 +10,9 @@
 - New: pause button with a menu: keep playing, home, sound, settings, end the shift.
 - New: "How to make" tutorial with the station cards from the printed sheet, read aloud step by step.
 - New: shop music picked by the cashier on a radio, changeable during the shift.
-- New: Crowd setting: normal, busy or chaos (no limit on waiting customers).
+- New: Crowd setting: normal, busy or chaos (no limit on the line).
+- New: drinks in progress slider from 1 to 5, or chaos.
+- New: four more customers (bunny, panda, frog, penguin), random accessories, fur colors and names.
 - New: Skip (hold) to go straight to the shop, and a "Before the shift" setting (full, jobs only, skip).
 
 ## Order levels (October 13, 2026)
