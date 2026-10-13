@@ -13,6 +13,7 @@ import { t, line, orderSentence } from './text.js';
 import { speak, stopSpeaking, play } from './audio.js';
 import { createCharacter, setExpression, setTalking, act } from './character.js';
 import { h, icon, onTap, wait, nextButton } from './ui.js';
+import { orderIcons } from './orderview.js';
 import { bossSayer } from './meet.js';
 
 export const BADGES = ['perfectDay', 'perfectRegister', 'neverRanOut'];
@@ -58,13 +59,7 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone }) {
     const pick = c.picks[i];
     const type = CUSTOMERS.find((x) => x.id === pick.type) || CUSTOMERS[0];
     const cust = createCharacter(type);
-    const items = [];
-    for (const d of MENU.details) {
-      const o = d.options.find((x) => x.id === pick.order[d.id]);
-      if (!o || !o.icon || !ICONS[o.icon]) continue;
-      if (items.length) items.push(h('span', { class: 'plus' }, '+'));
-      items.push(icon(o.icon, 'order-icon'));
-    }
+    const items = orderIcons(pick.order, { width: 500, max: 100 });
     const sentence = orderSentence(pick.order);
     const repeat = h('button', { class: 'btn round repeat' }, icon('speaker'));
     const rightBtn = h('button', { class: 'btn big judge right-btn' }, icon('check', 'judge-icon'), h('span', { class: 'label' }, t('ui.right')));

@@ -6,6 +6,9 @@
 
 export const MENU = {
   id: 'boba',
+  // The order the pictures are shown in, matching how the manager calls
+  // the steps: cup, topping and scoops, then tea, ice and sugar.
+  showOrder: ['size', 'topping', 'scoops', 'fresh', 'tea', 'ice', 'sugar'],
   details: [
     {
       id: 'tea', level: 1,

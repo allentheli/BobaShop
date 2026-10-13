@@ -5,7 +5,7 @@
 //   line -> counter -> waiting -> served -> gone
 //   line -> gone (leaves when the shop closes, or runs out of patience)
 
-import { generateOrder, price, tipFor } from './logic.js';
+import { generateOrder, price, tipFor, activeDetails, useCup, soldOut } from './logic.js';
 
 let nextId = 1;
 
@@ -29,6 +29,25 @@ export class Shift {
     this.tips = 0;
     this.registerMistakes = 0;
     this.rungUp = 0;
+    this.closedBecause = null;
+
+    // Cups are counted only when orders name a size. A cup is used when
+    // its order is rung up.
+    this.countsCups = activeDetails(menu, config.level, config.enabledDetails).some((d) => d.id === 'size');
+    this.cupsLeft = { ...config.cups };
+  }
+
+  get lineLimit() {
+    return this.config.level >= 7 ? this.config.longLine : this.config.lineLength;
+  }
+
+  // Cups not yet promised to a customer who is in line or ordering.
+  get cupsFree() {
+    const free = { ...this.cupsLeft };
+    for (const p of this.people) {
+      if ((p.place === 'line' || p.place === 'counter') && p.order.size) free[p.order.size] = (free[p.order.size] ?? 0) - 1;
+    }
+    return free;
   }
 
   get money() { return this.sales + this.tips; }
@@ -41,11 +60,12 @@ export class Shift {
     this.time += dt;
     for (const p of this.people) p.placeTime += dt;
 
-    if (!this.closed && this.time >= this.config.shiftLength) this.close();
+    if (!this.closed && this.time >= this.config.shiftLength) this.close('sunset');
+    if (!this.closed && this.countsCups && soldOut(this.cupsLeft)) this.close('soldOut');
 
     if (!this.closed && this.time >= this.nextArrival) {
       this.nextArrival += this.config.arrivalEvery;
-      if (this.line.length < this.config.lineLength) this.arrive();
+      if (this.line.length < this.lineLimit) this.arrive();
     }
 
     if (!this.closed && this.config.waitingCustomersLeave) {
@@ -68,9 +88,10 @@ export class Shift {
       owned: this.config.owned,
       bias: this.config.bias,
       previous: this.lastOrder,
+      cupsLeft: this.countsCups ? this.cupsFree : undefined,
       rng: this.rng,
     });
-    if (!order) return null;
+    if (!order) return null;   // every cup is already promised
     this.lastOrder = order;
     const p = { id: nextId++, type, order, place: 'line', placeTime: 0, number: null, paidAt: null };
     this.people.push(p);
@@ -111,6 +132,7 @@ export class Shift {
     }
     p.price = due;
     p.paidAt = this.time;
+    if (this.countsCups) this.cupsLeft = useCup(this.cupsLeft, p.order);
     // Each customer keeps the same waiting spot until served, so the
     // numbers on screen never shuffle around.
     // A spot where a served customer is still sipping is used only if
@@ -151,9 +173,11 @@ export class Shift {
     this.emit('leave', p);
   }
 
-  close() {
+  // why: 'sunset' when the shift time is up, 'soldOut' when every cup is used.
+  close(why = 'sunset') {
     this.closed = true;
-    this.emit('close');
+    this.closedBecause = why;
+    this.emit('close', why);
     // Customers in line leave cheerfully. Anyone already ordering stays.
     for (const p of this.line) this.leave(p, 'closed');
   }
@@ -185,6 +209,8 @@ export class Shift {
       tips: this.tips,
       registerMistakes: this.registerMistakes,
       rungUp: this.rungUp,
+      cupsLeft: this.cupsLeft,
+      closedBecause: this.closedBecause,
     };
   }
 
@@ -192,7 +218,7 @@ export class Shift {
   // as the first kind.
   static restore(data, opts) {
     const s = new Shift(opts);
-    for (const k of ['time', 'closed', 'nextArrival', 'nextOrderNumber', 'lastOrder', 'sales', 'tips', 'registerMistakes', 'rungUp']) {
+    for (const k of ['time', 'closed', 'nextArrival', 'nextOrderNumber', 'lastOrder', 'sales', 'tips', 'registerMistakes', 'rungUp', 'cupsLeft', 'closedBecause']) {
       if (data[k] !== undefined) s[k] = data[k];
     }
     s.served = (data.served || []).slice();
@@ -212,6 +238,7 @@ export class Shift {
       drinks: this.served.length,
       registerMistakes: this.registerMistakes,
       rungUp: this.rungUp,
+      soldOut: this.closedBecause === 'soldOut',
       served: this.served.slice(),
     };
   }

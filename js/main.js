@@ -116,10 +116,35 @@ function parentPanel() {
   const close = h('button', { class: 'btn small-btn' }, 'Close');
   const demo = h('button', { class: 'btn small-btn' }, 'Play a demo shift (fast, by itself)');
   const voice = h('button', { class: 'btn small-btn' }, `Voice: ${config.sound.voice ? 'on' : 'off'}`);
+  const LEVELS = [
+    'Tea and topping',
+    '+ cup size (small or large)',
+    '+ scoops of topping (1, 2 or 3)',
+    '+ ice (none, some, lots)',
+    '+ sugar (none, half, full)',
+    '+ fresh topping (1 coin more)',
+    '+ a longer line',
+  ];
+  const levelNote = h('p', { class: 'level-note' });
+  const levelBtns = LEVELS.map((_, i) => h('button', { class: 'btn level-btn' }, String(i + 1)));
+  const drawLevel = () => {
+    levelBtns.forEach((b, i) => b.classList.toggle('chosen', i + 1 === config.level));
+    levelNote.textContent = `Level ${config.level}: ${LEVELS.slice(0, config.level).join(' ')}`;
+  };
+  levelBtns.forEach((b, i) => onTap(b, () => {
+    save.settings.level = i + 1;
+    persist();
+    config = withSettings(save.settings);
+    drawLevel();
+  }));
+  drawLevel();
   const panel = h('div', { class: 'parent-panel' },
     h('div', { class: 'panel-card' },
       h('h2', {}, 'Parents'),
-      h('p', {}, 'More settings (cups, shift length, order levels, register and call modes, job locks, backup) come in milestone 3.'),
+      h('div', { class: 'panel-label' }, 'Order level (each level adds one detail to the orders)'),
+      h('div', { class: 'level-row' }, ...levelBtns),
+      levelNote,
+      h('p', {}, 'A new level starts with the next day. Cups are counted from level 2 (6 small, 6 large). The rest of the settings come in milestone 3.'),
       voice, demo, close));
   app.querySelector('.screen').appendChild(panel);
   onTap(close, () => panel.remove());
@@ -136,7 +161,9 @@ function parentPanel() {
 // ---- The day ------------------------------------------------------------------
 
 function newDay() {
-  save.day = { phase: 'meet', number: save.days + 1, startedAt: Date.now() };
+  // The order level is fixed for the whole day, so changing it in the
+  // parent panel never changes a shift halfway.
+  save.day = { phase: 'meet', number: save.days + 1, startedAt: Date.now(), level: config.level };
   persist();
   showPhase();
 }
@@ -173,7 +200,7 @@ function showPhase() {
     case 'open':
       startOpen({
         app,
-        config: { ...structuredClone(config), bias: day.hint },
+        config: { ...structuredClone(config), bias: day.hint, level: day.level ?? config.level },
         speed: Number(params.get('speed')) || 1,
         restore: day.shift || null,
         onSave: (snapshot) => { day.shift = snapshot; persist(); },

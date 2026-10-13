@@ -6,6 +6,7 @@ export const CONFIG = {
   cups: { small: 6, large: 6 },
   drinksInProgress: 2,       // waiting spots
   lineLength: 3,             // customers waiting at the door
+  longLine: 5,               // the line at order level 7
   arrivalEvery: 35,          // seconds between new customers
   firstArrivalAt: 2,         // the first customer walks in right after opening
 

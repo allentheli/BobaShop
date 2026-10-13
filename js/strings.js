@@ -99,6 +99,19 @@ export const STRINGS = {
       lids: 'Stack the lids and straws.',
     },
 
+    // How a spoken order is put together, for example
+    // "a large taro with two scoops of fresh boba pearls, some ice and half sugar".
+    orderParts: {
+      sized: 'a {size} {tea}',
+      unsized: '{tea}',
+      topping: 'with {topping}',
+      toppingScoops: 'with {scoops} of {topping}',
+      fresh: 'fresh {topping}',
+      extras: ', {list}',
+      and: ' and ',
+      comma: ', ',
+    },
+
     menu: {
       tea: { milk: 'milk tea', matcha: 'matcha', taro: 'taro' },
       topping: { pearls: 'boba pearls', jelly: 'coconut jelly', hearts: 'gummy hearts' },
@@ -144,11 +157,11 @@ export const STRINGS = {
         'Hello there! I\'m {name}.',
         'Hi, Boba Shop! It\'s me, {name}!',
       ],
-      // Order sentence for orders with only tea and topping.
+      // The order sentence. {drink} is built from the parts in `orderParts`.
       order: [
-        'Can I please have {tea} with {topping}?',
-        'I would like {tea} with {topping}, please!',
-        '{tea} with {topping}, please!',
+        'Can I please have {drink}?',
+        'I would like {drink}, please!',
+        '{drink}, please!',
       ],
       wrongTotal: [
         'Hmm, that doesn\'t sound right. Let\'s try again!',
@@ -158,6 +171,7 @@ export const STRINGS = {
       servedCall: 'Order {n}!',
       sip: ['Yummy!', 'Mmm, delicious!', 'This is perfect!', 'Wow, so good!'],
       tip: ['Here is a tip!', 'Keep the change!'],
+      soldOut: 'We used every cup! Sold out! What a great day! Let\'s finish the last drinks.',
       closing: 'The sun is setting. The shop is closed! Let\'s finish the last drinks.',
       lineBye: ['Bye bye! See you tomorrow!', 'Okay, see you tomorrow!'],
       dayEnd: 'What a day! We made {n} coins!',

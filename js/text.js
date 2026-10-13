@@ -39,12 +39,27 @@ export function customerName(id) {
   return lookup(`customers.${id}`) || { name: id, full: id };
 }
 
-// The spoken order. Milestone 1 orders have tea and topping only.
+// The spoken order, with every detail the order has.
 export function orderSentence(order, rng = Math.random) {
-  return line('say.order', {
-    tea: menuWord('tea', order.tea),
-    topping: menuWord('topping', order.topping),
-  }, rng);
+  return line('say.order', { drink: drinkPhrase(order) }, rng);
+}
+
+export function drinkPhrase(order) {
+  const P = (k, vars) => fill(lookup(`orderParts.${k}`), vars);
+  const tea = menuWord('tea', order.tea);
+  let topping = menuWord('topping', order.topping);
+  if (order.fresh === 'yes') topping = P('fresh', { topping });
+  let s = order.size ? P('sized', { size: menuWord('size', order.size), tea }) : P('unsized', { tea });
+  s += ' ' + (order.scoops ? P('toppingScoops', { scoops: menuWord('scoops', order.scoops), topping }) : P('topping', { topping }));
+  const extras = [];
+  if (order.ice) extras.push(menuWord('ice', order.ice));
+  if (order.sugar) extras.push(menuWord('sugar', order.sugar));
+  if (extras.length) {
+    const and = lookup('orderParts.and');
+    const list = extras.length === 1 ? extras[0] : extras.slice(0, -1).join(lookup('orderParts.comma')) + and + extras[extras.length - 1];
+    s += P('extras', { list });
+  }
+  return s;
 }
 
 // The boss's one-sentence job explanation, matching the call mode.

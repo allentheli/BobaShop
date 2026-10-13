@@ -340,13 +340,14 @@ img { -webkit-user-drag: none; }
 .reg-parts { display: flex; gap: 12px; }
 .part { width: 130px; height: 120px; border-radius: 24px; background: var(--pink); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px; }
 .part-img { width: 62px; height: 62px; }
-.cup-small .part-img { width: 48px; height: 48px; }
+.cup-small .part-img { width: 62px; height: 62px; }
 .part-coins { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; max-width: 110px; }
 .mini-coin { width: 20px; height: 20px; }
 .part-price { position: absolute; right: 10px; top: 6px; font-size: 22px; font-weight: 900; opacity: .6; }
 .tray { flex: 1; height: 116px; border-radius: 20px; background: #f6efe6; display: flex; align-items: center; padding: 0 14px; gap: 10px; }
 .tray-coins { flex: 1; display: flex; flex-wrap: wrap; gap: 3px; align-content: center; }
 .tray-coin { width: 32px; height: 32px; animation: pop-in .25s; }
+.reg-parts:has(.part:nth-child(3)) + .tray .tray-coin { width: 22px; height: 22px; }
 .tray-num { font-size: 58px; font-weight: 900; min-width: 60px; text-align: right; }
 .reg-clear { background: #f1e6da; }
 .reg-ring { background: #c7c0cc; }
@@ -522,3 +523,20 @@ img { -webkit-user-drag: none; }
   85% { transform: translateY(170px) scale(.6); opacity: 1; }
   100% { transform: translateY(190px) scale(.4); opacity: 0; }
 }
+
+/* Orders with many details: a wider bubble */
+.order-bubble.wide { left: 150px; width: 880px; }
+.order-bubble.wide::after { left: 410px; }
+.order-items { gap: 8px; }
+.inspect-order .order-items { max-width: 520px; }
+.inspect-body { gap: 10px; }
+.inspect-cust { width: 160px; }
+.inspect-cust .char { transform: scale(.85) translateX(-20px); }
+
+/* Parent panel: order level */
+.panel-label { font-size: 18px; font-weight: 800; }
+.level-row { display: flex; gap: 8px; }
+.level-btn { flex: 1; min-width: 0; min-height: 64px; font-size: 26px; font-weight: 900; background: #f1e6da; }
+.level-btn.chosen { background: var(--mint); color: #fff; }
+.panel-card .level-note { font-size: 16px; opacity: .9; min-height: 44px; }
+.panel-card { width: 640px; }

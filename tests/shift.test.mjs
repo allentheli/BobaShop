@@ -144,3 +144,48 @@ test('a whole played shift adds up', () => {
   assert.equal(s.sales, s.served.reduce((a, r) => a + r.price, 0) + shift.waiting.length * CONFIG.prices.base);
   assert.deepEqual(s.served.map((r) => r.number), [...s.served.map((r) => r.number)].sort((a, b) => a - b));
 });
+
+test('higher levels put every detail in the orders', () => {
+  const { shift } = make({ level: 6 });
+  run(shift, 3);
+  const o = shift.counter.order;
+  for (const k of ['tea', 'topping', 'size', 'scoops', 'ice', 'sugar', 'fresh']) assert.ok(o[k], k);
+});
+
+test('cups are counted and the shop sells out', () => {
+  const { shift, events } = make({ level: 2, cups: { small: 2, large: 1 }, arrivalEvery: 3 });
+  let promisedTooMany = false;
+  for (let t = 0; t < 200; t += 0.5) {
+    shift.tick(0.5);
+    const free = shift.cupsFree;
+    if (free.small < 0 || free.large < 0) promisedTooMany = true;
+    if (shift.counter) shift.ringUp(price(shift.counter.order, CONFIG.prices));
+    if (shift.waiting.length) shift.serve(shift.waiting[0].id);
+    for (const p of shift.people) if (p.place === 'served') shift.finishServed(p.id);
+  }
+  assert.equal(promisedTooMany, false);
+  assert.equal(shift.rungUp, 3);
+  assert.deepEqual(shift.cupsLeft, { small: 0, large: 0 });
+  assert.equal(shift.closedBecause, 'soldOut');
+  assert.ok(events.some((e) => e.type === 'close' && e.p === 'soldOut'));
+  assert.equal(shift.summary().soldOut, true);
+  // Sold out before the sun set.
+  assert.ok(shift.time < CONFIG.shiftLength);
+});
+
+test('cups are not counted at level 1, where orders have no size', () => {
+  const { shift } = make({ level: 1, cups: { small: 1, large: 1 }, arrivalEvery: 3 });
+  for (let t = 0; t < 60; t += 0.5) {
+    shift.tick(0.5);
+    if (shift.counter) shift.ringUp(price(shift.counter.order, CONFIG.prices));
+    if (shift.waiting.length) shift.serve(shift.waiting[0].id);
+  }
+  assert.ok(shift.rungUp > 2);
+  assert.equal(shift.closed, false);
+});
+
+test('level 7 has a longer line', () => {
+  const { shift, config } = make({ level: 7, arrivalEvery: 1 });
+  run(shift, 30);
+  assert.equal(shift.line.length, config.longLine);
+});

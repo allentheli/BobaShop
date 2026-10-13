@@ -19,7 +19,13 @@ A whole day runs from the title screen and back:
 
 **Saving:** the day is saved after every step. If the app is closed in the middle of a day, the title screen shows a big **Continue** button. **New day** starts over.
 
-**Parents:** hold the "Parents" button on the title screen for 3 seconds to turn the voice on or off, or to watch a demo shift that plays itself at high speed.
+**Parents:** hold the "Parents" button on the title screen for 3 seconds. There you can:
+
+- pick the **order level** (1 to 7). Level 1 is tea and topping only. Each level adds one detail: 2 cup size, 3 scoops, 4 ice, 5 sugar, 6 fresh topping, 7 a longer line. A new level starts with the next day.
+- turn the voice on or off.
+- watch a demo shift that plays itself at high speed.
+
+From level 2, the app counts cups (6 small and 6 large). It never orders a size that has run out, and when every cup is used the shop is "sold out" and closes early, as a win.
 
 ## How to open it on the iPad
 

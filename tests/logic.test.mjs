@@ -113,3 +113,17 @@ test('cup counting', () => {
   assert.equal(soldOut(cups), true);
   assert.deepEqual(useCup({ small: 0, large: 0 }, { size: 'small' }), { small: 0, large: 0 });
 });
+
+test('the spoken order names every detail', async () => {
+  const { orderSentence, drinkPhrase } = await import('../js/text.js');
+  assert.equal(drinkPhrase({ tea: 'milk', topping: 'pearls' }), 'milk tea with boba pearls');
+  assert.equal(
+    drinkPhrase({ tea: 'taro', topping: 'pearls', size: 'large', scoops: '3', ice: 'lots', sugar: 'half', fresh: 'yes' }),
+    'a large taro with three scoops of fresh boba pearls, lots of ice and half sugar');
+  assert.ok(orderSentence({ tea: 'matcha', topping: 'jelly', size: 'small', ice: 'none' }).includes('a small matcha with coconut jelly, no ice'));
+});
+
+test('every detail option has a picture', async () => {
+  const { ICONS } = await import('../js/assets.js');
+  for (const d of MENU.details) for (const o of d.options) if (o.icon) assert.ok(ICONS[o.icon], o.icon);
+});

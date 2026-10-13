@@ -48,3 +48,17 @@ Choices made while building that the build instructions did not settle. One line
 - On continuing a shift, everyone appears in their place at once and the customer at the counter says their order again.
 - The cleanup song is a short tune made by the app, played twice, while the boss names each dough color and tub.
 - The day history keeps the last 100 days (date, players, money, stars, badges, drinks) for later use.
+
+## Order levels (brought forward from milestone 3)
+
+- The order level picker moved into the parent panel early, because level 1 orders only name tea and topping. The default is still level 1.
+- The order level is fixed when a day starts, so changing it never changes a shift halfway.
+- Order pictures follow the manager's calling order: cup size, topping, scoops, fresh, tea, ice, sugar.
+- Pictures shrink to fit when an order has many details, and the bubble widens.
+- The spoken order joins every detail into one sentence, for example "a large taro with three scoops of fresh boba pearls, lots of ice and half sugar".
+- "No ice" and "no sugar" are a red no-sign over the ice cube and the sugar jar. Half and full sugar show the jar's fill level.
+- The easy register shows a small cup, a large cup and a "fresh" button, each with its coins.
+- Cups are counted only from level 2, when orders name a size. A cup is used when its order is rung up.
+- A customer only joins the line if a cup is still free for them, counting the cups already promised to customers in line.
+- Sold out closes the shop with a cheerful fanfare instead of the sunset sound.
+- Level 7's longer line holds 5 customers (`longLine` in `config.js`).

@@ -1,5 +1,12 @@
 # Changelog
 
+## Order levels (October 13, 2026)
+
+- New: order levels 1 to 7 in the parent panel. Customers now say and show cup size, scoops, ice, sugar and fresh at the higher levels.
+- New: pictures for each new detail, a wider order bubble, and small, large and fresh buttons on the register.
+- New: cup counting from level 2, and the shop sells out when every cup is used.
+- New: a longer line at level 7.
+
 ## Milestone 2: the full day (October 13, 2026)
 
 - New: Meet the boss with apron colors, spoken job explanations that rotate each day, and the day's coin goals.

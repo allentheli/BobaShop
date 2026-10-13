@@ -3,7 +3,7 @@
 // background when there is a connection, so updates show on the next launch.
 // Bump VERSION when files are added or removed.
 
-const VERSION = 'boba-m2-1';
+const VERSION = 'boba-m2-2';
 const FILES = [
   './',
   'index.html',
@@ -26,6 +26,7 @@ const FILES = [
   'js/meet.js',
   'js/before.js',
   'js/closing.js',
+  'js/orderview.js',
   'assets/app/icon-180.png',
   'assets/app/icon-192.png',
   'assets/app/icon-512.png',
@@ -34,6 +35,18 @@ const FILES = [
   'assets/characters/bao.svg',
   'assets/characters/taro.svg',
   'assets/icons/bell.svg',
+  'assets/icons/size-small.svg',
+  'assets/icons/size-large.svg',
+  'assets/icons/scoops-1.svg',
+  'assets/icons/scoops-2.svg',
+  'assets/icons/scoops-3.svg',
+  'assets/icons/ice-none.svg',
+  'assets/icons/ice-some.svg',
+  'assets/icons/ice-lots.svg',
+  'assets/icons/sugar-none.svg',
+  'assets/icons/sugar-half.svg',
+  'assets/icons/sugar-full.svg',
+  'assets/icons/fresh-yes.svg',
   'assets/icons/badge-bowl.svg',
   'assets/icons/badge-day.svg',
   'assets/icons/badge-empty.svg',

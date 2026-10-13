@@ -9,11 +9,13 @@ import { t, line, customerName, orderSentence } from './text.js';
 import { speak, play, stopSpeaking, resume } from './audio.js';
 import { createCharacter, setExpression, setTalking, act } from './character.js';
 import { h, icon, onTap, wait } from './ui.js';
+import { orderIcons } from './orderview.js';
 
 // Where characters stand, in stage pixels (the stage is 1180 x 820).
 // x, y is the point between the character's feet; s is the size.
 const SLOTS = {
-  line: [{ x: 345, y: 560, s: 0.6 }, { x: 240, y: 556, s: 0.58 }, { x: 140, y: 552, s: 0.56 }],
+  // Up to 5 places in line (5 only at order level 7).
+  line: [{ x: 345, y: 560, s: 0.6 }, { x: 255, y: 557, s: 0.58 }, { x: 170, y: 554, s: 0.56 }, { x: 95, y: 551, s: 0.54 }, { x: 30, y: 548, s: 0.52 }],
   counter: { x: 575, y: 655, s: 1.22 },
   waiting: [{ x: 910, y: 645, s: 0.8 }, { x: 1080, y: 645, s: 0.8 }],
   // A served customer steps forward from their waiting spot to the counter.
@@ -99,16 +101,16 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   const details = activeDetails(MENU, config.level, config.enabledDetails).map((d) => d.id);
   const partDefs = [];
   if (details.includes('size')) {
-    partDefs.push({ id: 'small', coins: config.prices.small, cls: 'cup-small' });
-    partDefs.push({ id: 'large', coins: config.prices.large, cls: 'cup-large' });
+    partDefs.push({ id: 'small', coins: config.prices.small, cls: 'cup-small', icon: 'size.small' });
+    partDefs.push({ id: 'large', coins: config.prices.large, cls: 'cup-large', icon: 'size.large' });
   } else {
-    partDefs.push({ id: 'base', coins: config.prices.base, cls: 'cup-base' });
+    partDefs.push({ id: 'base', coins: config.prices.base, cls: 'cup-base', icon: 'drink' });
   }
-  if (details.includes('fresh')) partDefs.push({ id: 'fresh', coins: config.prices.fresh, cls: 'fresh' });
+  if (details.includes('fresh')) partDefs.push({ id: 'fresh', coins: config.prices.fresh, cls: 'fresh', icon: 'fresh.yes' });
 
   for (const part of partDefs) {
     const coins = h('div', { class: 'part-coins' }, ...Array.from({ length: part.coins }, () => icon('coin', 'mini-coin')));
-    const btn = h('button', { class: `btn part ${part.cls}` }, icon('drink', 'part-img'), coins, h('span', { class: 'part-price' }, String(part.coins)));
+    const btn = h('button', { class: `btn part ${part.cls}` }, icon(part.icon, 'part-img'), coins, h('span', { class: 'part-price' }, String(part.coins)));
     onTap(btn, () => addPart(part), { sound: 'coin', gap: 200 });
     partsRow.appendChild(btn);
   }
@@ -370,14 +372,8 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
 
   function showBubble(p) {
     bubbleNum.textContent = String(p.number);
-    const items = [];
-    for (const d of MENU.details) {
-      if (p.order[d.id] == null) continue;
-      const opt = d.options.find((o) => o.id === p.order[d.id]);
-      if (!opt || !opt.icon || !ICONS[opt.icon]) continue;
-      if (items.length) items.push(h('span', { class: 'plus' }, '+'));
-      items.push(icon(opt.icon, 'order-icon'));
-    }
+    const items = orderIcons(p.order, { width: 600 });
+    bubble.classList.toggle('wide', items.length > 2);
     bubbleItems.replaceChildren(...items);
     bubble.classList.remove('hidden');
     bubble.classList.remove('pop'); void bubble.offsetWidth; bubble.classList.add('pop');
@@ -412,7 +408,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
         break;
       }
       case 'close':
-        onClose();
+        onClose(p);
         break;
       default:
     }
@@ -424,10 +420,10 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     root.classList.add('is-closed');
   }
 
-  async function onClose() {
-    play('sunset');
+  async function onClose(why) {
+    play(why === 'soldOut' ? 'fanfare' : 'sunset');
     showClosed();
-    await speak(line('say.closing'), { pitch: BOSS.voice.pitch, rate: BOSS.voice.rate });
+    await speak(line(why === 'soldOut' ? 'say.soldOut' : 'say.closing'), { pitch: BOSS.voice.pitch, rate: BOSS.voice.rate });
   }
 
   onTap(finishBtn, () => finish());
