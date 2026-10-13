@@ -23,6 +23,8 @@ A whole day runs from the title screen and back:
 
 **Skipping:** hold **Skip** (top right) during Meet the boss or Before opening to go straight to the shop. In the settings, "Before the shift" can be set to Full, Jobs only (no how-to cards), or Skip to the shop.
 
+**Decorating the shop:** the money from each day goes into the savings jar. At closing, after the badges, the day's decorator (it rotates between aprons, like the jobs) opens the decoration shop and may buy one thing: wall patterns, floors, counter colors, the sign, or things like a plant, a clock, string lights, a picture, balloons, a rug or a sleepy shop kitty. Tap once to see it in the little shop, tap again to buy. Every price is shown in coins; there are no mystery prizes, and decorations only change the look. Bought decorations show in the shop during play, and the next day a customer notices the new one. The coin button on the title screen shows the jar and lets you switch between decorations you already own.
+
 **Music:** the cashier picks the shop's music on the radio during Before opening (the radio picture on the cashier's list). Tapping a song plays it, so kids choose by listening. During the shift, the manager or cashier can change it by tapping the radio on the wall. The music gets quieter whenever someone talks, speeds up a little as the sun sets, and stops when paused. Settings has music on/off and volume. The four songs are made by the app; any of them can be replaced by a recorded file in `js/music.js`.
 
 **Crowd:** in the settings, Normal (up to 3 in line), Busy (faster, up to 5 in line), or Chaos (customers keep pouring in with no limit, like Overcooked).

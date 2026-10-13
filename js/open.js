@@ -13,6 +13,8 @@ import { orderIcons } from './orderview.js';
 import { addPauseButton } from './pause.js';
 import { playMusic, stopMusic, setMusicSpeed } from './music.js';
 import { openRadio } from './radio.js';
+import { applyDecor } from './decorview.js';
+import { shopLook } from './decor.js';
 
 // Where characters stand, in stage pixels (the stage is 1180 x 820).
 // x, y is the point between the character's feet; s is the size.
@@ -31,7 +33,9 @@ const SLOTS = {
 //          change, so the shift survives the app being closed.
 // pause: { onHome, onSettings, getSoundOn, onToggleSound } for the pause menu.
 // music: { song, onPick(id) } for the shop radio.
-export function startOpen({ app, config, demo = false, speed = 1, restore = null, onSave = () => {}, onFinish, pause = null, music = null }) {
+// decor: the save's decorations; mention: a just-bought decoration a
+// customer may notice ({ id } or null).
+export function startOpen({ app, config, demo = false, speed = 1, restore = null, onSave = () => {}, onFinish, pause = null, music = null, decor = null, mention = null }) {
   const walkMs = config.anim.walk * 1000;
   const root = h('div', { class: 'screen open-screen' });
   const people = new Map();   // customer id -> { p, el, slot, busyUntil, mood, moodUntil }
@@ -41,11 +45,15 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
 
   // ---- Static parts of the screen --------------------------------------
 
+  // Decorations bought with the savings jar (js/decor.js).
+  const thingsLayer = h('div', { class: 'decor-things' });
+  const counterThings = h('div', { class: 'decor-things' });
   const scene = h('div', { class: 'scene' },
     h('div', { class: 'wall' }),
     h('div', { class: 'shelf shelf-1' }, icon('cup.milk', 'shelf-cup'), icon('cup.matcha', 'shelf-cup'), icon('cup.taro', 'shelf-cup')),
     h('div', { class: 'floor' }),
     h('div', { class: 'door' }, h('div', { class: 'door-window' }), h('div', { class: 'door-knob' })),
+    thingsLayer,
   );
   const chars = h('div', { class: 'chars' });
   scene.appendChild(chars);
@@ -116,7 +124,8 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   const paidCoin = h('div', { class: 'paid-coin hidden' }, icon('coin', 'paid-coin-img'), h('span', { class: 'paid-coin-num' }));
   const finishBtn = h('button', { class: 'btn big finish hidden' }, h('span', { class: 'moon' }), h('span', { class: 'label' }, t('ui.finish')));
 
-  const counter = h('div', { class: 'counter' }, priceBoard, register, finishBtn);
+  const counter = h('div', { class: 'counter' }, counterThings, priceBoard, register, finishBtn);
+  applyDecor({ wall: scene.querySelector('.wall'), floor: scene.querySelector('.floor'), counter, sign, things: thingsLayer, counterThings }, shopLook(decor || {}));
   bubble.insertBefore(paidCoin, repeatBtn);
   const popupLayer = h('div', { class: 'popups' });
 
@@ -414,6 +423,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
 
   // ---- Serving -------------------------------------------------------------
 
+  let mentioned = false;
   let popup = null;
   function closePopup() { if (popup) { popup.remove(); popup = null; } }
 
@@ -473,6 +483,10 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     showBubble(p);
     p.sentence = orderSentence(p.order);
     await sayAs(p, line('say.greet', { name: visitorName(p.type.id, p.look) }));
+    if (mention && !mentioned) {
+      mentioned = true;
+      await sayAs(p, line('say.noticeDecor', { thing: t(`decor.${mention.id}`) }));
+    }
     // In hard call mode the customer only says hello: the order is pictures only.
     if (config.callMode !== 'hard') await sayAs(p, p.sentence);
     if (mode === 'hard' && shift.counter === p) await sayAs(p, line('say.payWith', { n: p.pays }));

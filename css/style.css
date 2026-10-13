@@ -698,3 +698,100 @@ img { -webkit-user-drag: none; }
 .drinks-range::-moz-range-track { height: 14px; border-radius: 7px; background: linear-gradient(90deg, #d8f3e2, #ffc9a8 80%, #ff8a8a); }
 .drinks-range::-moz-range-thumb { width: 40px; height: 40px; border-radius: 50%; background: var(--mint); border: 5px solid #fff; }
 .drinks-ticks { display: flex; justify-content: space-between; font-size: 18px; font-weight: 800; opacity: .6; padding: 0 6px; }
+
+/* ======================= Decorations (js/decor.js) ======================= */
+
+.wall.wall-mint { background: repeating-linear-gradient(90deg, #e3f7ec 0 60px, #d2f0df 60px 120px); }
+.wall.wall-polka { background: radial-gradient(circle, #ffc4d4 9px, transparent 10px) 0 0 / 60px 60px, radial-gradient(circle, #ffc4d4 9px, transparent 10px) 30px 30px / 60px 60px, #ffeef3; }
+.wall.wall-clouds {
+  background:
+    radial-gradient(ellipse 60px 26px at 30% 30%, #fff 98%, transparent) 0 0 / 360px 220px,
+    radial-gradient(ellipse 40px 20px at 36% 22%, #fff 98%, transparent) 0 0 / 360px 220px,
+    radial-gradient(ellipse 55px 24px at 80% 70%, #fff 98%, transparent) 0 0 / 360px 220px,
+    linear-gradient(#a8dcff, #d8f0ff);
+}
+.wall.wall-night {
+  background:
+    radial-gradient(circle, #ffe9a8 2.5px, transparent 3.5px) 0 0 / 90px 70px,
+    radial-gradient(circle, #fff 1.8px, transparent 2.8px) 45px 35px / 90px 70px,
+    linear-gradient(#2f2a5c, #5b4a8f);
+}
+.wall.wall-rainbow { background: linear-gradient(#ffd6d6 0 16%, #ffe6c7 16% 32%, #fff6c7 32% 48%, #dff6d8 48% 64%, #d6ecff 64% 80%, #e8dcff 80%); }
+
+.floor.floor-mint { background: repeating-conic-gradient(#d2f0df 0 25%, #b8e6cc 0 50%) 0 0 / 80px 80px; }
+.floor.floor-wood { background: repeating-linear-gradient(0deg, #c98a5a 0 26px, #b97a4c 26px 30px), #c98a5a; }
+.floor.floor-hearts { background: radial-gradient(circle at 50% 55%, #ff9fb5 7px, transparent 8px) 0 0 / 50px 50px, repeating-conic-gradient(#ffe4ec 0 25%, #ffd1dc 0 50%) 0 0 / 100px 100px; }
+.floor.floor-rainbow { background: repeating-conic-gradient(#ffd6d6 0 12.5%, #fff6c7 0 25%, #dff6d8 0 37.5%, #d6ecff 0 50%) 0 0 / 120px 120px; }
+
+.counter.counter-pink { background: linear-gradient(#ff9fb5 0 26px, #e07a94 26px 34px, #ffc4d4 34px); border-top-color: #c95f7a; }
+.counter.counter-mint { background: linear-gradient(#7fd6a4 0 26px, #4fb57f 26px 34px, #b8ecd0 34px); border-top-color: #3f9a6a; }
+.counter.counter-marble {
+  background: linear-gradient(115deg, transparent 40%, rgba(150,150,170,.25) 41%, transparent 43%) 0 0 / 260px 220px,
+              linear-gradient(60deg, transparent 60%, rgba(150,150,170,.2) 61%, transparent 62%) 0 0 / 300px 220px,
+              linear-gradient(#f4f4f8 0 26px, #c9c9d6 26px 34px, #fbfbfd 34px);
+  border-top-color: #a8a8b8;
+}
+.counter.counter-gold { background: linear-gradient(#ffd45a 0 26px, #d9a520 26px 34px, #ffe9a0 34px); border-top-color: #b88a10; box-shadow: inset 0 40px 60px -40px rgba(255,255,255,.8); }
+
+.sign.sign-pink .sign-open { background: #ff7f95; }
+.sign.sign-purple .sign-open { background: #8a64b3; }
+.sign.sign-rainbow .sign-open { background: linear-gradient(90deg, #ff7f7f, #ffb347, #ffd45a, #7fd67f, #7fb8ff, #b48fdb); text-shadow: 0 2px 0 rgba(0,0,0,.25); }
+
+.decor-things { position: absolute; inset: 0; pointer-events: none; }
+.decor-thing { position: absolute; }
+.counter .decor-thing { z-index: 2; }
+.decor-thing.new-thing { animation: pop-in .6s cubic-bezier(.3, 1.6, .6, 1); }
+
+/* Decoration catalog */
+.decor-panel { position: absolute; inset: 0; z-index: 990; background: rgba(42, 31, 51, .55); display: flex; align-items: center; justify-content: center; }
+.decor-panel.embedded { position: static; background: none; width: 100%; height: 100%; }
+.decor-card { background: #fff; border-radius: 32px; padding: 18px 22px; width: 1000px; height: 770px; display: flex; flex-direction: column; gap: 12px; }
+.embedded .decor-card { width: 100%; height: 100%; padding: 0; background: none; }
+.decor-top { display: flex; align-items: center; gap: 24px; justify-content: center; }
+.mini-shop { position: relative; overflow: hidden; border-radius: 20px; border: 5px solid #fff; box-shadow: 0 0 0 3px #e8c9a2; flex: none; }
+.mini-stage { position: absolute; left: 0; top: 0; width: 1180px; height: 720px; transform-origin: 0 0; background: var(--wall); }
+.mini-stage .sign { position: absolute; left: 470px; top: 20px; }
+.mini-stage .counter { top: 600px; }
+.decor-jar { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.jar { width: 110px; height: 120px; border-radius: 20px 20px 34px 34px; border: 5px solid var(--ink); background: linear-gradient(transparent 30%, #fff3c4 30%); display: flex; align-items: center; justify-content: center; position: relative; }
+.jar::before { content: ""; position: absolute; left: 14px; right: 14px; top: -16px; height: 14px; border-radius: 6px; background: #c98a5a; border: 4px solid var(--ink); }
+.jar-coin-big { width: 64px; height: 64px; }
+.jar-num { font-size: 54px; font-weight: 900; line-height: 1; }
+.decor-tabs { display: flex; gap: 10px; justify-content: center; }
+.decor-tab { width: 170px; height: 104px; border-radius: 22px; background: #f6efe6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 18px; font-weight: 800; padding: 6px; overflow: hidden; }
+.decor-tab.chosen { background: #d8f3e2; box-shadow: 0 0 0 5px var(--mint), 0 6px 0 rgba(59,42,74,.2); }
+.decor-tab .decor-swatch, .decor-tab .swatch-sign { width: 110px; height: 50px; }
+.decor-tab .decor-swatch-img { width: 70px; height: 54px; object-fit: contain; }
+.decor-grid { flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; overflow-y: auto; padding: 8px; align-content: start; touch-action: pan-y; }
+.decor-item { height: 150px; border-radius: 24px; background: #f6efe6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 10px; position: relative; }
+.decor-item .decor-swatch { width: 160px; height: 96px; border-radius: 14px; border: 3px solid rgba(59,42,74,.2); }
+.decor-item .decor-swatch-img { width: 150px; height: 100px; object-fit: contain; }
+.decor-item .swatch-sign { width: 170px; height: 76px; transform: scale(.8); }
+/* Swatches reuse the shop's own .wall/.floor/.counter styles, without their placement. */
+.decor-swatch.wall, .decor-swatch.floor, .decor-swatch.counter { position: relative; inset: auto; left: auto; right: auto; top: auto; bottom: auto; z-index: 0; flex: none; }
+.decor-swatch.counter { border-top-width: 6px; }
+.swatch-sign .sign-face { font-size: 30px; letter-spacing: 1px; }
+.decor-tab .swatch-sign { width: 120px; height: 52px; }
+.decor-tab .swatch-sign .sign-face { font-size: 20px; border-width: 4px; }
+.decor-price { display: flex; align-items: center; gap: 6px; font-size: 30px; font-weight: 900; }
+.price-coin-sm { width: 30px; height: 30px; }
+.decor-have { font-size: 36px; font-weight: 900; color: var(--mint-deep); height: 34px; }
+.decor-item.in-use { background: #d8f3e2; box-shadow: 0 0 0 5px var(--mint), 0 6px 0 rgba(59,42,74,.2); }
+.decor-item.locked { opacity: .5; }
+.decor-item.buyable { background: #fff6dc; }
+.decor-item.armed { background: #ffe08a; box-shadow: 0 0 0 6px #ffc22e, 0 6px 0 rgba(59,42,74,.2); animation: bob .8s ease-in-out infinite; }
+.decor-note { text-align: center; min-height: 24px; }
+.decor-close { position: absolute; right: 70px; top: 30px; background: var(--mint); box-shadow: 0 6px 0 var(--mint-deep); }
+.title-shop { position: absolute; left: 24px; top: 140px; display: flex; align-items: center; gap: 10px; min-height: 80px; padding: 8px 20px 8px 10px; border-radius: 30px; font-size: 26px; font-weight: 900; background: rgba(255,255,255,.85); }
+.decorate-head { display: flex; align-items: center; gap: 12px; }
+.decorate-holder { width: 920px; height: 640px; }
+.decorate-holder .decor-card { gap: 8px; }
+.decorate-holder .decor-tab { height: 84px; }
+.decorate-holder .decor-grid { grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.decorate-holder .decor-item { height: 128px; gap: 4px; }
+.decorate-holder .decor-item .decor-swatch { width: 140px; height: 70px; }
+.decorate-holder .decor-item .decor-swatch-img { width: 130px; height: 74px; }
+.decorate-holder .decor-item .swatch-sign { width: 160px; height: 66px; transform: scale(.7); }
+.decorate-next { position: absolute; right: 0; bottom: 0; }
+.closing-main:has(.decorate-holder) { justify-content: flex-start; gap: 8px; }
+.decor-swatch-img[src*="lights"] { object-fit: cover; object-position: 30% 50%; }

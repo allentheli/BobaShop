@@ -1,5 +1,11 @@
 # Changelog
 
+## Milestone 5: decorating (October 13, 2026)
+
+- New: the decoration shop at closing. The day's decorator spends the savings jar on walls, floors, counters, signs and things (plant, clock, lights, picture, balloons, rug, shop kitty).
+- New: decorations show in the shop during play, and customers notice new ones.
+- New: the title screen's coin button opens the shop to switch between owned decorations.
+
 ## Milestone 3: settings and difficulty (October 13, 2026)
 
 - Changed: the menu and pictures now match the printed order ticket (no topping, extra topping, sugar some or lots, red milk tea), with ticket row colors and numbers on screen.

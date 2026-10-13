@@ -3,7 +3,7 @@
 // background when there is a connection, so updates show on the next launch.
 // Bump VERSION when files are added or removed.
 
-const VERSION = 'boba-m3-4';
+const VERSION = 'boba-m5-1';
 const FILES = [
   './',
   'index.html',
@@ -38,6 +38,13 @@ const FILES = [
   'assets/characters/momo.svg',
   'assets/characters/pebble.svg',
   'assets/characters/taro.svg',
+  'assets/decor/balloons.svg',
+  'assets/decor/clock.svg',
+  'assets/decor/lights.svg',
+  'assets/decor/pet.svg',
+  'assets/decor/picture.svg',
+  'assets/decor/plant.svg',
+  'assets/decor/rug.svg',
   'assets/icons/badge-bowl.svg',
   'assets/icons/badge-day.svg',
   'assets/icons/badge-empty.svg',
@@ -92,9 +99,12 @@ const FILES = [
   'js/assets.js',
   'js/audio.js',
   'js/before.js',
+  'js/catalog.js',
   'js/character.js',
   'js/closing.js',
   'js/config.js',
+  'js/decor.js',
+  'js/decorview.js',
   'js/howto.js',
   'js/jobs.js',
   'js/logic.js',

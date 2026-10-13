@@ -2,7 +2,7 @@
 //
 // day.closing keeps where we are, so closing the app halfway picks up at
 // the same step:
-//   { step: 'inspect' | 'stars' | 'badges' | 'cleanup',
+//   { step: 'inspect' | 'stars' | 'badges' | 'decorate' | 'cleanup',
 //     picks: [served orders to inspect], results: [true/false...],
 //     ranOut: true | false | null, banked: false }
 
@@ -12,7 +12,9 @@ import { starsFor, badgesFor } from './logic.js';
 import { t, line, orderSentence } from './text.js';
 import { speak, stopSpeaking, play } from './audio.js';
 import { createCharacter, setExpression, setTalking, act } from './character.js';
-import { h, icon, onTap, wait, nextButton } from './ui.js';
+import { h, icon, onTap, wait, nextButton, apronSvg } from './ui.js';
+import { openCatalog } from './catalog.js';
+import { APRONS } from './jobs.js';
 import { orderIcons } from './orderview.js';
 import { bossSayer } from './meet.js';
 
@@ -27,7 +29,8 @@ export function dayMoney(day, config) {
 
 // onChange() after every step; onBank(money, stars) once when the stars are
 // counted; onDone({ money, stars, badges }) when the team taps Done.
-export function closingScreen({ app, day, config, onChange, onBank, onDone }) {
+// shop: { getSave, onSave } so the decorator can spend the savings jar.
+export function closingScreen({ app, day, config, onChange, onBank, onDone, shop = null }) {
   const c = day.closing;
   const boss = createCharacter(BOSS);
   const main = h('div', { class: 'closing-main' });
@@ -41,7 +44,7 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone }) {
     onChange();
     stopSpeaking();
     if (!alive()) return;
-    ({ inspect, stars, badges, cleanup })[step]();
+    ({ inspect, stars, badges, decorate, cleanup })[step]();
   }
 
   // ---- 1. Inspection ------------------------------------------------------
@@ -179,7 +182,7 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone }) {
     const next = nextButton();
     main.replaceChildren(h('div', { class: 'parent-label' }, t('ui.badges')), h('div', { class: 'badge-row' }, ...slots), next);
     let moved = false;
-    onTap(next, () => { if (moved) return; moved = true; go('cleanup'); });
+    onTap(next, () => { if (moved) return; moved = true; go(shop ? 'decorate' : 'cleanup'); });
     if (earned.length) {
       play('fanfare');
       setExpression(boss, 'happy');
@@ -189,6 +192,39 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone }) {
     } else {
       await say(line('say.noBadges'));
     }
+  }
+
+  // ---- 4. Decorating: the day's decorator buys one thing --------------------
+
+  async function decorate() {
+    const holder = h('div', { class: 'decorate-holder' });
+    const next = nextButton('decorate-next');
+    const apron = day.decorator ? APRONS.find((a) => a.id === day.decorator) : null;
+    main.replaceChildren(
+      h('div', { class: 'decorate-head' },
+        apron ? apronSvg(apron.color, 'apron small') : null,
+        h('div', { class: 'parent-label' }, t('ui.shop'))),
+      holder, next);
+    openCatalog(holder, {
+      embedded: true,
+      getSave: shop.getSave,
+      onSave: shop.onSave,
+      canBuy: !c.bought,
+      bought: !!c.bought,
+      scale: 0.28,
+      dayNumber: day.number || 0,
+      say: (text) => { stopSpeaking(); say(text); },
+      onBought: () => { c.bought = true; onChange(); setExpression(boss, 'happy'); act(boss, 'hop'); },
+    });
+    let moved = false;
+    onTap(next, () => { if (moved) return; moved = true; go('cleanup'); });
+    if (!c.bought) {
+      await say(apron ? jobSentenceDecorator(apron.id) : line('say.decoratorAny'));
+    }
+  }
+
+  function jobSentenceDecorator(apronId) {
+    return line('say.decorator', { apron: t(`aprons.${apronId}`) });
   }
 
   // ---- 4. Cleanup song --------------------------------------------------------

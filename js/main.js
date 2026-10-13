@@ -17,6 +17,7 @@ import { beforeScreen } from './before.js';
 import { closingScreen } from './closing.js';
 import { loadSave, writeSave, defaultSave } from './storage.js';
 import { openSettings } from './settings.js';
+import { openCatalog } from './catalog.js';
 import { addPauseButton, addSkipButton } from './pause.js';
 import { howtoScreen } from './howto.js';
 import { configureMusic, stopMusic } from './music.js';
@@ -90,6 +91,9 @@ function titleScreen() {
   const startBtn = h('button', { class: `btn big start-btn ${hasDay ? 'secondary' : ''}` }, h('span', { class: 'play-tri' }), h('span', { class: 'label' }, t(hasDay ? 'ui.newDay' : 'ui.start')));
   const continueBtn = hasDay ? h('button', { class: 'btn big continue-btn' }, h('span', { class: 'play-tri' }), h('span', { class: 'label' }, t('ui.continueDay'))) : null;
   const parentBtn = h('button', { class: 'btn parent-btn' }, h('span', { class: 'label' }, t('ui.parents')));
+  // The savings jar, and a look at the shop's decorations (buying happens
+  // at closing time, by the day's decorator).
+  const shopBtn = h('button', { class: 'btn title-shop' }, icon('coin', 'jar-coin'), h('span', {}, String(save.savings)));
   const root = h('div', { class: `screen title-screen ${hasDay ? 'has-day' : ''}` },
     h('div', { class: 'awning' }),
     h('div', { class: 'title-sign' }, icon('drink', 'title-cup'), h('h1', {}, t('ui.appName')), icon('drink', 'title-cup flip')),
@@ -99,7 +103,7 @@ function titleScreen() {
     continueBtn,
     startBtn,
     h('div', { class: 'sound-hint' }, t('ui.soundHint')),
-    save.savings > 0 ? h('div', { class: 'title-jar' }, icon('coin', 'jar-coin'), h('span', {}, String(save.savings))) : null,
+    shopBtn,
     parentBtn,
   );
   app.replaceChildren(root);
@@ -117,6 +121,10 @@ function titleScreen() {
     }, { sound: null });
   }
   onHold(parentBtn, () => { unlock(); settingsPanel(root, { withDemo: true }); }, 3);
+  onTap(shopBtn, () => {
+    unlock();
+    openCatalog(root, { getSave: () => save, onSave: persist, canBuy: false, onClose: () => titleScreen() });
+  });
 }
 
 // ---- Parent settings and the pause menu ------------------------------------
@@ -227,6 +235,9 @@ function showPhase() {
         config: { ...structuredClone(config), ...(config.crowds[config.crowd] || {}), bias: day.hint, level: day.level ?? config.level, cups: day.cups ?? config.cups },
         pause: pauseOptions({ restartOnSettings: true }),
         music: { song: day.song || 'off', onPick: (id) => { day.song = id; save.lastSong = id; persist(); } },
+        decor: save.decorations,
+        // A customer notices a decoration bought at the end of the last day.
+        mention: save.decorations && save.decorations.newest && save.decorations.newest.day === (day.number || 0) - 1 ? save.decorations.newest : null,
         speed: Number(params.get('speed')) || 1,
         restore: day.shift || null,
         onSave: (snapshot) => { day.shift = snapshot; persist(); },
@@ -247,6 +258,7 @@ function showPhase() {
     case 'closing':
       closingScreen({
         app, day, config,
+        shop: { getSave: () => save, onSave: persist },
         onChange: persist,
         onBank: (money, stars) => {
           save.savings += money;

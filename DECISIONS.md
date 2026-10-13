@@ -91,3 +91,13 @@ Choices made while building that the build instructions did not settle. One line
 - Drinks in progress is a slider: 1 to 5, or Chaos (stored as 99, no limit). From 3 up, waiting customers stand in staggered rows of four.
 - More customers (Allen's request): four new animals (bunny, panda, frog, penguin) and accessories drawn as separate pictures in `assets/accessories/`, placed by each character's head, face and neck points in `js/assets.js`. A visitor's look (hat about half the time, glasses a third, neckwear a third, fur color and name) is picked when they arrive and saved with them.
 - Kids' drawings (milestone 4) will use the same head, face and neck points, so they can wear accessories too.
+
+## Milestone 5: decorating
+
+- The decoration shop is a closing step after the badges, before the cleanup song. The day's decorator (rotating by apron color) may buy one item; on a skipped day without jobs, anyone may.
+- Buying takes two taps: the first shows the item in a little copy of the shop, the second buys it.
+- Walls, floors, counters and signs are styles drawn in code; things are pictures in `assets/decor/` placed on the shop screen. Things can be hidden again for free; styles can be switched back to any owned one for free.
+- From the title screen (coin button) the family can look at the shop and switch between owned decorations, but buying stays at closing, as the plan says.
+- Prices from 5 to 60 coins: something cheap in every group after any ordinary day, and the gold counter and the shop kitty take several days.
+- The day after a purchase, the first customer notices the new decoration.
+- Unlocking new toppings and customers with stars is not built yet.

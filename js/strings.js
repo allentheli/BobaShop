@@ -57,8 +57,23 @@ export const STRINGS = {
       skip: 'Skip (hold)',
       howTo: 'How to make',
       gotIt: 'Got it!',
+      shop: 'Decorate',
+      jar: 'Savings jar',
+      buy: 'Buy',
+      boughtToday: 'Bought today',
+      buyAtClosing: 'The decorator buys at closing time',
       music: 'Music',
     },
+
+    // Decoration names: spoken by customers and the boss, and shown to parents.
+    decor: {
+      'wall-cream': 'cream stripes', 'wall-mint': 'mint stripes', 'wall-polka': 'polka dots', 'wall-clouds': 'cloud wallpaper', 'wall-night': 'starry wallpaper', 'wall-rainbow': 'rainbow wallpaper',
+      'floor-checker': 'checker floor', 'floor-mint': 'mint floor', 'floor-wood': 'wood floor', 'floor-hearts': 'heart floor', 'floor-rainbow': 'rainbow floor',
+      'counter-wood': 'wood counter', 'counter-pink': 'pink counter', 'counter-mint': 'mint counter', 'counter-marble': 'marble counter', 'counter-gold': 'gold counter',
+      'sign-green': 'green sign', 'sign-pink': 'pink sign', 'sign-purple': 'purple sign', 'sign-rainbow': 'rainbow sign',
+      'thing-picture': 'picture', 'thing-plant': 'plant', 'thing-balloons': 'balloons', 'thing-clock': 'clock', 'thing-rug': 'rug', 'thing-lights': 'twinkly lights', 'thing-pet': 'shop kitty',
+    },
+    kinds: { wall: 'Wall', floor: 'Floor', counter: 'Counter', sign: 'Sign', things: 'Things' },
 
     songs: { bubbly: 'Bubbly pop', sunny: 'Sunny day', rainy: 'Rainy cafe', dragon: 'Dragon dance', off: 'No music' },
 
@@ -209,6 +224,12 @@ export const STRINGS = {
       hintTea: ['{tea} is today\'s special!', 'I think lots of people will want {tea} today.'],
       hintTopping: ['Everybody loves {topping} today. Make extra!', 'Lots of customers want {topping} today!'],
       pickMusic: 'Cashier, you can pick the music for our shop! Tap the radio.',
+      noticeDecor: ['Ooh, I love the new {thing}!', 'Wow! Is that a new {thing}?', 'What a pretty {thing}!'],
+      decorator: '{apron} apron, you are today\'s decorator! Pick one thing for our shop.',
+      decoratorAny: 'Who wants to decorate? Pick one thing for our shop.',
+      bought: ['Great choice! Our shop looks wonderful.', 'Ooh, I love it!'],
+      tooMuch: 'We need more coins for that one. Let\'s save up!',
+      decorDone: 'The shop looks lovely!',
       allReady: 'Everyone is ready. Let\'s open the shop!',
       bossClosing: 'Great work today! Time to check some drinks.',
       inspectOrder: 'Let\'s check order {n}.',
