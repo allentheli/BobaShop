@@ -9,6 +9,7 @@ import { MENU } from './menu.js';
 import { APRONS } from './jobs.js';
 import { t } from './text.js';
 import { h, onTap } from './ui.js';
+import { openBackup } from './backupui.js';
 
 const LEVELS = [
   'Tea and topping',
@@ -38,7 +39,7 @@ const ALL_JOBS = ['cashier', 'manager', 'topping', 'tea', 'maker', 'front'];
 // onChange(): called after every change (the caller saves and reloads config)
 // onReset(kind): 'day' or 'everything'; onDemo(): start the demo (or null)
 // onClose(): the panel was closed
-export function openSettings({ host, save, getConfig, onChange, onReset, onDemo = null, onClose, dayRunning = false }) {
+export function openSettings({ host, save, getConfig, onChange, onReset, onDemo = null, onClose, dayRunning = false, onRestore = null }) {
   const st = save.settings;
   const body = h('div', { class: 'settings-body scroll' });
   const closeBtn = h('button', { class: 'btn settings-close' }, 'Done');
@@ -152,6 +153,9 @@ export function openSettings({ host, save, getConfig, onChange, onReset, onDemo 
     const demoBtn = onDemo ? h('button', { class: 'btn choice' }, 'Play a demo shift (fast, by itself)') : null;
     if (demoBtn) onTap(demoBtn, () => { panel.remove(); onDemo(); });
 
+    const backupBtn = h('button', { class: 'btn choice' }, 'Backup and restore');
+    if (onRestore) onTap(backupBtn, () => openBackup(panel, { getSave: () => save, onRestore: (s2) => { panel.remove(); onRestore(s2); } }));
+
     const scrollTop = body.scrollTop;
     body.replaceChildren(
       section('Order level', `Each level adds one detail to the orders.${nextDay}`,
@@ -189,6 +193,7 @@ export function openSettings({ host, save, getConfig, onChange, onReset, onDemo 
         choices([[true, 'Music on'], [false, 'Music off']], c.music.on, (v) => set('music', { ...c.music, on: v })),
         choices([[0.3, 'Quiet'], [0.6, 'Normal'], [0.9, 'Loud']], c.music.volume, (v) => set('music', { ...c.music, volume: v }))),
       demoBtn ? section('Demo', 'Watch a shift play itself at high speed. Nothing is saved.', demoBtn) : null,
+      onRestore ? section('Backup', 'Save the whole shop as a file or a code, to keep it safe or move it to another iPad. Safari can clear saved data from apps that are not used for a while, so a backup now and then is a good idea.', backupBtn) : null,
       section('Reset', 'Reset the day starts today over. Reset everything also empties the savings jar, stars and history.',
         h('div', { class: 'choice-row' }, resetDay, resetAll)),
     );

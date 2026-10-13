@@ -3,7 +3,7 @@
 // background when there is a connection, so updates show on the next launch.
 // Bump VERSION when files are added or removed.
 
-const VERSION = 'boba-m5-1';
+const VERSION = 'boba-m5-2';
 const FILES = [
   './',
   'index.html',
@@ -98,6 +98,8 @@ const FILES = [
   'css/style.css',
   'js/assets.js',
   'js/audio.js',
+  'js/backup.js',
+  'js/backupui.js',
   'js/before.js',
   'js/catalog.js',
   'js/character.js',

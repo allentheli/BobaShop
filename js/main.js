@@ -151,6 +151,13 @@ function settingsPanel(host, { onClose = () => {}, withDemo = false } = {}) {
       titleScreen();
     },
     onDemo: withDemo ? () => demoShift() : null,
+    // Load a backup: it replaces the whole shop.
+    onRestore: (loaded) => {
+      save = loaded;
+      persist();
+      reloadConfig();
+      titleScreen();
+    },
     onClose,
   });
 }

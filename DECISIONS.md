@@ -101,3 +101,10 @@ Choices made while building that the build instructions did not settle. One line
 - Prices from 5 to 60 coins: something cheap in every group after any ordinary day, and the gold counter and the shop kitty take several days.
 - The day after a purchase, the first customer notices the new decoration.
 - Unlocking new toppings and customers with stars is not built yet.
+
+## Backup (milestone 4, built early)
+
+- A backup is one JSON file with the whole save, named by date. On iPad it opens the share sheet (Files, iCloud Drive, AirDrop, Messages); elsewhere it downloads.
+- The text code is the same backup in base64 with a "BOBA1:" prefix, so it survives being pasted into notes and messages (line breaks are ignored).
+- Loading checks it is a Boba Shop backup, fills in anything missing from older versions, shows a summary, and needs two taps to replace the shop.
+- The app never sends a backup anywhere by itself. Kids' drawings and voices (when they arrive) will be added to backups.

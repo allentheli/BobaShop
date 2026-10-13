@@ -47,6 +47,8 @@ A whole day runs from the title screen and back:
 - **Waiting customers:** leave or not, and patience bars on or off.
 - **Lock an apron to a job**, **sound** volume and voice, a **demo shift**, and **reset** the day or everything.
 
+- **Backup and restore:** save the whole shop (settings, savings jar, stars, history, decorations, the day in progress) as a file, or copy it as a text code. Load it on this or another iPad to bring the shop back; the app shows what is in the backup and asks twice before replacing anything.
+
 The order level and cup counts start with the next day. Everything else changes right away.
 
 The order pictures match the printed order ticket: the same pictures, on the same row colors and numbers (1 Cup, 2 Tea, 3 Topping, 4 Ice, 5 Sugar, 6 Notes). Freshly brewed tea is not on the ticket, so the cashier writes it on the Notes line.
@@ -62,6 +64,10 @@ The app needs to be hosted on the web once. After that it works offline.
 5. Open Boba Shop from the Home Screen icon, turn the iPad sideways, and turn the sound up.
 
 Always open it from the Home Screen icon. Safari can delete saved data for websites that have not been used for a while, and the Home Screen app is protected better.
+
+## Keeping the shop safe
+
+Safari can clear saved data from web apps that are not opened for a few weeks, and deleting the app from the Home Screen erases it. Now and then, open **Parents → Backup and restore → Save a backup file** and keep the file in Files or iCloud Drive. To move the shop to another iPad, load that file there.
 
 ## Turning on hosting
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## Backup (October 13, 2026)
+
+- New: Backup and restore in Parent settings. Save the whole shop as a file or a text code, and load it on this or another iPad.
+
 ## Milestone 5: decorating (October 13, 2026)
 
 - New: the decoration shop at closing. The day's decorator spends the savings jar on walls, floors, counters, signs and things (plant, clock, lights, picture, balloons, rug, shop kitty).
