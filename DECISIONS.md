@@ -62,3 +62,4 @@ Choices made while building that the build instructions did not settle. One line
 - A customer only joins the line if a cup is still free for them, counting the cups already promised to customers in line.
 - Sold out closes the shop with a cheerful fanfare instead of the sunset sound.
 - Level 7's longer line holds 5 customers (`longLine` in `config.js`).
+- Level 8 (added at Allen's request): some customers ask for freshly brewed tea. It costs 1 coin more (`prices.brew`), has its own register button, and shows as a sparkly teapot right after the tea picture. The app does not track the pots; brewing happens at the table.

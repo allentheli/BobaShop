@@ -21,6 +21,7 @@ export const ICONS = {
   'sugar.half': 'assets/icons/sugar-half.svg',
   'sugar.full': 'assets/icons/sugar-full.svg',
   'fresh.yes': 'assets/icons/fresh-yes.svg',
+  'brew.yes': 'assets/icons/brew-yes.svg',
   drink: 'assets/icons/drink.svg',
   coin: 'assets/icons/coin.svg',
   star: 'assets/icons/star.svg',

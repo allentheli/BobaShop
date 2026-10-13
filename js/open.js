@@ -107,6 +107,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     partDefs.push({ id: 'base', coins: config.prices.base, cls: 'cup-base', icon: 'drink' });
   }
   if (details.includes('fresh')) partDefs.push({ id: 'fresh', coins: config.prices.fresh, cls: 'fresh', icon: 'fresh.yes' });
+  if (details.includes('brew')) partDefs.push({ id: 'brew', coins: config.prices.brew, cls: 'brew', icon: 'brew.yes' });
 
   for (const part of partDefs) {
     const coins = h('div', { class: 'part-coins' }, ...Array.from({ length: part.coins }, () => icon('coin', 'mini-coin')));

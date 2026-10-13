@@ -124,6 +124,7 @@ function parentPanel() {
     '+ sugar (none, half, full)',
     '+ fresh topping (1 coin more)',
     '+ a longer line',
+    '+ freshly brewed tea (1 coin more)',
   ];
   const levelNote = h('p', { class: 'level-note' });
   const levelBtns = LEVELS.map((_, i) => h('button', { class: 'btn level-btn' }, String(i + 1)));

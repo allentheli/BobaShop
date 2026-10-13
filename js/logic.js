@@ -80,6 +80,7 @@ export function priceParts(order, prices) {
   if (order.size) parts.push({ id: order.size, coins: prices[order.size] });
   else parts.push({ id: 'base', coins: prices.base });
   if (order.fresh === 'yes') parts.push({ id: 'fresh', coins: prices.fresh });
+  if (order.brew === 'yes') parts.push({ id: 'brew', coins: prices.brew });
   return parts;
 }
 

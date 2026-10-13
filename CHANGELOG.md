@@ -6,6 +6,7 @@
 - New: pictures for each new detail, a wider order bubble, and small, large and fresh buttons on the register.
 - New: cup counting from level 2, and the shop sells out when every cup is used.
 - New: a longer line at level 7.
+- New: level 8, freshly brewed tea (1 coin more), with its own picture and register button.
 
 ## Milestone 2: the full day (October 13, 2026)
 

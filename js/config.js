@@ -10,7 +10,7 @@ export const CONFIG = {
   arrivalEvery: 35,          // seconds between new customers
   firstArrivalAt: 2,         // the first customer walks in right after opening
 
-  prices: { base: 3, small: 3, large: 5, fresh: 1 },
+  prices: { base: 3, small: 3, large: 5, fresh: 1, brew: 1 },   // fresh = fresh topping, brew = freshly brewed tea
 
   // Tip by seconds since the order was rung up.
   tips: [
@@ -28,7 +28,7 @@ export const CONFIG = {
   },
   waitingCustomersLeave: false,
 
-  level: 1,                  // order level, 1 to 7
+  level: 1,                  // order level, 1 to 8
   registerMode: 'easy',      // easy | medium | hard
   callMode: 'normal',        // easy | normal | hard
 

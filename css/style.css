@@ -540,3 +540,11 @@ img { -webkit-user-drag: none; }
 .level-btn.chosen { background: var(--mint); color: #fff; }
 .panel-card .level-note { font-size: 16px; opacity: .9; min-height: 44px; }
 .panel-card { width: 640px; }
+
+/* Level 8: four register buttons */
+.reg-parts:has(.part:nth-child(4)) { gap: 8px; }
+.reg-parts:has(.part:nth-child(4)) .part { width: 100px; }
+.reg-parts:has(.part:nth-child(4)) .part-img { width: 52px; height: 52px; }
+.reg-parts:has(.part:nth-child(4)) .mini-coin { width: 16px; height: 16px; }
+.reg-parts:has(.part:nth-child(4)) + .tray { padding: 0 8px; }
+.reg-parts:has(.part:nth-child(4)) + .tray .tray-num { font-size: 46px; min-width: 50px; }

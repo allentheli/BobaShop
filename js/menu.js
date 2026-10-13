@@ -8,7 +8,7 @@ export const MENU = {
   id: 'boba',
   // The order the pictures are shown in, matching how the manager calls
   // the steps: cup, topping and scoops, then tea, ice and sugar.
-  showOrder: ['size', 'topping', 'scoops', 'fresh', 'tea', 'ice', 'sugar'],
+  showOrder: ['size', 'topping', 'scoops', 'fresh', 'tea', 'brew', 'ice', 'sugar'],
   details: [
     {
       id: 'tea', level: 1,
@@ -45,6 +45,11 @@ export const MENU = {
     {
       id: 'fresh', level: 6, priced: true,
       options: [{ id: 'no', icon: null }, { id: 'yes', icon: 'fresh.yes' }],
+    },
+    {
+      // Freshly brewed tea: the manager brews a new pot for this drink.
+      id: 'brew', level: 8, priced: true,
+      options: [{ id: 'no', icon: null }, { id: 'yes', icon: 'brew.yes' }],
     },
   ],
 };

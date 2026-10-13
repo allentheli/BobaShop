@@ -21,7 +21,7 @@ A whole day runs from the title screen and back:
 
 **Parents:** hold the "Parents" button on the title screen for 3 seconds. There you can:
 
-- pick the **order level** (1 to 7). Level 1 is tea and topping only. Each level adds one detail: 2 cup size, 3 scoops, 4 ice, 5 sugar, 6 fresh topping, 7 a longer line. A new level starts with the next day.
+- pick the **order level** (1 to 8). Level 1 is tea and topping only. Each level adds one detail: 2 cup size, 3 scoops, 4 ice, 5 sugar, 6 fresh topping, 7 a longer line, 8 freshly brewed tea (the manager brews a new pot for that drink; 1 coin more). A new level starts with the next day.
 - turn the voice on or off.
 - watch a demo shift that plays itself at high speed.
 

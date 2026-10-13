@@ -107,6 +107,7 @@ export const STRINGS = {
       topping: 'with {topping}',
       toppingScoops: 'with {scoops} of {topping}',
       fresh: 'fresh {topping}',
+      brewed: 'freshly brewed {tea}',
       extras: ', {list}',
       and: ' and ',
       comma: ', ',
@@ -120,6 +121,7 @@ export const STRINGS = {
       ice: { none: 'no ice', some: 'some ice', lots: 'lots of ice' },
       sugar: { none: 'no sugar', half: 'half sugar', full: 'full sugar' },
       fresh: { yes: 'fresh', no: '' },
+      brew: { yes: 'freshly brewed', no: '' },
       base: 'a drink',
     },
 

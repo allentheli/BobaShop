@@ -3,7 +3,7 @@
 // background when there is a connection, so updates show on the next launch.
 // Bump VERSION when files are added or removed.
 
-const VERSION = 'boba-m2-2';
+const VERSION = 'boba-m2-3';
 const FILES = [
   './',
   'index.html',
@@ -47,6 +47,7 @@ const FILES = [
   'assets/icons/sugar-half.svg',
   'assets/icons/sugar-full.svg',
   'assets/icons/fresh-yes.svg',
+  'assets/icons/brew-yes.svg',
   'assets/icons/badge-bowl.svg',
   'assets/icons/badge-day.svg',
   'assets/icons/badge-empty.svg',

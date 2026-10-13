@@ -184,6 +184,13 @@ test('cups are not counted at level 1, where orders have no size', () => {
   assert.equal(shift.closed, false);
 });
 
+test('level 8 adds freshly brewed tea and keeps the longer line', () => {
+  const { shift, config } = make({ level: 8, arrivalEvery: 1 });
+  run(shift, 30);
+  assert.equal(shift.line.length, config.longLine);
+  assert.ok(['yes', 'no'].includes(shift.counter.order.brew));
+});
+
 test('level 7 has a longer line', () => {
   const { shift, config } = make({ level: 7, arrivalEvery: 1 });
   run(shift, 30);

@@ -46,7 +46,8 @@ export function orderSentence(order, rng = Math.random) {
 
 export function drinkPhrase(order) {
   const P = (k, vars) => fill(lookup(`orderParts.${k}`), vars);
-  const tea = menuWord('tea', order.tea);
+  let tea = menuWord('tea', order.tea);
+  if (order.brew === 'yes') tea = P('brewed', { tea });
   let topping = menuWord('topping', order.topping);
   if (order.fresh === 'yes') topping = P('fresh', { topping });
   let s = order.size ? P('sized', { size: menuWord('size', order.size), tea }) : P('unsized', { tea });

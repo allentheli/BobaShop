@@ -20,7 +20,7 @@ test('level 1 orders have only tea and topping', () => {
 });
 
 test('each level adds its detail', () => {
-  const expected = { 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 7 };
+  const expected = { 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 7, 8: 8 };
   for (const [level, n] of Object.entries(expected)) {
     assert.equal(activeDetails(MENU, Number(level)).length, n, `level ${level}`);
     const o = generateOrder(MENU, { level: Number(level), rng: seeded(5) });
@@ -81,6 +81,8 @@ test('prices', () => {
   assert.equal(price({ size: 'large' }, p), 5);
   assert.equal(price({ size: 'large', fresh: 'yes' }, p), 6);
   assert.equal(price({ size: 'small', fresh: 'no' }, p), 3);
+  assert.equal(price({ size: 'small', brew: 'yes' }, p), 4);
+  assert.equal(price({ size: 'large', fresh: 'yes', brew: 'yes' }, p), 7);
   assert.deepEqual(priceParts({ size: 'small', fresh: 'yes' }, p).map((x) => x.id), ['small', 'fresh']);
 });
 
@@ -120,6 +122,9 @@ test('the spoken order names every detail', async () => {
   assert.equal(
     drinkPhrase({ tea: 'taro', topping: 'pearls', size: 'large', scoops: '3', ice: 'lots', sugar: 'half', fresh: 'yes' }),
     'a large taro with three scoops of fresh boba pearls, lots of ice and half sugar');
+  assert.equal(
+    drinkPhrase({ tea: 'milk', topping: 'jelly', size: 'small', brew: 'yes', fresh: 'no' }),
+    'a small freshly brewed milk tea with coconut jelly');
   assert.ok(orderSentence({ tea: 'matcha', topping: 'jelly', size: 'small', ice: 'none' }).includes('a small matcha with coconut jelly, no ice'));
 });
 
