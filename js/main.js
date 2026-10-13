@@ -1,21 +1,42 @@
-// Starts the app and moves between screens:
-// Title -> How many players -> Open -> Day total -> Title.
+// Starts the app and moves through the day:
+// Title -> Meet the boss -> Before opening -> Open -> Closing -> Title.
+// The day in progress is saved after every change (js/storage.js), so the
+// app can be closed at any point and continued on the next launch.
 
 import { CONFIG } from './config.js';
 import { BOSS, CUSTOMERS, ICONS } from './assets.js';
-import { starsFor } from './logic.js';
+import { MENU } from './menu.js';
+import { starsFor, pickHint, pickInspection } from './logic.js';
 import { t, line } from './text.js';
 import { unlock, speak, stopSpeaking, configureSound, setMuted, play, resume } from './audio.js';
 import { createCharacter, setTalking, act, setExpression } from './character.js';
 import { h, icon, onTap, onHold, wait } from './ui.js';
 import { startOpen } from './open.js';
+import { meetScreen } from './meet.js';
+import { beforeScreen } from './before.js';
+import { closingScreen } from './closing.js';
+import { loadSave, writeSave } from './storage.js';
 
 const STAGE_W = 1180;
 const STAGE_H = 820;
 
 const params = new URLSearchParams(location.search);
 const app = document.getElementById('app');
-let config = structuredClone(CONFIG);
+let save = loadSave();
+let config = withSettings(save.settings);
+
+// Parent settings (milestone 3) are stored as overrides of js/config.js.
+function withSettings(settings) {
+  const c = structuredClone(CONFIG);
+  for (const [k, v] of Object.entries(settings || {})) {
+    c[k] = v && typeof v === 'object' && !Array.isArray(v) ? { ...c[k], ...v } : v;
+  }
+  return c;
+}
+
+function persist() {
+  writeSave(save);
+}
 
 // ---- Fit the fixed-size stage to any screen --------------------------------
 
@@ -58,14 +79,18 @@ function bossSay(el, text) {
 
 function titleScreen() {
   stopSpeaking();
-  const startBtn = h('button', { class: 'btn big start-btn' }, h('span', { class: 'play-tri' }), h('span', { class: 'label' }, t('ui.start')));
+  const hasDay = !!save.day;
+  const startBtn = h('button', { class: `btn big start-btn ${hasDay ? 'secondary' : ''}` }, h('span', { class: 'play-tri' }), h('span', { class: 'label' }, t(hasDay ? 'ui.newDay' : 'ui.start')));
+  const continueBtn = hasDay ? h('button', { class: 'btn big continue-btn' }, h('span', { class: 'play-tri' }), h('span', { class: 'label' }, t('ui.continueDay'))) : null;
   const parentBtn = h('button', { class: 'btn parent-btn' }, h('span', { class: 'label' }, t('ui.parents')));
-  const root = h('div', { class: 'screen title-screen' },
+  const root = h('div', { class: `screen title-screen ${hasDay ? 'has-day' : ''}` },
     h('div', { class: 'awning' }),
     h('div', { class: 'title-sign' }, icon('drink', 'title-cup'), h('h1', {}, t('ui.appName')), icon('drink', 'title-cup flip')),
     h('div', { class: 'title-friends' }, ...CUSTOMERS.map((c) => createCharacter(c, { expression: 'happy' }))),
+    continueBtn,
     startBtn,
     h('div', { class: 'sound-hint' }, t('ui.soundHint')),
+    save.savings > 0 ? h('div', { class: 'title-jar' }, icon('coin', 'jar-coin'), h('span', {}, String(save.savings))) : null,
     parentBtn,
   );
   app.replaceChildren(root);
@@ -73,8 +98,15 @@ function titleScreen() {
   onTap(startBtn, () => {
     unlock();
     play('tap');
-    playersScreen();
+    newDay();
   }, { sound: null });
+  if (continueBtn) {
+    onTap(continueBtn, () => {
+      unlock();
+      play('tap');
+      showPhase();
+    }, { sound: null });
+  }
   onHold(parentBtn, () => { unlock(); parentPanel(); }, 3);
 }
 
@@ -87,76 +119,134 @@ function parentPanel() {
   const panel = h('div', { class: 'parent-panel' },
     h('div', { class: 'panel-card' },
       h('h2', {}, 'Parents'),
-      h('p', {}, 'More settings (cups, shift length, order levels, register and call modes) come in milestone 3.'),
+      h('p', {}, 'More settings (cups, shift length, order levels, register and call modes, job locks, backup) come in milestone 3.'),
       voice, demo, close));
   app.querySelector('.screen').appendChild(panel);
   onTap(close, () => panel.remove());
   onTap(voice, () => {
-    config.sound.voice = !config.sound.voice;
+    save.settings.sound = { ...(save.settings.sound || {}), voice: !config.sound.voice };
+    persist();
+    config = withSettings(save.settings);
     configureSound(config.sound);
     voice.textContent = `Voice: ${config.sound.voice ? 'on' : 'off'}`;
   });
-  onTap(demo, () => openScreen(4, { demo: true }));
+  onTap(demo, () => demoShift());
 }
 
-// ---- How many players --------------------------------------------------------
+// ---- The day ------------------------------------------------------------------
 
-function playersScreen() {
-  const boss = createCharacter(BOSS);
-  const buttons = [2, 3, 4].map((n) => {
-    const heads = h('div', { class: 'heads' }, ...Array.from({ length: n }, (_, i) => h('span', { class: `head c${i}` })));
-    return h('button', { class: 'btn count-btn', 'data-n': n }, heads, h('span', { class: 'count-num' }, String(n)));
-  });
-  const root = h('div', { class: 'screen players-screen' },
-    h('div', { class: 'boss-spot' }, boss),
-    h('div', { class: 'players-right' },
-      h('div', { class: 'parent-label' }, t('ui.howMany')),
-      h('div', { class: 'count-row' }, ...buttons)),
-  );
-  app.replaceChildren(root);
-  bossSay(boss, line('say.bossHello'));
-
-  let chosen = false;
-  buttons.forEach((b, i) => onTap(b, async () => {
-    if (chosen) return;
-    chosen = true;
-    const n = i + 2;
-    b.classList.add('chosen');
-    stopSpeaking();
-    setExpression(boss, 'happy');
-    act(boss, 'hop');
-    await bossSay(boss, line('say.bossPlayers', { n }));
-    await wait(300);
-    openScreen(n);
-  }));
+function newDay() {
+  save.day = { phase: 'meet', number: save.days + 1, startedAt: Date.now() };
+  persist();
+  showPhase();
 }
 
-// ---- Open --------------------------------------------------------------------
+function setPhase(phase) {
+  save.day.phase = phase;
+  persist();
+  showPhase();
+}
 
-function openScreen(players, { demo = false } = {}) {
-  const runConfig = structuredClone(config);
-  let speed = Number(params.get('speed')) || 1;
-  if (demo) {
-    speed = config.demo.speed;
-    setMuted(true);
+function showPhase() {
+  const day = save.day;
+  if (!day) { titleScreen(); return; }
+  switch (day.phase) {
+    case 'meet':
+      meetScreen({
+        app, config, save,
+        onDone: (team) => {
+          Object.assign(day, team, {
+            hint: pickHint(MENU, { owned: config.owned, weight: config.hintWeight }),
+            ready: [],
+          });
+          setPhase('before');
+        },
+      });
+      break;
+    case 'before':
+      beforeScreen({
+        app, day,
+        onReady: (list) => { day.ready = list; persist(); },
+        onDone: () => setPhase('open'),
+      });
+      break;
+    case 'open':
+      startOpen({
+        app,
+        config: { ...structuredClone(config), bias: day.hint },
+        speed: Number(params.get('speed')) || 1,
+        restore: day.shift || null,
+        onSave: (snapshot) => { day.shift = snapshot; persist(); },
+        onFinish: (summary) => {
+          day.summary = summary;
+          day.shift = null;
+          day.closing = {
+            step: 'inspect',
+            picks: pickInspection(summary.served, config.inspection.drinks),
+            results: [],
+            ranOut: null,
+            banked: false,
+          };
+          setPhase('closing');
+        },
+      });
+      break;
+    case 'closing':
+      closingScreen({
+        app, day, config,
+        onChange: persist,
+        onBank: (money, stars) => {
+          save.savings += money;
+          save.totalStars += stars;
+          persist();
+        },
+        onDone: (result) => finishDay(result),
+      });
+      break;
+    default:
+      titleScreen();
   }
+}
+
+function finishDay(result) {
+  const day = save.day;
+  save.days += 1;
+  save.history.push({
+    day: day.number,
+    date: new Date().toISOString().slice(0, 10),
+    players: day.players,
+    money: result.money,
+    stars: result.stars,
+    badges: result.badges,
+    drinks: day.summary.drinks,
+  });
+  if (save.history.length > 100) save.history.shift();
+  save.rotation.byCount[day.players] = day.jobs;
+  save.rotation.lastDecorator = day.decorator;
+  save.day = null;
+  persist();
+  titleScreen();
+}
+
+// ---- Demo shift: plays by itself, fast, and saves nothing ----------------------
+
+function demoShift() {
+  setMuted(true);
   startOpen({
     app,
-    config: runConfig,
-    demo,
-    speed,
-    players,
+    config: structuredClone(config),
+    demo: true,
+    speed: config.demo.speed,
     onFinish: (summary) => {
-      if (demo) {
-        setMuted(false);
-        console.log('Demo shift finished', summary);
-      }
-      dayTotalScreen(summary, { demo });
+      setMuted(false);
+      console.log('Demo shift finished', summary);
+      dayTotalScreen(summary, { demo: true });
     },
   });
 }
 
-// ---- Day total -----------------------------------------------------------------
+// ---- Day total (demo only) -------------------------------------------------------
+
 
 function dayTotalScreen(sum, { demo = false } = {}) {
   const boss = createCharacter(BOSS, { expression: 'happy' });
@@ -193,5 +283,5 @@ configureSound(config.sound);
 titleScreen();
 if (params.has('demo')) {
   unlock();
-  openScreen(4, { demo: true });
+  demoShift();
 }

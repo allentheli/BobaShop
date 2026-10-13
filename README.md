@@ -4,16 +4,22 @@ Boba Shop is a team game for 2 to 4 kids, about 5 to 8 years old. They run a pre
 
 The full game design is in `boba-shop-handoff.md`. The build plan is in `boba-shop-claude-code.md`.
 
-## What works now (Milestone 1: one shift)
+## What works now (Milestones 1 and 2: the full day)
 
-- Title screen with a big Start button.
-- The boss asks how many players there are.
-- A 5-minute shift. Customers walk in, wait in line (each shows the topping they want), step up to the counter and order by voice and pictures.
-- The easy register: tap the drink button, then the green check. A wrong total gets a friendly "Hmm" and another try.
-- Paid customers wait in one of two numbered spots. Tap a waiting customer, then the bell, to serve. They sip, hop and leave a tip.
-- The sun crosses the shop window as the clock. When it sets, the sign flips to Closed and a Finish button appears.
-- A day total with coins, tips, stars and drinks served.
-- Parents: hold the "Parents" button on the title screen for 3 seconds to turn the voice on or off, or to watch a demo shift that plays itself at high speed.
+A whole day runs from the title screen and back:
+
+1. **Meet the boss.** The boss asks how many are playing (2, 3 or 4). Each player taps an apron color. The boss gives each apron a job, with a picture and one spoken sentence. Tap a job card to hear it again. Jobs move to the next one each day. Then the boss shows the day's coin goals for 1, 2 and 3 stars.
+2. **Before opening.** Each apron gets a column with its job's checklist pictures. Tap a picture to hear what to do. The boss says a hint for the day (for example "Taro is today's special!"), and that item really does get ordered more. When every apron taps Ready, the sign flips to Open.
+3. **Open.** The 5-minute shift from milestone 1: customers order, the cashier rings up, the manager taps a waiting customer and the bell to serve, and the customer leaves a tip.
+4. **Closing.**
+   - **Inspection:** the boss replays up to 3 random orders. Compare each one to the real cup and tap Right or Not right. A right cup earns a bonus coin, and a wrong one gets a silly face.
+   - **Stars:** the day's money (with bonuses) against the goals. The money also goes into the savings jar shown on the title screen.
+   - **Badges:** the boss asks whether any topping bowl ran empty. Then come "perfect day", "perfect register" and "never ran out", plus an empty fourth slot for the tea maker's badge.
+   - **Cleanup song:** dough goes into its matching tub. Tap Done to return to the title screen.
+
+**Saving:** the day is saved after every step. If the app is closed in the middle of a day, the title screen shows a big **Continue** button. **New day** starts over.
+
+**Parents:** hold the "Parents" button on the title screen for 3 seconds to turn the voice on or off, or to watch a demo shift that plays itself at high speed.
 
 ## How to open it on the iPad
 
@@ -49,12 +55,12 @@ Open the web address in Chrome and make the window wide. On your own computer yo
 
 Handy addresses for testing:
 
-- `?demo` plays a fast shift by itself.
+- `?demo` plays a fast shift by itself (it does not touch the saved day).
 - `?speed=4` makes a normal shift run 4 times faster.
 
 ## For developers
 
 - Plain HTML, CSS and JavaScript modules with no build step. Open `index.html` through any web server.
 - `js/config.js` holds every number that can be tuned. `js/strings.js` holds every word and spoken line. `js/assets.js` lists every picture and sound. `js/menu.js` is the menu.
-- `js/logic.js` (orders, prices, tips, stars) and `js/shift.js` (the shift) have no screen code and are covered by tests. Run them with `npm test` (needs Node 20 or newer, no packages to install).
+- `js/logic.js` (orders, prices, tips, stars, hints, inspection, badges), `js/shift.js` (the shift), `js/jobs.js` (jobs and rotation) and `js/storage.js` (saving) have no screen code and are covered by tests. Run them with `npm test` (needs Node 20 or newer, no packages to install).
 - `sw.js` keeps the app working offline. Add any new file to its list and change `VERSION`. A test checks that nothing is missing.

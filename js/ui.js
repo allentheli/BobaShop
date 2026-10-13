@@ -8,7 +8,11 @@ export function h(tag, attrs = {}, ...children) {
   for (const [k, v] of Object.entries(attrs)) {
     if (v == null || v === false) continue;
     if (k === 'class') el.className = v;
-    else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v);
+    else if (k === 'style' && typeof v === 'object') {
+      for (const [sk, sv] of Object.entries(v)) {
+        if (sk.startsWith('--')) el.style.setProperty(sk, sv); else el.style[sk] = sv;
+      }
+    }
     else if (k === 'html') el.innerHTML = v;
     else el.setAttribute(k, v === true ? '' : v);
   }
@@ -70,4 +74,21 @@ export function stagePos(el, stage, scale) {
   const r = el.getBoundingClientRect();
   const s = stage.getBoundingClientRect();
   return { x: (r.left + r.width / 2 - s.left) / scale, y: (r.top + r.height / 2 - s.top) / scale };
+}
+
+// A big arrow button that moves to the next step.
+export function nextButton(cls = '') {
+  return h('button', { class: `btn round next-btn ${cls}`, 'aria-label': 'Next' }, h('span', { class: 'arrow' }));
+}
+
+// An apron picture in a given color, drawn in code.
+export function apronSvg(color, cls = 'apron') {
+  const el = h('div', { class: cls });
+  el.innerHTML = `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <path d="M34 8 Q50 18 66 8" fill="none" stroke="#3b2a4a" stroke-width="4" stroke-linecap="round"/>
+    <path d="M34 8 L32 30 L14 38 Q20 60 22 92 H78 Q80 60 86 38 L68 30 L66 8 Q50 16 34 8 Z" fill="${color}" stroke="#3b2a4a" stroke-width="4" stroke-linejoin="round"/>
+    <rect x="36" y="54" width="28" height="20" rx="4" fill="#fff" fill-opacity=".55" stroke="#3b2a4a" stroke-width="3"/>
+    <path d="M14 38 Q4 44 6 56 M86 38 Q96 44 94 56" fill="none" stroke="#3b2a4a" stroke-width="4" stroke-linecap="round"/>
+  </svg>`;
+  return el;
 }

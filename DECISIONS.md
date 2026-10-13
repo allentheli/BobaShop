@@ -26,3 +26,25 @@ Choices made while building that the build instructions did not settle. One line
 - A small parent panel (hold "Parents" for 3 seconds) has the voice switch and the demo shift. The full settings come in milestone 3.
 - The demo shift is also reachable with `?demo` in the address, for automated checks.
 - Offline: the app is served from the saved copy first and refreshed in the background, so an update shows on the second launch after it is published.
+
+## Milestone 2
+
+- Players pick from 6 apron colors. Jobs and the decorator rotate by apron color, so the same child keeps the same color from day to day.
+- Each apron moves to the job after the one it had on the last day with the same number of players. Aprons new to that player count fill the jobs left over. A parent lock (milestone 3 setting) always wins.
+- The rotation moves on only when a day is finished, so restarting or abandoning a day does not skip anyone's turn.
+- The day's decorator is worked out and saved now, but not shown until decorating arrives in milestone 5.
+- The boss's job sentences change with the call mode (easy, normal, hard).
+- The job cards play one after another, and a green arrow appears when the boss has finished. Tapping a card replays its sentence.
+- Checklist pictures speak their step when tapped and turn green, but nothing has to be ticked: the Ready button is all that counts.
+- A Ready button can be tapped again to undo it, until everyone is ready.
+- The day's hint is a tea or a topping the family owns, ordered twice as often as the others (`hintWeight` in `config.js`).
+- Inspection always speaks the order, even in hard call mode, because it is the team checking its own cups.
+- The inspection orders are picked when the shift ends and saved, so continuing after a restart checks the same cups.
+- A wrong inspected cup gets a winking, tongue-out face and a giggle, never a frown.
+- "Perfect register" needs at least one order rung up, and "perfect day" needs at least one inspected cup.
+- The savings jar and total stars are added once, at the stars step, and a saved flag stops them being added twice.
+- During the shift the save happens every 2 seconds and after every order, payment and serve, so closing the app loses at most 2 seconds.
+- A customer who was sipping their drink when the app closed has already paid and tipped, so they are not brought back.
+- On continuing a shift, everyone appears in their place at once and the customer at the counter says their order again.
+- The cleanup song is a short tune made by the app, played twice, while the boss names each dough color and tub.
+- The day history keeps the last 100 days (date, players, money, stars, badges, drinks) for later use.

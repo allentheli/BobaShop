@@ -3,7 +3,7 @@
 // background when there is a connection, so updates show on the next launch.
 // Bump VERSION when files are added or removed.
 
-const VERSION = 'boba-m1-1';
+const VERSION = 'boba-m2-1';
 const FILES = [
   './',
   'index.html',
@@ -21,6 +21,11 @@ const FILES = [
   'js/audio.js',
   'js/character.js',
   'js/ui.js',
+  'js/jobs.js',
+  'js/storage.js',
+  'js/meet.js',
+  'js/before.js',
+  'js/closing.js',
   'assets/app/icon-180.png',
   'assets/app/icon-192.png',
   'assets/app/icon-512.png',
@@ -29,6 +34,22 @@ const FILES = [
   'assets/characters/bao.svg',
   'assets/characters/taro.svg',
   'assets/icons/bell.svg',
+  'assets/icons/badge-bowl.svg',
+  'assets/icons/badge-day.svg',
+  'assets/icons/badge-empty.svg',
+  'assets/icons/badge-register.svg',
+  'assets/icons/batch.svg',
+  'assets/icons/bowl-empty.svg',
+  'assets/icons/bowl-full.svg',
+  'assets/icons/bowls.svg',
+  'assets/icons/brew.svg',
+  'assets/icons/cross.svg',
+  'assets/icons/cups.svg',
+  'assets/icons/lids.svg',
+  'assets/icons/rail.svg',
+  'assets/icons/register.svg',
+  'assets/icons/ticket.svg',
+  'assets/icons/tickets.svg',
   'assets/icons/check.svg',
   'assets/icons/clear.svg',
   'assets/icons/coin.svg',

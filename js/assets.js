@@ -16,6 +16,33 @@ export const ICONS = {
   check: 'assets/icons/check.svg',
   clear: 'assets/icons/clear.svg',
   bell: 'assets/icons/bell.svg',
+  cross: 'assets/icons/cross.svg',
+  register: 'assets/icons/register.svg',
+  ticket: 'assets/icons/ticket.svg',
+  // Before-opening checklist pictures (keys match js/jobs.js CHECKLISTS).
+  tickets: 'assets/icons/tickets.svg',
+  brew: 'assets/icons/brew.svg',
+  rail: 'assets/icons/rail.svg',
+  batch: 'assets/icons/batch.svg',
+  cups: 'assets/icons/cups.svg',
+  bowls: 'assets/icons/bowls.svg',
+  lids: 'assets/icons/lids.svg',
+  'bowl.full': 'assets/icons/bowl-full.svg',
+  'bowl.empty': 'assets/icons/bowl-empty.svg',
+  'badge.perfectDay': 'assets/icons/badge-day.svg',
+  'badge.perfectRegister': 'assets/icons/badge-register.svg',
+  'badge.neverRanOut': 'assets/icons/badge-bowl.svg',
+  'badge.empty': 'assets/icons/badge-empty.svg',
+};
+
+// The picture (or pictures) for each job.
+export const JOB_ICONS = {
+  cashier: ['register'],
+  manager: ['ticket'],
+  topping: ['batch'],
+  tea: ['drink'],
+  maker: ['batch', 'drink'],
+  front: ['register', 'ticket'],
 };
 
 // Characters. `face` says where the app draws eyes and a mouth on the
@@ -71,6 +98,7 @@ export const SOUNDS = {
   sunset: null,
   hop: null,
   fanfare: null,
+  song: null,
 };
 
 export const APP_ICON = 'assets/app/icon-512.png';

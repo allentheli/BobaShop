@@ -28,6 +28,7 @@ export class Shift {
     this.sales = 0;
     this.tips = 0;
     this.registerMistakes = 0;
+    this.rungUp = 0;
   }
 
   get money() { return this.sales + this.tips; }
@@ -120,6 +121,7 @@ export class Shift {
     p.spot = spots.find((i) => !waitingIn.has(i) && !sippingIn.has(i))
       ?? spots.find((i) => !waitingIn.has(i));
     this.sales += due;
+    this.rungUp++;
     this.move(p, 'waiting');
     this.emit('paid', p);
     return true;
@@ -166,6 +168,42 @@ export class Shift {
     return this.closed && !this.counter && this.waiting.length === 0;
   }
 
+  // A plain copy of the shift for saving. Customers who already left, or
+  // who were served and are only sipping, are not kept.
+  toJSON() {
+    return {
+      time: this.time,
+      closed: this.closed,
+      nextArrival: this.nextArrival,
+      nextOrderNumber: this.nextOrderNumber,
+      lastOrder: this.lastOrder,
+      people: this.people
+        .filter((p) => p.place === 'line' || p.place === 'counter' || p.place === 'waiting')
+        .map((p) => ({ ...p, type: p.type.id })),
+      served: this.served.slice(),
+      sales: this.sales,
+      tips: this.tips,
+      registerMistakes: this.registerMistakes,
+      rungUp: this.rungUp,
+    };
+  }
+
+  // Rebuild a saved shift. Customers whose kind no longer exists come back
+  // as the first kind.
+  static restore(data, opts) {
+    const s = new Shift(opts);
+    for (const k of ['time', 'closed', 'nextArrival', 'nextOrderNumber', 'lastOrder', 'sales', 'tips', 'registerMistakes', 'rungUp']) {
+      if (data[k] !== undefined) s[k] = data[k];
+    }
+    s.served = (data.served || []).slice();
+    s.people = (data.people || []).map((p) => ({
+      ...p,
+      type: opts.customers.find((c) => c.id === p.type) || opts.customers[0],
+    }));
+    nextId = Math.max(nextId, ...s.people.map((p) => p.id + 1));
+    return s;
+  }
+
   summary() {
     return {
       money: this.money,
@@ -173,6 +211,7 @@ export class Shift {
       tips: this.tips,
       drinks: this.served.length,
       registerMistakes: this.registerMistakes,
+      rungUp: this.rungUp,
       served: this.served.slice(),
     };
   }

@@ -2,7 +2,7 @@
 // The same code will draw faces on kids' drawings in milestone 4, so the
 // body is always a plain picture and the face is always drawn by the app.
 //
-// Expressions: waiting, happy, impatient, unsure.
+// Expressions: waiting, happy, impatient, unsure, silly.
 
 const EYES = {
   open: `
@@ -21,7 +21,7 @@ const EYES = {
     <g class="eyes">
       <path d="M-36 -10 H-18 A9 9 0 0 1 -36 -10 Z" fill="#241a1a"/>
       <path d="M18 -10 H36 A9 9 0 0 1 18 -10 Z" fill="#241a1a"/>
-      <path d="M-38 -24 L-18 -18 M38 -24 L18 -18" stroke="#241a1a" stroke-width="4" stroke-linecap="round"/>
+      <path d="M-38 -22 L-18 -20 M38 -22 L18 -20" stroke="#241a1a" stroke-width="4" stroke-linecap="round"/>
     </g>`,
   unsure: `
     <g class="eyes">
@@ -33,12 +33,20 @@ const EYES = {
     </g>`,
 };
 
+EYES.silly = `
+    <g class="eyes">
+      <circle cx="-27" cy="-10" r="11" fill="#fff" stroke="#241a1a" stroke-width="3"/>
+      <circle cx="-23" cy="-6" r="5" fill="#241a1a"/>
+      <path d="M18 -10 L36 -4 M18 -10 L36 -16" stroke="#241a1a" stroke-width="4" stroke-linecap="round"/>
+    </g>`;
+
 const MOUTH_OPEN = '<ellipse class="m-open" cx="0" cy="26" rx="9" ry="8" fill="#5b1f2a" stroke="#241a1a" stroke-width="3"/>';
 
 const MOUTHS = {
   waiting: '<path class="m-closed" d="M-13 22 Q0 32 13 22" fill="none" stroke="#241a1a" stroke-width="4" stroke-linecap="round"/>',
   happy: '<path class="m-closed" d="M-18 18 Q0 42 18 18 Z" fill="#5b1f2a" stroke="#241a1a" stroke-width="3.5" stroke-linejoin="round"/><path class="m-closed" d="M-8 29 Q0 24 8 29 Q0 35 -8 29 Z" fill="#ff8fa3"/>',
   impatient: '<path class="m-closed" d="M-13 28 Q-6 23 0 28 Q6 33 13 28" fill="none" stroke="#241a1a" stroke-width="4" stroke-linecap="round"/>',
+  silly: '<path class="m-closed" d="M-16 20 Q0 32 16 20" fill="none" stroke="#241a1a" stroke-width="4" stroke-linecap="round"/><path class="m-closed" d="M-2 26 Q6 44 14 26 Z" fill="#ff8fa3" stroke="#241a1a" stroke-width="3" stroke-linejoin="round"/>',
   unsure: '<ellipse class="m-closed" cx="3" cy="27" rx="5" ry="6" fill="#5b1f2a" stroke="#241a1a" stroke-width="3"/>',
 };
 

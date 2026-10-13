@@ -105,3 +105,40 @@ export function useCup(cupsLeft, order) {
 export function soldOut(cupsLeft) {
   return Object.values(cupsLeft).every((n) => n <= 0);
 }
+
+// ---- The full day (milestone 2) -------------------------------------------
+
+// The boss's hint for the day: one tea or topping that customers will ask
+// for more often. Only items the family owns are picked.
+export function pickHint(menu, { owned = {}, weight = 2, rng = Math.random } = {}) {
+  const detailIds = ['tea', 'topping'];
+  const d = detailIds[Math.floor(rng() * detailIds.length)];
+  const options = menu.details.find((x) => x.id === d).options
+    .filter((o) => !owned[d] || owned[d].includes(o.id));
+  if (options.length < 2) return null;
+  return { detail: d, option: options[Math.floor(rng() * options.length)].id, weight };
+}
+
+// Closing inspection: pick up to `count` served orders at random, shown in
+// order-number order. All of them when fewer were served.
+export function pickInspection(served, count, rng = Math.random) {
+  const pool = served.slice();
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, count).sort((a, b) => a.number - b.number);
+}
+
+// Badges earned at closing.
+//   results:    true/false for each inspected cup
+//   rungUp:     how many orders were rung up
+//   mistakes:   wrong totals at the register
+//   ranOut:     the honor-system answer (true, false, or null if not asked)
+export function badgesFor({ results = [], rungUp = 0, mistakes = 0, ranOut = null }) {
+  const badges = [];
+  if (results.length > 0 && results.every(Boolean)) badges.push('perfectDay');
+  if (rungUp > 0 && mistakes === 0) badges.push('perfectRegister');
+  if (ranOut === false) badges.push('neverRanOut');
+  return badges;
+}

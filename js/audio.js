@@ -163,5 +163,18 @@ const SYNTH = {
   hmm: (t) => { tone(t, 330, 0.18, { type: 'triangle', gain: 0.2 }); tone(t + 0.2, 262, 0.3, { type: 'triangle', gain: 0.2 }); },
   sunset: (t) => [784, 659, 523, 392].forEach((f, i) => tone(t + i * 0.22, f, 0.5, { type: 'triangle', gain: 0.18 })),
   hop: (t) => tone(t, 400, 0.18, { type: 'sine', gain: 0.2, slideTo: 900 }),
+  // The cleanup song: a short bouncy tune, played twice.
+  song: (t) => {
+    const n = { C: 523, D: 587, E: 659, F: 698, G: 784, A: 880, c: 1046 };
+    const tune = 'G-E-G-E-C-D-E---G-E-G-E-c-A-G---F-F-E-E-D-D-C---';
+    let i = 0;
+    for (let rep = 0; rep < 2; rep++) {
+      for (let k = 0; k < tune.length; k += 2) {
+        const ch = tune[k];
+        if (ch !== '-') tone(t + i * 0.2, n[ch], 0.3, { type: 'triangle', gain: 0.16 });
+        i++;
+      }
+    }
+  },
   fanfare: (t) => [523, 659, 784, 1046].forEach((f, i) => tone(t + i * 0.14, f, i === 3 ? 0.8 : 0.2, { type: 'triangle', gain: 0.2 })),
 };

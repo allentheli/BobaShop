@@ -46,3 +46,17 @@ export function orderSentence(order, rng = Math.random) {
     topping: menuWord('topping', order.topping),
   }, rng);
 }
+
+// The boss's one-sentence job explanation, matching the call mode.
+export function jobSentence(job, apronId, callMode = 'normal') {
+  const lines = lookup(`jobSay.${job}`) || {};
+  const s = lines[callMode] || lines.normal || '';
+  return fill(s, { apron: lookup(`aprons.${apronId}`) || apronId });
+}
+
+export function hintSentence(hint, rng = Math.random) {
+  if (!hint) return '';
+  return hint.detail === 'tea'
+    ? line('say.hintTea', { tea: menuWord('tea', hint.option) }, rng)
+    : line('say.hintTopping', { topping: menuWord('topping', hint.option) }, rng);
+}

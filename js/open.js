@@ -21,7 +21,10 @@ const SLOTS = {
   door: { x: 110, y: 540, s: 0.5 },
 };
 
-export function startOpen({ app, config, demo = false, speed = 1, onFinish }) {
+// restore: a saved shift to pick up again (from Shift.toJSON).
+// onSave:  called with the shift's state every few seconds and after every
+//          change, so the shift survives the app being closed.
+export function startOpen({ app, config, demo = false, speed = 1, restore = null, onSave = () => {}, onFinish }) {
   const walkMs = config.anim.walk * 1000;
   const root = h('div', { class: 'screen open-screen' });
   const people = new Map();   // customer id -> { p, el, slot, busyUntil, mood, moodUntil }
@@ -256,7 +259,7 @@ export function startOpen({ app, config, demo = false, speed = 1, onFinish }) {
     v.slot = slot.key;
   }
 
-  function addPerson(p) {
+  function addPerson(p, { instant = false } = {}) {
     const el = createCharacter(p.type);
     const wish = h('div', { class: 'wish' }, icon(option(MENU, 'topping', p.order.topping).icon, 'wish-icon'));
     const tag = h('div', { class: 'tag' });
@@ -266,12 +269,16 @@ export function startOpen({ app, config, demo = false, speed = 1, onFinish }) {
     chars.appendChild(el);
     const v = { p, el, slot: null, busyUntil: 0, mood: null, moodUntil: 0, arrived: false };
     people.set(p.id, v);
-    placeEl(v, { key: 'door', ...SLOTS.door }, true);
-    el.classList.add('entering');
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      el.classList.remove('entering');
-      layout();
-    }));
+    if (instant) {
+      placeEl(v, slotFor(p), true);
+    } else {
+      placeEl(v, { key: 'door', ...SLOTS.door }, true);
+      el.classList.add('entering');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        el.classList.remove('entering');
+        layout();
+      }));
+    }
     onTap(el, () => tapPerson(v), { sound: null });
   }
 
@@ -384,6 +391,7 @@ export function startOpen({ app, config, demo = false, speed = 1, onFinish }) {
   // ---- Shift events ----------------------------------------------------------
 
   function onEvent(type, p) {
+    if (type !== 'arrive') saveNow();
     switch (type) {
       case 'arrive':
         addPerson(p);
@@ -410,11 +418,15 @@ export function startOpen({ app, config, demo = false, speed = 1, onFinish }) {
     }
   }
 
-  async function onClose() {
-    play('sunset');
+  function showClosed() {
     sign.classList.add('flipped');
     finishBtn.classList.remove('hidden');
     root.classList.add('is-closed');
+  }
+
+  async function onClose() {
+    play('sunset');
+    showClosed();
     await speak(line('say.closing'), { pitch: BOSS.voice.pitch, rate: BOSS.voice.rate });
   }
 
@@ -427,6 +439,7 @@ export function startOpen({ app, config, demo = false, speed = 1, onFinish }) {
     clearInterval(botTimer);
     stopSpeaking();
     document.removeEventListener('visibilitychange', onVisibility);
+    clearInterval(saveTimer);
     if (wakeLock) wakeLock.release().catch(() => {});
     onFinish(shift.summary());
   }
@@ -495,11 +508,26 @@ export function startOpen({ app, config, demo = false, speed = 1, onFinish }) {
 
   // ---- Go --------------------------------------------------------------------
 
-  shift = new Shift({ config, menu: MENU, customers: CUSTOMERS, onEvent });
+  function saveNow() {
+    if (!finished) onSave(shift.toJSON());
+  }
+  const saveTimer = setInterval(saveNow, 2000);
+
+  const opts = { config, menu: MENU, customers: CUSTOMERS, onEvent };
+  if (restore) {
+    // Pick up a saved shift: everyone is put straight back in place, and
+    // the customer at the counter orders again.
+    shift = Shift.restore(restore, opts);
+    for (const p of shift.people) addPerson(p, { instant: true });
+    if (shift.closed) showClosed();
+    if (shift.counter) stepUp(shift.counter);
+  } else {
+    shift = new Shift(opts);
+    speak(line('say.shopOpen'), { pitch: BOSS.voice.pitch, rate: BOSS.voice.rate });
+  }
   // Expose for checking in the browser console and automated runs.
   window.__boba = { shift, finish, price: (o) => price(o, config.prices) };
   keepAwake();
-  speak(line('say.shopOpen'), { pitch: BOSS.voice.pitch, rate: BOSS.voice.rate });
   drawTray();
   raf = requestAnimationFrame(frame);
   if (demo) startBot();

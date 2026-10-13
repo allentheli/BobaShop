@@ -40,5 +40,8 @@ export const CONFIG = {
     registerWrongPause: 0.6,
   },
 
+  hintWeight: 2,             // how much more often the boss's hint item is ordered
+  jobLocks: {},              // { apronId: jobId } set by a parent (milestone 3)
+
   demo: { speed: 8 },
 };
