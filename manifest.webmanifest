@@ -1,0 +1,16 @@
+{
+  "name": "Boba Shop",
+  "short_name": "Boba Shop",
+  "description": "A family tabletop game: run a pretend bubble tea shop together.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#2a1f33",
+  "theme_color": "#2a1f33",
+  "icons": [
+    { "src": "assets/app/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/app/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
