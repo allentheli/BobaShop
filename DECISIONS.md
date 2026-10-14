@@ -144,3 +144,8 @@ Choices made while building that the build instructions did not settle. One line
 ## Taps instead of holds (October 14, 2026)
 
 - Allen found the long holds not intuitive, so every hold is now a normal tap: Parents on the title screen, the pause button, Settings in the pause menu, and Skip. This replaces the earlier hold rules above. The two-tap confirmations stay (New day with a day in progress, End the shift, Reset, replacing the shop with a backup, buying a decoration).
+
+## Music that keeps playing (October 14, 2026)
+
+- "No music" on the radio used to be remembered for every following day, so one tap on it silenced the music for good. Now it lasts for that day only; a new day plays the last real song picked. Music off for good is the parent setting.
+- The iPad can pause a web app's sound by itself (screen locked, a call, Siri, another app). While music is on, the player checks many times a second and asks for the sound back at most once a second, and also when the voice stops talking. Missed notes are skipped, not played all at once.

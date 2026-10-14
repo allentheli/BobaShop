@@ -9,7 +9,7 @@
 // "-" is a rest. Drum lines have one character per eighth note in a bar:
 // x = hit, - = nothing.
 
-import { audioOut, onTalking, isMuted, onMuteChange } from './audio.js';
+import { audioOut, onTalking, isMuted, onMuteChange, keepSoundAwake } from './audio.js';
 
 export const SONGS = [
   {
@@ -135,6 +135,8 @@ export function currentSong() { return current ? current.song.id : null; }
 function schedule(ctx) {
   const c = current;
   if (!c || !c.steps) return;
+  // If the iPad paused the sound, ask for it back (the notes wait meanwhile).
+  if (ctx.state !== 'running') { keepSoundAwake(); return; }
   // After a stall (the iPad was busy), skip the missed notes instead of
   // playing them all at once.
   if (c.nextTime < ctx.currentTime - 0.1) c.nextTime = ctx.currentTime + 0.05;

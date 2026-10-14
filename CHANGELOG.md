@@ -2,6 +2,8 @@
 
 ## Name, Chinese, cleanup (October 14, 2026)
 
+- Fixed: after anyone picked "No music" on the radio, every later day started without music. Now it lasts for that day only.
+- Fixed: the music now tries to start again if the iPad paused the app's sound (after the screen was locked, a call, or Siri).
 - Changed: no more long holds. Parents, Pause, Settings in the pause menu, and Skip all work with a normal tap.
 - New name: Boba Shop Frenzy, and 手搖癮 in Chinese.
 - New: Chinese (Mandarin, traditional characters). Switch on the title screen or in the settings. The boss and customers speak Mandarin.

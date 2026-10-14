@@ -54,7 +54,10 @@ export function onMuteChange(f) { muteListeners.push(f); }
 export function audioOut() { return ctx ? { ctx, master } : null; }
 const talkListeners = [];
 export function onTalking(f) { talkListeners.push(f); }
-function setTalkingState(on) { talkListeners.forEach((f) => f(on)); }
+function setTalkingState(on) {
+  talkListeners.forEach((f) => f(on));
+  if (!on) keepSoundAwake();
+}
 
 export function unlock() {
   try {
@@ -95,6 +98,18 @@ export function unlock() {
 // spoke. Called when the app comes back and on every tap.
 export function resume() {
   if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
+}
+
+// The iPad can pause the app's sound by itself (the screen was locked, a
+// call, Siri, another app's sound). While music is on, js/music.js calls
+// this often; it tries to start the sound again, at most once a second.
+let lastWake = 0;
+export function keepSoundAwake() {
+  if (!ctx || ctx.state === 'running' || ctx.state === 'closed') return;
+  const now = performance.now();
+  if (now - lastWake < 1000) return;
+  lastWake = now;
+  ctx.resume().catch(() => {});
 }
 
 // iPad Safari can leave speech stuck after the screen was locked.

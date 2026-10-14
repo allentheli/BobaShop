@@ -170,6 +170,18 @@ function titleScreen() {
   });
 }
 
+// ---- Music -------------------------------------------------------------------
+
+// A new day plays the last song a child picked. "No music" on the radio is
+// only for that day, so one tap on it never silences every day after.
+// (Parents turn the music off for good in the settings.)
+function daySong() {
+  return save.lastSong && save.lastSong !== 'off' ? save.lastSong : config.music.song;
+}
+function rememberSong(id) {
+  if (id !== 'off') save.lastSong = id;
+}
+
 // ---- Parent settings and the pause menu ------------------------------------
 
 function reloadConfig() {
@@ -240,7 +252,7 @@ function newDay() {
   // The order level and cup counts are fixed for the whole day, so
   // changing them in the settings never changes a shift halfway.
   save.day = {
-    phase: 'meet', number: save.days + 1, startedAt: Date.now(), song: save.lastSong || config.music.song,
+    phase: 'meet', number: save.days + 1, startedAt: Date.now(), song: daySong(),
     level: config.level, cups: { ...config.cups }, enabled: { ...(config.enabledDetails || {}) },
   };
   if (config.setup === 'skip') skipToShop();
@@ -303,7 +315,7 @@ function showPhase() {
         onReady: (list) => { day.ready = list; persist(); },
         onDone: () => setPhase('open'),
         onHowTo: () => { day.howto = { card: 0, step: 0 }; setPhase('howto'); },
-        onSong: (id) => { save.lastSong = id; persist(); },
+        onSong: (id) => { rememberSong(id); persist(); },
       });
       break;
     case 'open':
@@ -311,7 +323,7 @@ function showPhase() {
         app,
         config: { ...structuredClone(config), ...(config.crowds[config.crowd] || {}), bias: day.hint, ...dayRules(day) },
         pause: pauseOptions(),
-        music: { song: day.song || 'off', onPick: (id) => { day.song = id; save.lastSong = id; persist(); } },
+        music: { song: day.song || config.music.song, onPick: (id) => { day.song = id; rememberSong(id); persist(); } },
         decor: save.decorations,
         // A customer notices a decoration bought at the end of the last day.
         mention: save.decorations && save.decorations.newest && save.decorations.newest.day === (day.number || 0) - 1 ? save.decorations.newest : null,
