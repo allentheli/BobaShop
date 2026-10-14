@@ -10,7 +10,7 @@ import { starsFor, pickHint, pickInspection, makeLook } from './logic.js';
 import { t, line, setLanguage } from './text.js';
 import { unlock, speak, stopSpeaking, configureSound, setMuted, play, resume, resetSpeech, setSpeechLanguage } from './audio.js';
 import { createCharacter, setTalking, act, setExpression } from './character.js';
-import { h, icon, onTap, onHold, wait } from './ui.js';
+import { h, icon, onTap, wait } from './ui.js';
 import { startOpen } from './open.js';
 import { meetScreen } from './meet.js';
 import { beforeScreen } from './before.js';
@@ -160,7 +160,7 @@ function titleScreen() {
       showPhase();
     }, { sound: null });
   }
-  onHold(parentBtn, () => { unlock(); settingsPanel(root, { withDemo: true, onClose: () => titleScreen() }); }, 3);
+  onTap(parentBtn, () => { unlock(); settingsPanel(root, { withDemo: true, onClose: () => titleScreen() }); });
   onTap(shopBtn, () => {
     unlock();
     openCatalog(root, {

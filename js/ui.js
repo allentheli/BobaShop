@@ -48,30 +48,6 @@ export function onTap(el, fn, { sound = 'tap', gap = 350 } = {}) {
   return el;
 }
 
-// A button that only works after being held down (for parents).
-export function onHold(el, fn, seconds = 3) {
-  let timer = null;
-  const ring = h('div', { class: 'hold-ring' });
-  el.appendChild(ring);
-  const start = (e) => {
-    e.preventDefault();
-    cancel();
-    el.classList.add('holding');
-    ring.style.transitionDuration = `${seconds}s`;
-    timer = setTimeout(() => { cancel(); play('tap'); fn(); }, seconds * 1000);
-  };
-  const cancel = () => {
-    clearTimeout(timer);
-    timer = null;
-    el.classList.remove('holding');
-  };
-  el.addEventListener('pointerdown', start);
-  el.addEventListener('pointerup', cancel);
-  el.addEventListener('pointerleave', cancel);
-  el.addEventListener('pointercancel', cancel);
-  return el;
-}
-
 export const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Where an element is, in stage coordinates (the stage is scaled to fit).

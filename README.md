@@ -21,7 +21,7 @@ A whole day runs from the title screen and back:
 
 **How to make:** after jobs are given out, the boss walks the team through the station cards from the printed sheet (boba pearls, coconut jelly, gummy hearts, how much topping, tea, ice, sugar, finish the drink). Each step lights up on the card as the boss reads it. Cards for things not in today's orders (like ice at level 1) are left out. The arrows go back and forward, tapping the card repeats a step, and "Got it!" moves on. Before opening also has a "How to make" button to watch them again.
 
-**Skipping:** hold **Skip** (top right) during Meet the boss or Before opening to go straight to the shop. In the settings, "Before the shift" can be set to Full, Jobs only (no how-to cards), or Skip to the shop. "After the shift" can skip the drink check (then there are no bonus coins) and the badges.
+**Skipping:** tap **Skip** (top right) during Meet the boss or Before opening to go straight to the shop. In the settings, "Before the shift" can be set to Full, Jobs only (no how-to cards), or Skip to the shop. "After the shift" can skip the drink check (then there are no bonus coins) and the badges.
 
 **Language:** tap **English** or **中文** at the top of the title screen (also in the settings). In Chinese, everything on screen is in traditional characters and the boss and customers speak Mandarin with the iPad's Taiwan Mandarin voice (Meijia). The order words are the ones a Taiwan tea shop uses: 去冰 / 少冰 / 多冰 for ice and 無糖 / 半糖 / 全糖 for sugar, and the how-to cards explain each one (少冰 is 2 ice cubes, 半糖 is 1 sugar). The pictures on the printed station cards stay in English.
 
@@ -35,11 +35,11 @@ A whole day runs from the title screen and back:
 
 **Customers:** seven kinds of visitors (cat, bear, dragon, bunny, panda, frog, penguin). Each visitor gets a random look: maybe a hat (crown, party hat, flower, bow, beanie, cap), glasses (round, sunglasses, hearts), a bow tie or scarf, sometimes a different fur color, and one of four names. They keep their look all day, including at the inspection.
 
-**Pause:** during the day, hold the round pause button (top of the screen) for 1 second. The clock, the customers and their patience all freeze. From the pause menu you can keep playing, go Home (the day is saved, so Continue picks it up), turn the sound off, open the settings (hold it for 3 seconds, so kids don't wander in), or end the shift early (tap twice).
+**Pause:** during the day, tap the round pause button (top of the screen). The clock, the customers and their patience all freeze. From the pause menu you can keep playing, go Home (the day is saved, so Continue picks it up), turn the sound off, open the settings, or end the shift early (tap twice).
 
 **Customers who wait too long:** a patience bar over each customer's head shrinks from green to yellow to red. A customer in line who runs out of patience leaves without buying. A customer who already paid and runs out while waiting for their drink leaves and gets their coins back: a red "−3" floats over their head. Both can be switched off in the settings.
 
-**Parent settings:** hold the "Parents" button on the title screen for 3 seconds, or open Settings from the pause menu.
+**Parent settings:** tap the "Parents" button on the title screen, or open Settings from the pause menu.
 
 - **Order level** (1 to 8): 1 tea and topping, 2 cup size, 3 extra topping, 4 ice, 5 sugar, 6 fresh topping, 7 a longer line, 8 freshly brewed tea. Each detail can also be switched on or off by hand.
 - **Our cups:** type how many small and large cups you have. When all are used, the shop sells out and closes early.

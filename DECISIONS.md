@@ -140,3 +140,7 @@ Choices made while building that the build instructions did not settle. One line
 
 - Cleanup has four cards (Allen's request): dough into the tubs, tea sheets back on their piles, cups and lids stacked, ice and sugar cubes back in their bowls. The boss reads them one by one; tapping a card says it again and stops the reading.
 - "After the shift" (Allen's request) can skip the drink check and the badges. Skipping the check means no bonus coins; skipping badges means no badges that day. The stars and decorating always happen.
+
+## Taps instead of holds (October 14, 2026)
+
+- Allen found the long holds not intuitive, so every hold is now a normal tap: Parents on the title screen, the pause button, Settings in the pause menu, and Skip. This replaces the earlier hold rules above. The two-tap confirmations stay (New day with a day in progress, End the shift, Reset, replacing the shop with a backup, buying a decoration).

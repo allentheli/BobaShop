@@ -80,11 +80,6 @@ img { -webkit-user-drag: none; }
   min-height: 64px; padding: 0 24px; font-size: 18px; font-weight: 700;
   background: rgba(255, 255, 255, .7); overflow: hidden;
 }
-.hold-ring {
-  position: absolute; left: 0; bottom: 0; height: 6px; width: 0;
-  background: var(--mint-deep); transition-property: width; transition-timing-function: linear; transition-duration: 0s;
-}
-.holding .hold-ring { width: 100%; }
 
 /* ---- Characters ---------------------------------------------------------- */
 
@@ -625,8 +620,6 @@ html:lang(zh) .title-sub { letter-spacing: 6px; margin-top: 18px; }
 .pause-opt.armed { background: #ffd6d6; }
 .title-screen .start-btn.armed { background: #ffd6d6; }
 .pause-opt.off { opacity: .6; }
-.pause-opt .opt-text { display: flex; flex-direction: column; align-items: flex-start; text-align: left; line-height: 1.15; }
-.pause-opt .opt-text small { font-size: 17px; font-weight: 700; opacity: .65; }
 .opt-icon { width: 48px; height: 48px; flex: none; position: relative; }
 .opt-icon.house { background: linear-gradient(var(--ink), var(--ink)) 50% 100% / 34px 26px no-repeat; clip-path: polygon(50% 0, 100% 45%, 86% 45%, 86% 100%, 14% 100%, 14% 45%, 0 45%); background: var(--ink); }
 .opt-icon.speaker-icon { background: url("../assets/icons/speaker.svg") center / contain no-repeat; }

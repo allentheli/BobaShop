@@ -1,7 +1,6 @@
-// The pause button and its menu. The button needs a one-second hold, so a
-// stray tap during play does nothing.
+// The pause button and its menu.
 
-import { h, onTap, onHold } from './ui.js';
+import { h, onTap } from './ui.js';
 import { t } from './text.js';
 import { stopSpeaking } from './audio.js';
 
@@ -20,7 +19,7 @@ export function addPauseButton(host, { onPause = () => {}, onResume = () => {}, 
     const resume = h('button', { class: 'btn big pause-resume' }, h('span', { class: 'play-tri' }), h('span', { class: 'label' }, t('ui.resume')));
     const home = h('button', { class: 'btn pause-opt' }, h('span', { class: 'opt-icon house' }), h('span', {}, t('ui.home')));
     const sound = h('button', { class: 'btn pause-opt' }, h('span', { class: 'opt-icon speaker-icon' }), h('span', { class: 'sound-label' }));
-    const settings = h('button', { class: 'btn pause-opt' }, h('span', { class: 'opt-icon gear' }), h('span', { class: 'opt-text' }, t('ui.settings'), h('small', {}, t('ui.settingsHold'))));
+    const settings = h('button', { class: 'btn pause-opt' }, h('span', { class: 'opt-icon gear' }), h('span', {}, t('ui.settings')));
     const end = onEndShift ? h('button', { class: 'btn pause-opt' }, h('span', { class: 'opt-icon moon-small' }), h('span', { class: 'end-label' }, t('ui.endShift'))) : null;
     const drawSound = () => { sound.querySelector('.sound-label').textContent = getSoundOn() ? t('ui.soundOn') : t('ui.soundOff'); sound.classList.toggle('off', !getSoundOn()); };
     drawSound();
@@ -33,8 +32,7 @@ export function addPauseButton(host, { onPause = () => {}, onResume = () => {}, 
     onTap(resume, close);
     onTap(home, () => { remove(); onHome(); });
     onTap(sound, () => { onToggleSound(); drawSound(); });
-    // Settings are for parents: they need a 3-second hold, like on the title.
-    onHold(settings, () => onSettings(menu), 3);
+    onTap(settings, () => onSettings(menu));
     if (end) {
       // A second tap is needed, so the shift is not ended by accident.
       let armed = false;
@@ -55,15 +53,14 @@ export function addPauseButton(host, { onPause = () => {}, onResume = () => {}, 
   function remove() { if (menu) { menu.remove(); menu = null; } }
   function close() { remove(); onResume(); }
 
-  onHold(btn, open, 1);
+  onTap(btn, open);
   return { open, close, button: btn };
 }
 
-// A "Skip" button (hold for one second) that jumps ahead, for example
-// straight to the shop.
+// A "Skip" button that jumps ahead, for example straight to the shop.
 export function addSkipButton(host, onSkip) {
   const btn = h('button', { class: 'btn skip-btn', 'aria-label': t('ui.skip') }, h('span', { class: 'skip-arrows' }), h('span', { class: 'skip-label' }, t('ui.skip')));
   host.appendChild(btn);
-  onHold(btn, () => { stopSpeaking(); onSkip(); }, 1);
+  onTap(btn, () => { stopSpeaking(); onSkip(); });
   return btn;
 }

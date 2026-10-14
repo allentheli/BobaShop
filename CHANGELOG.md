@@ -2,6 +2,7 @@
 
 ## Name, Chinese, cleanup (October 14, 2026)
 
+- Changed: no more long holds. Parents, Pause, Settings in the pause menu, and Skip all work with a normal tap.
 - New name: Boba Shop Frenzy, and 手搖癮 in Chinese.
 - New: Chinese (Mandarin, traditional characters). Switch on the title screen or in the settings. The boss and customers speak Mandarin.
 - New: the cleanup has four cards: dough, tea sheets, cups and lids, ice and sugar.
