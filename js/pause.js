@@ -20,7 +20,7 @@ export function addPauseButton(host, { onPause = () => {}, onResume = () => {}, 
     const resume = h('button', { class: 'btn big pause-resume' }, h('span', { class: 'play-tri' }), h('span', { class: 'label' }, t('ui.resume')));
     const home = h('button', { class: 'btn pause-opt' }, h('span', { class: 'opt-icon house' }), h('span', {}, t('ui.home')));
     const sound = h('button', { class: 'btn pause-opt' }, h('span', { class: 'opt-icon speaker-icon' }), h('span', { class: 'sound-label' }));
-    const settings = h('button', { class: 'btn pause-opt' }, h('span', { class: 'opt-icon gear' }), h('span', {}, t('ui.settings')));
+    const settings = h('button', { class: 'btn pause-opt' }, h('span', { class: 'opt-icon gear' }), h('span', { class: 'opt-text' }, t('ui.settings'), h('small', {}, t('ui.settingsHold'))));
     const end = onEndShift ? h('button', { class: 'btn pause-opt' }, h('span', { class: 'opt-icon moon-small' }), h('span', { class: 'end-label' }, t('ui.endShift'))) : null;
     const drawSound = () => { sound.querySelector('.sound-label').textContent = getSoundOn() ? t('ui.soundOn') : t('ui.soundOff'); sound.classList.toggle('off', !getSoundOn()); };
     drawSound();
@@ -33,7 +33,8 @@ export function addPauseButton(host, { onPause = () => {}, onResume = () => {}, 
     onTap(resume, close);
     onTap(home, () => { remove(); onHome(); });
     onTap(sound, () => { onToggleSound(); drawSound(); });
-    onTap(settings, () => onSettings(menu));
+    // Settings are for parents: they need a 3-second hold, like on the title.
+    onHold(settings, () => onSettings(menu), 3);
     if (end) {
       // A second tap is needed, so the shift is not ended by accident.
       let armed = false;

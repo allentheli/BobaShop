@@ -17,7 +17,7 @@ A whole day runs from the title screen and back:
    - **Badges:** the boss asks whether any topping bowl ran empty. Then come "perfect day", "perfect register" and "never ran out", plus an empty fourth slot for the tea maker's badge.
    - **Cleanup song:** dough goes into its matching tub. Tap Done to return to the title screen.
 
-**Saving:** the day is saved after every step. If the app is closed in the middle of a day, the title screen shows a big **Continue** button. **New day** starts over.
+**Saving:** the day is saved after every step. If the app is closed in the middle of a day, the title screen shows a big **Continue** button. **New day** starts over; when a day is in progress it needs a second tap, so a stray tap cannot wipe it.
 
 **How to make:** after jobs are given out, the boss walks the team through the station cards from the printed sheet (boba pearls, coconut jelly, gummy hearts, how much topping, tea, ice, sugar, finish the drink). Each step lights up on the card as the boss reads it. Cards for things not in today's orders (like ice at level 1) are left out. The arrows go back and forward, tapping the card repeats a step, and "Got it!" moves on. Before opening also has a "How to make" button to watch them again.
 
@@ -33,7 +33,7 @@ A whole day runs from the title screen and back:
 
 **Customers:** seven kinds of visitors (cat, bear, dragon, bunny, panda, frog, penguin). Each visitor gets a random look: maybe a hat (crown, party hat, flower, bow, beanie, cap), glasses (round, sunglasses, hearts), a bow tie or scarf, sometimes a different fur color, and one of four names. They keep their look all day, including at the inspection.
 
-**Pause:** during the day, hold the round pause button (top of the screen) for 1 second. The clock, the customers and their patience all freeze. From the pause menu you can keep playing, go Home (the day is saved, so Continue picks it up), turn the sound off, open the settings, or end the shift early (tap twice).
+**Pause:** during the day, hold the round pause button (top of the screen) for 1 second. The clock, the customers and their patience all freeze. From the pause menu you can keep playing, go Home (the day is saved, so Continue picks it up), turn the sound off, open the settings (hold it for 3 seconds, so kids don't wander in), or end the shift early (tap twice).
 
 **Customers who wait too long:** a patience bar over each customer's head shrinks from green to yellow to red. A customer in line who runs out of patience leaves without buying. A customer who already paid and runs out while waiting for their drink leaves and gets their coins back: a red "−3" floats over their head. Both can be switched off in the settings.
 
@@ -64,6 +64,10 @@ The app needs to be hosted on the web once. After that it works offline.
 5. Open Boba Shop from the Home Screen icon, turn the iPad sideways, and turn the sound up.
 
 Always open it from the Home Screen icon. Safari can delete saved data for websites that have not been used for a while, and the Home Screen app is protected better.
+
+**Keeping the screen on:** the app asks the iPad not to dim during the shift, but iPads older than iPadOS 18.4 ignore that request in Home Screen apps. If the screen dims mid-game, set **Settings → Display & Brightness → Auto-Lock** to **Never** while you play (and back afterwards), or use Guided Access (Settings → Accessibility → Guided Access), which also keeps little fingers inside the app.
+
+**Updates:** after a new version is published, the iPad fetches it in the background the next time the app is open with internet. The new version starts the time after that. The saved shop is kept.
 
 ## Keeping the shop safe
 
@@ -99,4 +103,4 @@ Handy addresses for testing:
 - Plain HTML, CSS and JavaScript modules with no build step. Open `index.html` through any web server.
 - `js/config.js` holds every number that can be tuned. `js/strings.js` holds every word and spoken line. `js/assets.js` lists every picture and sound. `js/menu.js` is the menu.
 - `js/logic.js` (orders, prices, tips, stars, hints, inspection, badges), `js/shift.js` (the shift), `js/jobs.js` (jobs and rotation) and `js/storage.js` (saving) have no screen code and are covered by tests. Run them with `npm test` (needs Node 20 or newer, no packages to install).
-- `sw.js` keeps the app working offline. Add any new file to its list and change `VERSION`. A test checks that nothing is missing.
+- `sw.js` keeps the app working offline. After adding, removing or changing any file, run `node tools/sw-files.mjs`: it rewrites the file list and the `VERSION` (made from the files' contents) so iPads pick up the change. `npm test` fails if this was forgotten.

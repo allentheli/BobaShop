@@ -8,7 +8,7 @@ import { BOSS, CUSTOMERS, ICONS, ACCESSORIES } from './assets.js';
 import { MENU } from './menu.js';
 import { starsFor, pickHint, pickInspection, makeLook } from './logic.js';
 import { t, line } from './text.js';
-import { unlock, speak, stopSpeaking, configureSound, setMuted, play, resume } from './audio.js';
+import { unlock, speak, stopSpeaking, configureSound, setMuted, play, resume, resetSpeech } from './audio.js';
 import { createCharacter, setTalking, act, setExpression } from './character.js';
 import { h, icon, onTap, onHold, wait } from './ui.js';
 import { startOpen } from './open.js';
@@ -63,7 +63,14 @@ for (const ev of ['gesturestart', 'gesturechange', 'dblclick', 'contextmenu']) {
 }
 // Scrolling is allowed only inside panels marked .scroll (the settings).
 document.addEventListener('touchmove', (e) => { if (!e.target.closest('.scroll')) e.preventDefault(); }, { passive: false });
-document.addEventListener('visibilitychange', () => { if (!document.hidden) resume(); });
+// Coming back after the iPad was locked or another app was used: wake the
+// sound up, and clear any speech Safari left stuck.
+let hiddenAt = 0;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { hiddenAt = Date.now(); return; }
+  resume();
+  if (Date.now() - hiddenAt > 2000) resetSpeech();
+});
 
 // ---- Offline support --------------------------------------------------------
 
@@ -84,7 +91,15 @@ function bossSay(el, text) {
 
 // ---- Title ------------------------------------------------------------------
 
+// The running shift screen, so it can always be stopped before another
+// screen takes over (Home, Reset, Restore, Continue...).
+let stopShift = null;
+function stopRunningShift() {
+  if (stopShift) { stopShift(); stopShift = null; }
+}
+
 function titleScreen() {
+  stopRunningShift();
   stopSpeaking();
   stopMusic();
   const hasDay = !!save.day;
@@ -108,9 +123,19 @@ function titleScreen() {
   );
   app.replaceChildren(root);
 
+  // With a day in progress, New day needs a second tap: it replaces the
+  // saved day.
+  let armed = false;
   onTap(startBtn, () => {
     unlock();
     play('tap');
+    if (hasDay && !armed) {
+      armed = true;
+      startBtn.classList.add('armed');
+      startBtn.querySelector('.label').textContent = t('ui.newDaySure');
+      setTimeout(() => { armed = false; startBtn.classList.remove('armed'); startBtn.querySelector('.label').textContent = t('ui.newDay'); }, 3000);
+      return;
+    }
     newDay();
   }, { sound: null });
   if (continueBtn) {
@@ -123,7 +148,10 @@ function titleScreen() {
   onHold(parentBtn, () => { unlock(); settingsPanel(root, { withDemo: true }); }, 3);
   onTap(shopBtn, () => {
     unlock();
-    openCatalog(root, { getSave: () => save, onSave: persist, canBuy: false, onClose: () => titleScreen() });
+    openCatalog(root, {
+      getSave: () => save, onSave: persist, canBuy: false, onClose: () => titleScreen(),
+      say: (text) => { stopSpeaking(); speak(text, { pitch: BOSS.voice.pitch, rate: BOSS.voice.rate }); },
+    });
   });
 }
 
@@ -164,13 +192,14 @@ function settingsPanel(host, { onClose = () => {}, withDemo = false } = {}) {
 
 // What every pause menu needs. During the shift, closing the settings
 // restarts the shift screen from its save, so new settings apply at once.
-function pauseOptions({ restartOnSettings = false } = {}) {
+// Outside the shift, the screen is redrawn from the save when play goes on,
+// so new settings apply there too.
+function pauseOptions() {
   return {
     onHome: () => { persist(); titleScreen(); },
-    onSettings: (menuEl, stopScreen) => settingsPanel(menuEl, {
-      onClose: () => {
-        if (restartOnSettings) { if (stopScreen) stopScreen(); showPhase(); }
-      },
+    onResume: () => showPhase(),
+    onSettings: (menuEl) => settingsPanel(menuEl, {
+      onClose: () => { stopRunningShift(); showPhase(); },
     }),
     getSoundOn: () => config.sound.voice && config.sound.volume > 0 && !soundMuted,
     onToggleSound: () => { soundMuted = !soundMuted; setMuted(soundMuted); },
@@ -183,7 +212,10 @@ let soundMuted = false;
 function newDay() {
   // The order level and cup counts are fixed for the whole day, so
   // changing them in the settings never changes a shift halfway.
-  save.day = { phase: 'meet', number: save.days + 1, startedAt: Date.now(), level: config.level, cups: { ...config.cups }, song: save.lastSong || config.music.song };
+  save.day = {
+    phase: 'meet', number: save.days + 1, startedAt: Date.now(), song: save.lastSong || config.music.song,
+    level: config.level, cups: { ...config.cups }, enabled: { ...(config.enabledDetails || {}) },
+  };
   if (config.setup === 'skip') skipToShop();
   else { persist(); showPhase(); }
 }
@@ -198,10 +230,21 @@ function skipToShop() {
 function setPhase(phase) {
   save.day.phase = phase;
   persist();
+  stopSpeaking();
   showPhase();
 }
 
+// The order rules for a day: the level, details and cups it started with.
+function dayRules(day) {
+  return {
+    level: day.level ?? config.level,
+    enabledDetails: day.enabled ?? config.enabledDetails ?? {},
+    cups: day.cups ?? config.cups,
+  };
+}
+
 function showPhase() {
+  stopRunningShift();
   const day = save.day;
   if (!day) { titleScreen(); return; }
   switch (day.phase) {
@@ -221,7 +264,7 @@ function showPhase() {
     case 'howto':
       howtoScreen({
         app,
-        cards: cardsFor(MENU, { level: day.level ?? config.level, enabled: config.enabledDetails, owned: config.owned }),
+        cards: cardsFor(MENU, { level: dayRules(day).level, enabled: dayRules(day).enabledDetails, owned: config.owned }),
         at: day.howto || { card: 0, step: 0 },
         onProgress: (at) => { day.howto = at; persist(); },
         onDone: () => setPhase('before'),
@@ -237,10 +280,10 @@ function showPhase() {
       });
       break;
     case 'open':
-      startOpen({
+      stopShift = startOpen({
         app,
-        config: { ...structuredClone(config), ...(config.crowds[config.crowd] || {}), bias: day.hint, level: day.level ?? config.level, cups: day.cups ?? config.cups },
-        pause: pauseOptions({ restartOnSettings: true }),
+        config: { ...structuredClone(config), ...(config.crowds[config.crowd] || {}), bias: day.hint, ...dayRules(day) },
+        pause: pauseOptions(),
         music: { song: day.song || 'off', onPick: (id) => { day.song = id; save.lastSong = id; persist(); } },
         decor: save.decorations,
         // A customer notices a decoration bought at the end of the last day.
@@ -276,6 +319,10 @@ function showPhase() {
       });
       break;
     default:
+      // A day saved by a newer version of the app, in a part of the day this
+      // version does not know: start a fresh day instead of getting stuck.
+      save.day = null;
+      persist();
       titleScreen();
       return;
   }

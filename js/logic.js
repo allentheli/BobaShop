@@ -124,12 +124,13 @@ export function soldOut(cupsLeft) {
 // The boss's hint for the day: one tea or topping that customers will ask
 // for more often. Only items the family owns are picked.
 export function pickHint(menu, { owned = {}, weight = 2, rng = Math.random } = {}) {
-  const detailIds = ['tea', 'topping'];
-  const d = detailIds[Math.floor(rng() * detailIds.length)];
-  const options = menu.details.find((x) => x.id === d).options
-    .filter((o) => !o.always && (!owned[d] || owned[d].includes(o.id)));
-  if (options.length < 2) return null;
-  return { detail: d, option: options[Math.floor(rng() * options.length)].id, weight };
+  const detailIds = rng() < 0.5 ? ['tea', 'topping'] : ['topping', 'tea'];
+  for (const d of detailIds) {
+    const options = menu.details.find((x) => x.id === d).options
+      .filter((o) => !o.always && (!owned[d] || owned[d].includes(o.id)));
+    if (options.length >= 2) return { detail: d, option: options[Math.floor(rng() * options.length)].id, weight };
+  }
+  return null;
 }
 
 // Closing inspection: pick up to `count` served orders at random, shown in

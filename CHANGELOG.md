@@ -1,5 +1,19 @@
 # Changelog
 
+## Check-up (October 14, 2026)
+
+- Fixed: the app could get stuck waiting for the voice (the register, Before opening, or a served customer not leaving), especially after the iPad was locked.
+- Fixed: two kids tapping different buttons at the same moment could lose one tap.
+- Fixed: the pause menu now pauses Meet the boss, Before opening, How to make and Closing too.
+- Fixed: changing the order details mid-day could make the register refuse every total.
+- Fixed: lowering "drinks in progress" during a shift could freeze the shop.
+- Fixed: Reset or Load a backup during a shift left the old shift running in the background.
+- Fixed: setting both cup counts to 0 ended the shift right away.
+- Fixed: a backup from a newer version of the app is refused with a message. A few spoken lines now match the screen.
+- Changed: New day needs a second tap when a day is in progress. Settings in the pause menu is a 3-second hold.
+- Changed: smoother shift screen on busy and chaos days.
+- Changed: offline copies are always one complete version of the app, and every update is picked up.
+
 ## Backup (October 13, 2026)
 
 - New: Backup and restore in Parent settings. Save the whole shop as a file or a text code, and load it on this or another iPad.

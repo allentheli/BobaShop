@@ -141,10 +141,10 @@ test('the how-to cards follow the day\'s order details and toppings', async () =
   const { cardsFor, CARDS } = await import('../js/tutorial.js');
   const { STRINGS } = await import('../js/strings.js');
   const ids = (cards) => cards.map((c) => c.id);
-  // Level 1: no ice or sugar cards, and "how much" only explains "none".
+  // Level 1: no ice or sugar cards; "how much" explains cup sizes and "none".
   const l1 = cardsFor(MENU, { level: 1 });
   assert.deepEqual(ids(l1), ['boba', 'jelly', 'hearts', 'howmuch', 'tea', 'finish']);
-  assert.deepEqual(l1.find((c) => c.id === 'howmuch').steps.map((s) => s.index), [4]);
+  assert.deepEqual(l1.find((c) => c.id === 'howmuch').steps.map((s) => s.index), [0, 1, 4]);
   // Level 6: every card, and every "how much" line.
   const l6 = cardsFor(MENU, { level: 6 });
   assert.deepEqual(ids(l6), ['boba', 'jelly', 'hearts', 'howmuch', 'tea', 'ice', 'sugar', 'finish']);

@@ -1,7 +1,7 @@
 // Small helpers for building screens.
 
 import { ICONS } from './assets.js';
-import { play } from './audio.js';
+import { play, resume } from './audio.js';
 
 export function h(tag, attrs = {}, ...children) {
   const el = document.createElement(tag);
@@ -27,16 +27,21 @@ export function icon(key, cls = 'icon') {
   return h('img', { class: cls, src: ICONS[key], alt: '', draggable: 'false' });
 }
 
-// Every button responds once: repeated taps within a short time, and taps
-// on a disabled button, are ignored.
-let lastTapAt = 0;
+// Every button responds once. Each button ignores a second tap within a
+// short time (a double tap), and a button that has just appeared ignores
+// taps for a moment (so a double tap on Next does not also press whatever
+// appears under the finger). Different buttons never block each other, so
+// several kids can tap at once.
 export function onTap(el, fn, { sound = 'tap', gap = 350 } = {}) {
+  const bornAt = performance.now();
+  let lastTapAt = 0;
   el.addEventListener('pointerup', (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     if (el.disabled || el.classList.contains('disabled')) return;
     const now = performance.now();
-    if (now - lastTapAt < gap) return;
+    if (now - lastTapAt < gap || now - bornAt < 250) return;
     lastTapAt = now;
+    resume();
     if (sound) play(sound);
     fn(e);
   });

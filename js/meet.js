@@ -23,7 +23,8 @@ export function meetScreen({ app, config, save, onDone }) {
   const right = h('div', { class: 'meet-right' });
   const root = h('div', { class: 'screen meet-screen' }, h('div', { class: 'boss-spot' }, boss), right);
   app.replaceChildren(root);
-  const alive = () => root.isConnected;
+  // A screen stops talking and moving on when it is left or paused.
+  const alive = () => root.isConnected && !root.querySelector('.pause-menu');
   const say = bossSayer(boss, alive);
 
   // 1. How many players?
@@ -123,6 +124,7 @@ export function meetScreen({ app, config, save, onDone }) {
     }
     if (!moved) highlight(null);
     next.classList.remove('hidden');
+    if (!moved) say(line('say.tapArrow'));
   }
 
   // 4. The day's coin goals for stars.
@@ -138,6 +140,7 @@ export function meetScreen({ app, config, save, onDone }) {
     let moved = false;
     onTap(next, () => { if (moved) return; moved = true; stopSpeaking(); onDone(team); });
     await say(line('say.bossGoals', { a: g[0], b: g[1], c: g[2] }));
+    if (!moved) await say(line('say.tapArrow'));
   }
 
   stepCount();

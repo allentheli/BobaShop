@@ -6,7 +6,7 @@ import { BOSS } from './assets.js';
 import { t, line, lookupList } from './text.js';
 import { speak, stopSpeaking, play } from './audio.js';
 import { createCharacter, setTalking, act, setExpression } from './character.js';
-import { h, onTap, wait, nextButton } from './ui.js';
+import { h, icon, onTap, wait, nextButton } from './ui.js';
 
 // cards: from cardsFor(); at: { card, step } to start from (for Continue)
 // onProgress(at) after every step; onDone() at the end (or when skipped).
@@ -18,7 +18,7 @@ export function howtoScreen({ app, cards, at = { card: 0, step: 0 }, onProgress 
   const dots = h('div', { class: 'howto-dots' }, ...cards.map(() => h('span', { class: 'dot' })));
   const back = h('button', { class: 'btn round howto-back', 'aria-label': 'Back' }, h('span', { class: 'arrow' }));
   const next = nextButton('howto-next');
-  const done = h('button', { class: 'btn big howto-done' }, h('span', { class: 'label' }, t('ui.gotIt')));
+  const done = h('button', { class: 'btn big howto-done' }, icon('check', 'howto-check'), h('span', { class: 'label' }, t('ui.gotIt')));
   const root = h('div', { class: 'screen howto-screen' },
     h('div', { class: 'boss-mini howto-boss' }, boss),
     h('div', { class: 'howto-title parent-label' }, t('ui.howTo')),
@@ -27,10 +27,13 @@ export function howtoScreen({ app, cards, at = { card: 0, step: 0 }, onProgress 
     h('div', { class: 'howto-controls' }, back, next),
     done);
   app.replaceChildren(root);
-  const alive = () => root.isConnected;
+  // A screen stops talking and moving on when it is left or paused.
+  const alive = () => root.isConnected && !root.querySelector('.pause-menu');
 
-  let ci = Math.min(at.card || 0, cards.length - 1);
-  let si = at.step || 0;
+  // (The list of cards can change between sessions, so keep the saved
+  // place inside it.)
+  let ci = Math.max(0, Math.min(at.card || 0, cards.length - 1));
+  let si = Math.max(0, Math.min(at.step || 0, cards[ci].steps.length - 1));
   let token = 0;   // each step's playback gets a token, so old ones stop
 
   const say = (text) => (alive() ? speak(text, {
@@ -53,6 +56,7 @@ export function howtoScreen({ app, cards, at = { card: 0, step: 0 }, onProgress 
   }
 
   async function play1(auto = true) {
+    if (finished) return;
     const my = ++token;
     stopSpeaking();
     show();
@@ -71,6 +75,7 @@ export function howtoScreen({ app, cards, at = { card: 0, step: 0 }, onProgress 
   }
 
   function forward() {
+    if (finished) return;
     const card = cards[ci];
     if (si < card.steps.length - 1) si++;
     else if (ci < cards.length - 1) { ci++; si = 0; play('hop'); }
@@ -79,6 +84,7 @@ export function howtoScreen({ app, cards, at = { card: 0, step: 0 }, onProgress 
   }
 
   function backward() {
+    if (finished) return;
     if (si > 0) si--;
     else if (ci > 0) { ci--; si = cards[ci].steps.length - 1; }
     play1();
@@ -98,7 +104,7 @@ export function howtoScreen({ app, cards, at = { card: 0, step: 0 }, onProgress 
 
   onTap(next, () => forward());
   onTap(back, () => backward());
-  onTap(cardBox, () => play1(false), { sound: null });
+  onTap(cardBox, () => play1(), { sound: null });
   onTap(done, () => finish());
 
   (async () => {

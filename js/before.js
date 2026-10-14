@@ -26,6 +26,7 @@ export function beforeScreen({ app, day, onReady, onDone, onHowTo = null, onSong
       const iconKey = item === 'music' ? 'radio' : (ICONS[item] ? item : 'ticket');
       const b = h('button', { class: `btn check-item ${item === 'music' ? 'radio-item' : ''}` }, icon(iconKey, 'check-icon'));
       onTap(b, () => {
+        if (finishing) return;
         stopSpeaking();
         b.classList.add('seen');
         if (item === 'music') {
@@ -61,10 +62,11 @@ export function beforeScreen({ app, day, onReady, onDone, onHowTo = null, onSong
     h('div', { class: 'before-top' }, h('div', { class: 'boss-mini' }, boss), hintCard, howToBtn, sign),
     h('div', { class: 'before-cols' }, ...columns));
   app.replaceChildren(root);
-  const alive = () => root.isConnected;
+  // A screen stops talking and moving on when it is left or paused.
+  const alive = () => root.isConnected && !root.querySelector('.pause-menu');
   const say = bossSayer(boss, alive);
 
-  if (hintCard) onTap(hintCard, () => { stopSpeaking(); say(hintSentence(day.hint)); });
+  if (hintCard) onTap(hintCard, () => { if (finishing) return; stopSpeaking(); say(hintSentence(day.hint)); });
 
   let finishing = false;
   function toggleReady(a, col) {
@@ -89,9 +91,11 @@ export function beforeScreen({ app, day, onReady, onDone, onHowTo = null, onSong
   }
 
   (async () => {
+    // The intro stops as soon as everyone is ready.
     await say(line('say.bossBefore'));
-    if (day.hint) await say(hintSentence(day.hint));
-    if (Object.values(day.jobs).some((j) => CHECKLISTS[j].includes('music'))) await say(line('say.pickMusic'));
+    if (day.hint && !finishing) await say(hintSentence(day.hint));
+    const dj = Object.entries(day.jobs).find(([, j]) => CHECKLISTS[j].includes('music'));
+    if (dj && !finishing) await say(line('say.pickMusic', { apron: t(`aprons.${dj[0]}`) }));
     if (ready.size === day.aprons.length && alive() && !finishing) allReady();
   })();
 }

@@ -36,7 +36,10 @@ export class Shift {
 
     // Cups are counted only when orders name a size. A cup is used when
     // its order is rung up.
-    this.countsCups = activeDetails(menu, config.level, config.enabledDetails).some((d) => d.id === 'size');
+    // Cups are counted only when orders have a size and the family has
+    // entered some cups (0 and 0 means "don't count").
+    this.countsCups = activeDetails(menu, config.level, config.enabledDetails).some((d) => d.id === 'size')
+      && Object.values(config.cups || {}).some((n) => n > 0);
     this.cupsLeft = { ...config.cups };
   }
 
@@ -154,7 +157,9 @@ export class Shift {
     // numbers on screen never shuffle around.
     // A spot where a served customer is still sipping is used only if
     // there is no other choice.
-    const spots = [...Array(this.config.drinksInProgress).keys()];
+    // (If the setting was lowered mid-shift, there may be more customers
+    // waiting than spots; there is always a free spot for the new one.)
+    const spots = [...Array(Math.max(this.config.drinksInProgress, this.waiting.length + 1)).keys()];
     const waitingIn = new Set(this.waiting.map((q) => q.spot));
     const sippingIn = new Set(this.people.filter((q) => q.place === 'served').map((q) => q.spot));
     p.spot = spots.find((i) => !waitingIn.has(i) && !sippingIn.has(i))

@@ -75,7 +75,7 @@ export function openCatalog(host, { getSave, onSave, canBuy = false, bought = fa
       draw();
       return;
     }
-    if (!canBuy) { play('hmm'); return; }
+    if (!canBuy) { play('hmm'); if (!bought) say(line('say.buyLater')); return; }
     if (!afford) { play('hmm'); say(line('say.tooMuch')); return; }
     // The first tap shows it in the little shop; a second tap buys it, so
     // a stray tap never spends the jar.

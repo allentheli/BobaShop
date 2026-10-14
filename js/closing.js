@@ -14,6 +14,7 @@ import { speak, stopSpeaking, play } from './audio.js';
 import { createCharacter, setExpression, setTalking, act } from './character.js';
 import { h, icon, onTap, wait, nextButton, apronSvg } from './ui.js';
 import { openCatalog } from './catalog.js';
+import { CATALOG, decorState, owns } from './decor.js';
 import { APRONS } from './jobs.js';
 import { orderIcons } from './orderview.js';
 import { bossSayer } from './meet.js';
@@ -36,7 +37,8 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone, shop
   const main = h('div', { class: 'closing-main' });
   const root = h('div', { class: 'screen closing-screen' }, h('div', { class: 'boss-mini closing-boss' }, boss), main);
   app.replaceChildren(root);
-  const alive = () => root.isConnected;
+  // A screen stops talking and moving on when it is left or paused.
+  const alive = () => root.isConnected && !root.querySelector('.pause-menu');
   const say = bossSayer(boss, alive);
 
   function go(step) {
@@ -44,7 +46,9 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone, shop
     onChange();
     stopSpeaking();
     if (!alive()) return;
-    ({ inspect, stars, badges, decorate, cleanup })[step]();
+    // (A step this version does not know, from a newer backup, starts over.)
+    const steps = { inspect, stars, badges, decorate, cleanup };
+    (steps[step] || inspect)();
   }
 
   // ---- 1. Inspection ------------------------------------------------------
@@ -80,10 +84,10 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone, shop
           repeat)),
       h('div', { class: 'judge-row' }, wrongBtn, rightBtn));
 
-    const custSay = (text) => speak(text, {
+    const custSay = (text) => (!alive() ? Promise.resolve() : speak(text, {
       pitch: type.voice.pitch, rate: type.voice.rate,
       onStart: () => setTalking(cust, true), onEnd: () => setTalking(cust, false),
-    });
+    }));
     onTap(repeat, () => { stopSpeaking(); custSay(sentence); }, { sound: null });
 
     let answered = false;
@@ -117,6 +121,7 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone, shop
     onTap(wrongBtn, () => answer(false), { sound: null });
 
     if (i === 0) await say(line('say.bossClosing'));
+    if (answered) return;
     await say(line('say.inspectOrder', { n: pick.number }));
     if (!answered) await custSay(sentence);
     if (!answered) await say(line('say.inspectAsk'));
@@ -151,6 +156,7 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone, shop
     onTap(next, () => { if (moved) return; moved = true; go('badges'); });
     await say(line('say.dayEnd', { n: money }));
     await say(n > 0 ? line(`say.stars${n}`) : line('say.noStars'));
+    if (!moved) await say(line('say.tapArrow'));
   }
 
   // ---- 3. Badges ------------------------------------------------------------
@@ -192,6 +198,7 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone, shop
     } else {
       await say(line('say.noBadges'));
     }
+    if (!moved) await say(line('say.tapArrow'));
   }
 
   // ---- 4. Decorating: the day's decorator buys one thing --------------------
@@ -219,7 +226,9 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone, shop
     let moved = false;
     onTap(next, () => { if (moved) return; moved = true; go('cleanup'); });
     if (!c.bought) {
-      await say(apron ? jobSentenceDecorator(apron.id) : line('say.decoratorAny'));
+      const s = shop.getSave();
+      const canAfford = CATALOG.some((it) => it.price > 0 && it.price <= s.savings && !owns(decorState(s.decorations), it.id));
+      await say(!canAfford ? line('say.saveUp') : apron ? jobSentenceDecorator(apron.id) : line('say.decoratorAny'));
     }
   }
 

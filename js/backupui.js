@@ -96,7 +96,11 @@ export function openBackup(host, { getSave, onRestore }) {
   function check(text) {
     const r = readBackup(text);
     if (!r.ok) {
-      say(r.why === 'notBackup' ? 'That is not a Boba Shop backup.' : 'That backup could not be read. Is it the whole file or code?', false);
+      const why = {
+        notBackup: 'That is not a Boba Shop backup.',
+        newer: 'That backup is from a newer version of the app. Open the app with internet once to update it, then try again.',
+      };
+      say(why[r.why] || 'That backup could not be read. Is it the whole file or code?', false);
       return;
     }
     const s = backupSummary(r.save);

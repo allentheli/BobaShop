@@ -41,7 +41,9 @@ export function unlock() {
         master.connect(ctx.destination);
       }
     }
-    if (ctx && ctx.state === 'suspended') ctx.resume();
+    if (ctx && ctx.state !== 'running') ctx.resume();
+    // Play through the iPad's silent switch, like a game (where supported).
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* older iPad */ }
     // A silent blip inside the tap unlocks Web Audio on iOS.
     if (ctx) {
       const b = ctx.createBuffer(1, 1, 22050);
@@ -63,9 +65,16 @@ export function unlock() {
   pickVoice();
 }
 
-// Keep sound working when the iPad comes back from the lock screen.
+// Keep sound working after the iPad was locked, a call came in, or Siri
+// spoke. Called when the app comes back and on every tap.
 export function resume() {
   if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
+}
+
+// iPad Safari can leave speech stuck after the screen was locked.
+export function resetSpeech() {
+  stopSpeaking();
+  pickVoice();
 }
 
 function pickVoice() {
@@ -85,18 +94,22 @@ function pickVoice() {
 
 const queue = [];
 let speaking = false;
+let current = null;   // the line being spoken: { item, finish }
 
-// Speak a line. Returns a promise that resolves when it is done (or a time
-// limit runs out, because iPad Safari sometimes never reports the end).
+// Speak a line. Returns a promise that always resolves: when the line is
+// done, when it is cut off by stopSpeaking(), or when a time limit runs out
+// (iPad Safari sometimes never reports the end). Anything waiting on a line
+// therefore never hangs.
 export function speak(text, { pitch = 1, rate = 1, onStart, onEnd, interrupt = false } = {}) {
   return new Promise((resolve) => {
-    const done = () => { onEnd && onEnd(); resolve(); };
+    let resolved = false;
+    const done = () => { if (resolved) return; resolved = true; onEnd && onEnd(); resolve(); };
     if (!text || muted || !voiceOn || !('speechSynthesis' in window)) {
       onStart && onStart();
-      setTimeout(done, Math.min(2500, 300 + text.length * 45));
+      setTimeout(done, text ? Math.min(2500, 300 + text.length * 45) : 0);
       return;
     }
-    if (interrupt) { queue.length = 0; speechSynthesis.cancel(); speaking = false; }
+    if (interrupt) stopSpeaking();
     queue.push({ text, pitch, rate, onStart, done });
     pump();
   });
@@ -107,6 +120,7 @@ function pump() {
   const item = queue.shift();
   speaking = true;
   setTalkingState(true);
+  if (!chosenVoice) pickVoice();
   const u = new SpeechSynthesisUtterance(item.text);
   if (chosenVoice) u.voice = chosenVoice;
   u.lang = chosenVoice ? chosenVoice.lang : 'en-US';
@@ -118,22 +132,30 @@ function pump() {
     if (finished) return;
     finished = true;
     clearTimeout(guard);
-    speaking = false;
-    if (queue.length === 0) setTalkingState(false);
+    // Ignore late reports from a line that was already cut off.
+    if (current && current.item === item) { current = null; speaking = false; }
+    if (queue.length === 0 && !speaking) setTalkingState(false);
     item.done();
     pump();
   };
+  current = { item, finish };
   const guard = setTimeout(finish, 1500 + item.text.length * 110);
-  u.onstart = () => item.onStart && item.onStart();
+  u.onstart = () => { if (!finished && item.onStart) item.onStart(); };
   u.onend = finish;
   u.onerror = finish;
   speechSynthesis.speak(u);
 }
 
+// Stop all talking now. Every line that was waiting is finished (not
+// dropped), so nothing that was waiting for it gets stuck.
 export function stopSpeaking() {
-  queue.length = 0;
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  const waiting = queue.splice(0);
+  const was = current;
+  current = null;
   speaking = false;
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  if (was) was.finish();
+  waiting.forEach((i) => i.done());
   setTalkingState(false);
 }
 
@@ -145,7 +167,9 @@ export function play(id) {
     try { files[id].currentTime = 0; files[id].volume = volume; files[id].play(); } catch (e) { /* ignore */ }
     return;
   }
-  if (!ctx) return;
+  // While the iPad has the sound paused (a call, Siri), skip effects
+  // instead of letting them all play at once later.
+  if (!ctx || ctx.state !== 'running') return;
   const fx = SYNTH[id];
   if (fx) fx(ctx.currentTime);
 }
@@ -160,6 +184,7 @@ function tone(t, freq, dur, { type = 'sine', gain = 0.3, slideTo = null, attack 
   g.gain.exponentialRampToValueAtTime(gain, t + attack);
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   o.connect(g); g.connect(master);
+  o.onended = () => { o.disconnect(); g.disconnect(); };
   o.start(t); o.stop(t + dur + 0.05);
 }
 

@@ -46,6 +46,7 @@ export function readBackup(text) {
     return { ok: false, why: 'unreadable' };
   }
   if (!data || data.app !== TAG || !data.save || typeof data.save !== 'object') return { ok: false, why: 'notBackup' };
+  if (Number(data.version) > SAVE_VERSION) return { ok: false, why: 'newer' };
   const base = defaultSave();
   const s = data.save;
   const save = {

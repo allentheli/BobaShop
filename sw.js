@@ -1,9 +1,14 @@
 // Offline support: keeps a copy of every app file on the iPad.
-// Files are served from the saved copy first, and refreshed in the
-// background when there is a connection, so updates show on the next launch.
-// Bump VERSION when files are added or removed.
+//
+// Every file is served from the saved copy for this VERSION, so all the
+// files always come from the same version of the app. When a new version
+// is published, sw.js changes (VERSION is made from the files' contents),
+// the iPad saves the whole new copy in the background, and the next launch
+// uses it.
+//
+// Do not edit VERSION or FILES by hand: run `node tools/sw-files.mjs`.
 
-const VERSION = 'boba-m5-2';
+const VERSION = 'boba-a64871396103';
 const FILES = [
   './',
   'index.html',
@@ -128,13 +133,19 @@ const FILES = [
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
+  // cache: 'reload' skips the browser's own cache, so a new version never
+  // saves an older copy of a file.
+  e.waitUntil(
+    caches.open(VERSION)
+      .then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: 'reload' }))))
+      .then(() => self.skipWaiting()),
+  );
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('boba-') && k !== VERSION).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
@@ -145,11 +156,12 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.open(VERSION).then(async (cache) => {
       const saved = await cache.match(req, { ignoreSearch: true });
-      const fresh = fetch(req)
-        .then((res) => { if (res.ok) cache.put(req, res.clone()); return res; })
-        .catch(() => null);
-      if (saved) { e.waitUntil(fresh); return saved; }
-      return (await fresh) || new Response('Offline', { status: 503 });
+      if (saved) return saved;
+      try {
+        return await fetch(req);
+      } catch {
+        return new Response('Offline', { status: 503 });
+      }
     }),
   );
 });

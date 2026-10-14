@@ -16,7 +16,7 @@ export const CARDS = [
   { id: 'hearts', station: 'topping', topping: 'hearts', steps: TOP3 },
   {
     id: 'howmuch', station: 'topping',
-    steps: [[0.24, 0.37, 'size'], [0.38, 0.52, 'size'], [0.525, 0.665, 'extra'], [0.67, 0.815, 'fresh'], [0.82, 0.965]],
+    steps: [[0.24, 0.37], [0.38, 0.52], [0.525, 0.665, 'extra'], [0.67, 0.815, 'fresh'], [0.82, 0.965]],
   },
   { id: 'tea', station: 'tea', steps: [[0.23, 0.34], [0.345, 0.46], [0.465, 0.63], [0.635, 0.8], [0.8, 0.97]] },
   { id: 'ice', station: 'tea', needs: 'ice', steps: [[0.23, 0.355], [0.37, 0.56], [0.57, 0.76], [0.77, 0.965]] },

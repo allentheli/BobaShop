@@ -253,7 +253,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   // ---- Money -------------------------------------------------------------
 
   let shownMoney = 0;
-  let shownStars = 0;
+  let shownStars = null;   // null until the first draw (no fanfare on Continue)
   function drawMoney() {
     const m = shift.money;
     if (m !== shownMoney) {
@@ -265,7 +265,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     const stars = starsFor(m, goals);
     if (stars !== shownStars) {
       starMarks.forEach((mk, i) => mk.classList.toggle('lit', i < stars));
-      if (stars > shownStars) play('fanfare');
+      if (shownStars !== null && stars > shownStars) play('fanfare');
       shownStars = stars;
     }
   }
@@ -321,7 +321,8 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   // Waiting spots: two side by side normally; when more drinks can be in
   // progress (busy or chaos), rows of three, the back rows smaller.
   function waitingSlot(i) {
-    if (config.drinksInProgress <= 2) return SLOTS.waiting[i];
+    // (Customers already in a higher spot keep it if the setting was lowered.)
+    if (config.drinksInProgress <= 2 && i < 2) return SLOTS.waiting[i];
     // Rows of four; each row further back is higher, smaller and shifted
     // half a place, so every face and number stays visible.
     const rows = [{ y: 648, s: 0.6, dx: 0 }, { y: 553, s: 0.5, dx: 52 }, { y: 470, s: 0.42, dx: 26 }];
@@ -338,9 +339,12 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     return { x: 60 + (k % 4) * 45, y: 540 - Math.floor(k / 4) * 18, s: 0.5 };
   }
 
-  function slotFor(p) {
+  function slotFor(p, lineIndex = null) {
     switch (p.place) {
-      case 'line': return { key: `line${shift.line.indexOf(p)}`, ...lineSlot(shift.line.indexOf(p)) };
+      case 'line': {
+        const i = lineIndex ? lineIndex.get(p) : shift.line.indexOf(p);
+        return { key: `line${i}`, ...lineSlot(i) };
+      }
       case 'counter': return { key: 'counter', ...SLOTS.counter };
       case 'waiting': return { key: `wait${p.spot}`, ...waitingSlot(p.spot) };
       case 'served': {
@@ -374,7 +378,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     el.append(wish, tag, bar, cup);
     el.dataset.place = p.place;
     chars.appendChild(el);
-    const v = { p, el, slot: null, busyUntil: 0, mood: null, moodUntil: 0, arrived: false };
+    const v = { p, el, slot: null, busyUntil: 0, mood: null, moodUntil: 0, arrived: false, tagEl: tag, barEl: bar.firstChild };
     people.set(p.id, v);
     if (instant) {
       placeEl(v, slotFor(p), true);
@@ -389,36 +393,54 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     onTap(el, () => tapPerson(v), { sound: null });
   }
 
+  // Puts every customer in place and updates faces, number tags and
+  // patience bars. Runs every frame, so it only touches what changed.
   function layout() {
+    const now = performance.now();
+    const lineIndex = new Map(shift.line.map((p, i) => [p, i]));
     for (const v of people.values()) {
       const { p, el } = v;
       if (el.classList.contains('entering')) continue;
-      const slot = slotFor(p);
+      const slot = slotFor(p, lineIndex);
       if (v.slot !== slot.key) placeEl(v, slot);
-      el.dataset.place = p.place;
-      if (p.number != null) el.querySelector('.tag').textContent = String(p.number);
+      if (el.dataset.place !== p.place) el.dataset.place = p.place;
+      if (p.number != null && v.shownNumber !== p.number) {
+        v.shownNumber = p.number;
+        v.tagEl.textContent = String(p.number);
+      }
 
       // Faces and body language.
       let mood = 'waiting';
-      if (v.mood && performance.now() < v.moodUntil) mood = v.mood;
+      if (v.mood && now < v.moodUntil) mood = v.mood;
       else if (p.place === 'served') mood = 'happy';
       else if (p.place === 'gone') mood = p.leftBecause === 'gaveUp' ? 'sad' : 'happy';
       const pat = shift.patienceOf(p);
       if (mood === 'waiting' && pat && pat.warn) mood = 'impatient';
       setExpression(el, mood);
-      el.classList.toggle('tapping', mood === 'impatient');
+      setClass(v, 'tapping', mood === 'impatient');
 
       // The patience bar: green, then yellow at the warning, then red.
       const showBar = !!(pat && config.customersLeave && config.patienceBar);
-      el.classList.toggle('has-bar', showBar);
+      setClass(v, 'has-bar', showBar);
       if (showBar) {
-        const fill = el.querySelector('.patience-fill');
-        fill.style.width = `${Math.round(pat.left * 100)}%`;
+        const left = Math.round(pat.left * 50) / 50;
+        if (v.barLeft !== left) {
+          v.barLeft = left;
+          v.barEl.style.transform = `scaleX(${left})`;
+        }
         const color = pat.left > 0.5 && !pat.warn ? 'green' : pat.left > 0.2 ? 'yellow' : 'red';
-        if (fill.dataset.color !== color) fill.dataset.color = color;
+        if (v.barEl.dataset.color !== color) v.barEl.dataset.color = color;
       }
-      el.classList.toggle('servable', p.place === 'waiting' && performance.now() > v.busyUntil);
+      setClass(v, 'servable', p.place === 'waiting' && now > v.busyUntil);
     }
+  }
+
+  // Changes a class only when it really changes (cheaper on older iPads).
+  function setClass(v, name, on) {
+    v.cls = v.cls || {};
+    if (v.cls[name] === on) return;
+    v.cls[name] = on;
+    v.el.classList.toggle(name, on);
   }
 
   // ---- Serving -------------------------------------------------------------
@@ -448,16 +470,19 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     const v = people.get(p.id);
     layout();
     await wait(walkMs);
+    if (finished) return;
     v.el.classList.add('has-cup');
     act(v.el, 'hop');
     play('hop');
     await sayAs(p, line('say.sip'));
+    if (finished) return;
     if (p.tip > 0) {
       const pop = h('div', { class: 'tip-pop' }, ...Array.from({ length: p.tip }, () => icon('coin', 'tip-coin')));
       v.el.appendChild(pop);
       flyCoins(v.el, p.tip);
     }
     await wait(config.anim.servedStay * 1000);
+    if (finished) return;
     shift.finishServed(p.id);
     v.el.classList.remove('has-cup');
     layout();
@@ -482,14 +507,16 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
     register.classList.remove('disabled');
     showBubble(p);
     p.sentence = orderSentence(p.order);
+    // Stop talking if the shift ends, is paused, or the customer has paid.
+    const still = () => !finished && !paused && shift.counter === p;
     await sayAs(p, line('say.greet', { name: visitorName(p.type.id, p.look) }));
-    if (mention && !mentioned) {
+    if (mention && !mentioned && still()) {
       mentioned = true;
       await sayAs(p, line('say.noticeDecor', { thing: t(`decor.${mention.id}`) }));
     }
     // In hard call mode the customer only says hello: the order is pictures only.
-    if (config.callMode !== 'hard') await sayAs(p, p.sentence);
-    if (mode === 'hard' && shift.counter === p) await sayAs(p, line('say.payWith', { n: p.pays }));
+    if (config.callMode !== 'hard' && still()) await sayAs(p, p.sentence);
+    if (mode === 'hard' && still()) await sayAs(p, line('say.payWith', { n: p.pays }));
   }
 
   function showBubble(p) {
@@ -562,6 +589,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   // Stop everything on this screen (timers, sound, the loop).
   function stop() {
     if (finished) return false;
+    saveNow();
     finished = true;
     stopMusic();
     setMusicSpeed(1);
@@ -580,14 +608,17 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
 
   // ---- Clock -----------------------------------------------------------------
 
+  // Moves the sun a few times a second (smoothed by a CSS transition).
+  let sunAt = -1;
   function drawSun() {
-    const k = shift.progress;
+    const k = Math.round(shift.progress * 400) / 400;
+    if (k === sunAt) return;
+    sunAt = k;
     // The sun rises from the left, crosses the window and sets on the right.
     const x = 6 + k * 88;
     const y = 78 - Math.sin(Math.min(1, k * 1.05) * Math.PI) * 62 + (k > 0.95 ? (k - 0.95) * 600 : 0);
-    sun.style.left = `${x}%`;
-    sun.style.top = `${y}%`;
-    windowEl.style.setProperty('--dusk', String(Math.max(0, (k - 0.65) / 0.35)));
+    sun.style.transform = `translate(${(x / 100) * 324}px, ${(y / 100) * 96}px) translate(-50%, -50%)`;
+    windowEl.style.setProperty('--dusk', String(Math.max(0, (k - 0.65) / 0.35).toFixed(2)));
   }
 
   // ---- Main loop ---------------------------------------------------------
@@ -596,6 +627,8 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   let raf = 0;
   let paused = false;
   function frame(now) {
+    // Ask for the next frame first, so one bad frame can never stop the shop.
+    if (!finished) raf = requestAnimationFrame(frame);
     const dt = Math.min(0.25, (now - last) / 1000);
     last = now;
     if (!document.hidden && !finished && !paused) {
@@ -607,11 +640,15 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
       setMusicSpeed(shift.progress > 0.75 && !shift.closed ? 1 + (shift.progress - 0.75) * 0.6 : 1);
       finishBtn.classList.toggle('pulse', shift.allDone);
     }
-    raf = requestAnimationFrame(frame);
   }
 
   async function keepAwake() {
-    try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { /* not supported */ }
+    try {
+      if (!('wakeLock' in navigator)) return;
+      const lock = await navigator.wakeLock.request('screen');
+      // The shift may have ended while the lock was being requested.
+      if (finished) lock.release().catch(() => {}); else wakeLock = lock;
+    } catch (e) { /* not supported */ }
   }
   function onVisibility() {
     if (!document.hidden) { last = performance.now(); resume(); if (!finished) keepAwake(); }
@@ -667,7 +704,7 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
       onResume: () => { paused = false; root.classList.remove('is-paused'); last = performance.now(); startMusic(); },
       onHome: () => { saveNow(); stop(); pause.onHome(); },
       onEndShift: () => { paused = false; finish(); },
-      onSettings: (menuEl) => pause.onSettings(menuEl, () => { saveNow(); stop(); }),
+      onSettings: (menuEl) => pause.onSettings(menuEl),
       getSoundOn: pause.getSoundOn,
       onToggleSound: pause.onToggleSound,
     });
@@ -680,4 +717,5 @@ export function startOpen({ app, config, demo = false, speed = 1, restore = null
   drawTray();
   raf = requestAnimationFrame(frame);
   if (demo) startBot();
+  return stop;
 }

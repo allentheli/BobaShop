@@ -235,9 +235,9 @@ img { -webkit-user-drag: none; }
 .sky { position: absolute; inset: 0; background: linear-gradient(#7cc8f5, #c9ecff); }
 .sky::after { content: ""; position: absolute; inset: 0; background: linear-gradient(#5b3f8f, #ff9a5a); opacity: var(--dusk); }
 .sun {
-  position: absolute; width: 46px; height: 46px; border-radius: 50%; transform: translate(-50%, -50%);
+  position: absolute; left: 0; top: 0; width: 46px; height: 46px; border-radius: 50%;
   background: radial-gradient(circle, #fff6b0 30%, #ffc93c 70%); box-shadow: 0 0 20px 6px rgba(255, 220, 90, .7);
-  transition: left .3s linear, top .3s linear;
+  transition: transform .8s linear; will-change: transform;
 }
 .hills { position: absolute; left: -10%; right: -10%; bottom: -40px; height: 70px; border-radius: 50%; background: #8fd18a; box-shadow: 120px -10px 0 -10px #7cc27a; }
 .window-bars { position: absolute; inset: 0; background: linear-gradient(90deg, transparent calc(50% - 3px), #fff calc(50% - 3px), #fff calc(50% + 3px), transparent calc(50% + 3px)); }
@@ -297,8 +297,11 @@ img { -webkit-user-drag: none; }
 }
 .char[data-place="waiting"] .tag { display: flex; }
 .char.servable { cursor: pointer; }
-.char.servable .tag { animation: tag-glow 2s ease-in-out infinite; }
-@keyframes tag-glow { 50% { box-shadow: 0 0 0 10px rgba(111, 207, 151, .5); } }
+.char.servable .tag::after {
+  content: ""; position: absolute; inset: -12px; border-radius: 50%; border: 10px solid rgba(111, 207, 151, .5);
+  animation: tag-glow 2s ease-in-out infinite; pointer-events: none;
+}
+@keyframes tag-glow { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
 
 .held-cup { position: absolute; left: 125px; top: 92px; width: 90px; height: 90px; display: none; }
 .held-cup-img { width: 100%; height: 100%; }
@@ -380,7 +383,7 @@ img { -webkit-user-drag: none; }
 .bell-icon { width: 64px; height: 64px; }
 .serve-no { position: absolute; right: -30px; top: -30px; width: 72px; height: 72px; font-size: 30px; font-weight: 900; background: #f1e6da; }
 
-.is-closed .wall { filter: saturate(.8) brightness(.95); }
+.is-closed .wall::after { content: ""; position: absolute; inset: 0; background: rgba(60, 40, 90, .08); }
 
 /* ---- Turn the iPad sideways --------------------------------------------------- */
 
@@ -577,7 +580,7 @@ img { -webkit-user-drag: none; }
 .char.has-bar .patience { display: block; }
 .char[data-place="line"] .patience { top: -100px; }
 .char[data-place="waiting"] .patience { top: -110px; left: 20px; right: 20px; height: 22px; }
-.patience-fill { height: 100%; width: 100%; transition: width .5s linear, background .4s; background: #5fcf7f; }
+.patience-fill { height: 100%; width: 100%; transform-origin: left center; transition: transform .5s linear, background .4s; background: #5fcf7f; }
 .patience-fill[data-color="yellow"] { background: #ffc93c; }
 .patience-fill[data-color="red"] { background: #ff5a5a; animation: bar-pulse .7s ease-in-out infinite; }
 @keyframes bar-pulse { 50% { opacity: .55; } }
@@ -601,7 +604,10 @@ img { -webkit-user-drag: none; }
 .pause-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; }
 .pause-opt { min-height: 96px; border-radius: 24px; background: #f6efe6; display: flex; align-items: center; gap: 14px; padding: 0 20px; font-size: 24px; font-weight: 800; }
 .pause-opt.armed { background: #ffd6d6; }
+.title-screen .start-btn.armed { background: #ffd6d6; }
 .pause-opt.off { opacity: .6; }
+.pause-opt .opt-text { display: flex; flex-direction: column; align-items: flex-start; text-align: left; line-height: 1.15; }
+.pause-opt .opt-text small { font-size: 17px; font-weight: 700; opacity: .65; }
 .opt-icon { width: 48px; height: 48px; flex: none; position: relative; }
 .opt-icon.house { background: linear-gradient(var(--ink), var(--ink)) 50% 100% / 34px 26px no-repeat; clip-path: polygon(50% 0, 100% 45%, 86% 45%, 86% 100%, 14% 100%, 14% 45%, 0 45%); background: var(--ink); }
 .opt-icon.speaker-icon { background: url("../assets/icons/speaker.svg") center / contain no-repeat; }
@@ -808,3 +814,10 @@ img { -webkit-user-drag: none; }
 .backup-text { width: 100%; height: 220px; font: 14px ui-monospace, Menlo, monospace; border: 3px solid #e8c9a2; border-radius: 16px; padding: 12px; -webkit-user-select: text; user-select: text; resize: none; color: var(--ink); }
 .backup-summary { margin: 0; font-size: 22px; line-height: 1.6; }
 .backup-body h3 { margin: 0; font-size: 26px; }
+
+/* Keep the big backgrounds on their own layer, so moving faces and bars
+   do not repaint them (helps older iPads). */
+.wall, .floor { will-change: transform; }
+.howto-done { gap: 10px; }
+.howto-done .howto-check { width: 40px; height: 40px; flex: none; }
+.howto-done .label { white-space: nowrap; }

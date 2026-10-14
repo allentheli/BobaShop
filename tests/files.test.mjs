@@ -6,18 +6,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ICONS, CUSTOMERS, BOSS } from '../js/assets.js';
 import { MENU } from '../js/menu.js';
+import { swIsCurrent } from '../tools/sw-files.mjs';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
 
-function walk(dir) {
-  return fs.readdirSync(path.join(root, dir), { withFileTypes: true }).flatMap((e) =>
-    e.isDirectory() ? walk(`${dir}/${e.name}`) : [`${dir}/${e.name}`]);
-}
-
-test('every app file is listed for offline play', () => {
-  const files = [...walk('js'), ...walk('css'), ...walk('assets')].filter((f) => !f.endsWith('icon.svg'));
-  for (const f of files) assert.ok(sw.includes(`'${f}'`), `${f} is missing from sw.js`);
+test('sw.js lists every app file and its VERSION matches them', () => {
+  assert.ok(swIsCurrent(), 'sw.js is out of date: run `node tools/sw-files.mjs`');
 });
 
 test('every listed asset exists', () => {

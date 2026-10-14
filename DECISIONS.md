@@ -25,7 +25,7 @@ Choices made while building that the build instructions did not settle. One line
 - The day total already shows stars against the goals, because the goals are on screen during the shift. Badges come with milestone 2.
 - A small parent panel (hold "Parents" for 3 seconds) has the voice switch and the demo shift. The full settings come in milestone 3.
 - The demo shift is also reachable with `?demo` in the address, for automated checks.
-- Offline: the app is served from the saved copy first and refreshed in the background, so an update shows on the second launch after it is published.
+- Offline: see "Check-up" at the end (changed October 14).
 
 ## Milestone 2
 
@@ -108,3 +108,18 @@ Choices made while building that the build instructions did not settle. One line
 - The text code is the same backup in base64 with a "BOBA1:" prefix, so it survives being pasted into notes and messages (line breaks are ignored).
 - Loading checks it is a Boba Shop backup, fills in anything missing from older versions, shows a summary, and needs two taps to replace the shop.
 - The app never sends a backup anywhere by itself. Kids' drawings and voices (when they arrive) will be added to backups.
+
+## Check-up (October 14, 2026)
+
+- Offline: every file is served from the saved copy for the current version only, never refreshed one at a time, so the iPad can never mix files from two versions. `VERSION` is a hash of all the files (`node tools/sw-files.mjs`), so every change is picked up, and a test fails if `sw.js` is stale. New copies are fetched past the browser cache. An update shows on the launch after the one that downloaded it.
+- Spoken lines always finish: if the voice stalls, is stopped, or the app goes to the background, every waiting line counts as said, so no screen can wait forever. After the app has been hidden for more than 2 seconds the voice is reset, because Safari's voice often stops working after that.
+- Taps are counted per button, not for the whole screen, so two kids can tap different things at once. A button ignores taps in its first quarter second, so a tap meant for the old screen does not land on the new one.
+- The pause menu pauses every screen of the day, not only the shift. Keep playing redraws the screen from the saved step.
+- A day's order level, order details and cup counts are fixed when the day starts. Changing them in the settings applies from the next day, so the register and the customers always agree.
+- Lowering "drinks in progress" during a shift lets the extra waiting customers finish; new ones wait until there is room.
+- If the shift ends early (or the sun sets) while paid customers are still waiting, the shop keeps their coins. Refunds are only for customers who give up.
+- 0 and 0 cups means "don't count cups", even when orders have sizes.
+- New day asks for a second tap when a day is in progress. Settings in the pause menu is a 3-second hold, like the Parents button.
+- Sound plays as "playback" on iPads that support it, so the music and voices are heard even when the iPad's silent switch is on.
+- Backups made by a newer version of the app are refused with a message, instead of loading something this version cannot read.
+- Speed: the shift screen only touches what changed each frame, and the patience bars, sun and glowing tags use moves and fades that the iPad draws without repainting the screen.

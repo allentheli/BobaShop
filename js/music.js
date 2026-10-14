@@ -135,6 +135,9 @@ export function currentSong() { return current ? current.song.id : null; }
 function schedule(ctx) {
   const c = current;
   if (!c || !c.steps) return;
+  // After a stall (the iPad was busy), skip the missed notes instead of
+  // playing them all at once.
+  if (c.nextTime < ctx.currentTime - 0.1) c.nextTime = ctx.currentTime + 0.05;
   while (c.nextTime < ctx.currentTime + 0.2) {
     const stepLen = 60 / c.song.bpm / 2 / speed;
     playStep(ctx, c, c.steps[c.step], c.nextTime, stepLen);
@@ -161,6 +164,7 @@ function note(ctx, out, f, t, dur, type, gain) {
   g.gain.exponentialRampToValueAtTime(type === 'square' ? gain * 0.45 : gain, t + 0.015);
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   o.connect(g); g.connect(out);
+  o.onended = () => { o.disconnect(); g.disconnect(); };
   o.start(t); o.stop(t + dur + 0.05);
 }
 
@@ -172,6 +176,7 @@ function kick(ctx, out, t) {
   g.gain.setValueAtTime(0.5, t);
   g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
   o.connect(g); g.connect(out);
+  o.onended = () => { o.disconnect(); g.disconnect(); };
   o.start(t); o.stop(t + 0.2);
 }
 
@@ -190,5 +195,6 @@ function hiss(ctx, out, t, dur, freq, gain) {
   g.gain.setValueAtTime(gain, t);
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   src.connect(f); f.connect(g); g.connect(out);
+  src.onended = () => { src.disconnect(); f.disconnect(); g.disconnect(); };
   src.start(t); src.stop(t + dur + 0.02);
 }
