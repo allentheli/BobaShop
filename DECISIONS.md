@@ -123,3 +123,20 @@ Choices made while building that the build instructions did not settle. One line
 - Sound plays as "playback" on iPads that support it, so the music and voices are heard even when the iPad's silent switch is on.
 - Backups made by a newer version of the app are refused with a message, instead of loading something this version cannot read.
 - Speed: the shift screen only touches what changed each frame, and the patience bars, sun and glowing tags use moves and fades that the iPad draws without repainting the screen.
+
+## Name and Chinese (October 14, 2026)
+
+- The game is Boba Shop Frenzy in English and 手搖癮 (Allen's name) in Chinese. The Home Screen icon name comes from the web app file, so it reads "Boba Shop Frenzy". The title sign shows "Boba Shop / Frenzy!" on two lines; 手搖癮 fits on one.
+- Chinese is Mandarin as spoken in Taiwan, in traditional characters (Allen's choice). The voice is the iPad's Taiwan Mandarin voice (Meijia), or a mainland Mandarin voice if that is missing; never Cantonese.
+- The language switch is on the title screen (Allen's request) and in the settings. It applies right away; a day in progress continues in the new language.
+- All words live in `js/strings.js` (English) and `js/strings-zh.js` (Chinese), including the parent settings and backup screens. A test checks every language has every line with the same {slots}, and that tutorial and cleanup lines match their cards one for one.
+- Chinese orders use real shop words: 去冰 / 少冰 / 多冰 and 無糖 / 半糖 / 全糖 (none / some / lots). "Extra topping" is said as 多加一勺 (one more scoop), which is exactly the rule.
+- Numbers are spoken as digits by the voice; before a counting word, 2 is changed to 兩 (兩個金幣), but not in order numbers (2號).
+- The voice's time limit counts a Chinese character like a short English word, so long Chinese lines are not cut off.
+- The dragon is 芋圓 in Chinese, so it is not confused with taro tea (芋頭).
+- The printed station cards are pictures with English words, so they stay in English; the boss reads them aloud in Chinese.
+
+## Cleanup and skipping closing steps (October 14, 2026)
+
+- Cleanup has four cards (Allen's request): dough into the tubs, tea sheets back on their piles, cups and lids stacked, ice and sugar cubes back in their bowls. The boss reads them one by one; tapping a card says it again and stops the reading.
+- "After the shift" (Allen's request) can skip the drink check and the badges. Skipping the check means no bonus coins; skipping badges means no badges that day. The stars and decorating always happen.

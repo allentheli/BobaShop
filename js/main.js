@@ -7,8 +7,8 @@ import { CONFIG } from './config.js';
 import { BOSS, CUSTOMERS, ICONS, ACCESSORIES } from './assets.js';
 import { MENU } from './menu.js';
 import { starsFor, pickHint, pickInspection, makeLook } from './logic.js';
-import { t, line } from './text.js';
-import { unlock, speak, stopSpeaking, configureSound, setMuted, play, resume, resetSpeech } from './audio.js';
+import { t, line, setLanguage } from './text.js';
+import { unlock, speak, stopSpeaking, configureSound, setMuted, play, resume, resetSpeech, setSpeechLanguage } from './audio.js';
 import { createCharacter, setTalking, act, setExpression } from './character.js';
 import { h, icon, onTap, onHold, wait } from './ui.js';
 import { startOpen } from './open.js';
@@ -16,7 +16,7 @@ import { meetScreen } from './meet.js';
 import { beforeScreen } from './before.js';
 import { closingScreen } from './closing.js';
 import { loadSave, writeSave, defaultSave } from './storage.js';
-import { openSettings } from './settings.js';
+import { openSettings, LANGUAGES } from './settings.js';
 import { openCatalog } from './catalog.js';
 import { addPauseButton, addSkipButton } from './pause.js';
 import { howtoScreen } from './howto.js';
@@ -109,9 +109,23 @@ function titleScreen() {
   // The savings jar, and a look at the shop's decorations (buying happens
   // at closing time, by the day's decorator).
   const shopBtn = h('button', { class: 'btn title-shop' }, icon('coin', 'jar-coin'), h('span', {}, String(save.savings)));
+  // English or Chinese, one tap away (also in the Parent settings).
+  const langRow = h('div', { class: 'lang-toggle' }, ...LANGUAGES.map(([id, label]) => {
+    const b = h('button', { class: `btn lang-opt ${config.language === id ? 'on' : ''}`, lang: id === 'zh' ? 'zh-Hant' : 'en' }, label);
+    onTap(b, () => {
+      if (config.language === id) return;
+      save.settings.language = id;
+      persist();
+      reloadConfig();
+      titleScreen();
+    });
+    return b;
+  }));
   const root = h('div', { class: `screen title-screen ${hasDay ? 'has-day' : ''}` },
     h('div', { class: 'awning' }),
-    h('div', { class: 'title-sign' }, icon('drink', 'title-cup'), h('h1', {}, t('ui.appName')), icon('drink', 'title-cup flip')),
+    h('div', { class: 'title-sign' }, icon('drink', 'title-cup'),
+      h('h1', { 'aria-label': t('ui.appName') }, h('span', { class: 'title-main' }, t('ui.titleMain')), t('ui.titleSub') ? h('span', { class: 'title-sub' }, t('ui.titleSub')) : null),
+      icon('drink', 'title-cup flip')),
     // Three random friends wave from the title screen, dressed up.
     h('div', { class: 'title-friends' }, ...[...CUSTOMERS].sort(() => Math.random() - 0.5).slice(0, 3)
       .map((c) => createCharacter(c, { expression: 'happy', look: makeLook(c, ACCESSORIES) }))),
@@ -119,6 +133,7 @@ function titleScreen() {
     startBtn,
     h('div', { class: 'sound-hint' }, t('ui.soundHint')),
     shopBtn,
+    langRow,
     parentBtn,
   );
   app.replaceChildren(root);
@@ -145,7 +160,7 @@ function titleScreen() {
       showPhase();
     }, { sound: null });
   }
-  onHold(parentBtn, () => { unlock(); settingsPanel(root, { withDemo: true }); }, 3);
+  onHold(parentBtn, () => { unlock(); settingsPanel(root, { withDemo: true, onClose: () => titleScreen() }); }, 3);
   onTap(shopBtn, () => {
     unlock();
     openCatalog(root, {
@@ -161,6 +176,18 @@ function reloadConfig() {
   config = withSettings(save.settings);
   configureSound(config.sound);
   configureMusic(config.music);
+  applyLanguage();
+}
+
+// Words on screen, the voice, and the Chinese font all follow the setting.
+function applyLanguage() {
+  const l = config.language === 'zh' ? 'zh' : 'en';
+  setLanguage(l);
+  setSpeechLanguage(l);
+  document.documentElement.lang = l === 'zh' ? 'zh-Hant-TW' : 'en';
+  document.title = t('ui.appName');
+  const rotate = document.querySelector('#rotate > div:last-child');
+  if (rotate) rotate.textContent = t('ui.landscape');
 }
 
 // host: the element the settings panel opens over.
@@ -387,11 +414,11 @@ function dayTotalScreen(sum, { demo = false } = {}) {
       h('div', { class: 'parent-label' }, t('ui.dayTotal')),
       h('div', { class: 'total-coins' }, icon('coin', 'total-coin'), h('span', {}, String(sum.money))),
       h('div', { class: 'total-detail' },
-        h('span', {}, `${t('ui.fromSales')}: ${sum.sales}`),
-        h('span', {}, `${t('ui.fromTips')}: ${sum.tips}`)),
+        h('span', {}, t('ui.stat', { label: t('ui.fromSales'), n: sum.sales })),
+        h('span', {}, t('ui.stat', { label: t('ui.fromTips'), n: sum.tips }))),
       starRow,
       h('div', { class: 'total-drinks' }, ...Array.from({ length: Math.min(sum.drinks, 16) }, () => icon('drink', 'mini-drink')),
-        h('span', { class: 'parent-label small' }, `${t('ui.drinksServed')}: ${sum.drinks}`)),
+        h('span', { class: 'parent-label small' }, t('ui.stat', { label: t('ui.drinksServed'), n: sum.drinks }))),
       doneBtn));
   app.replaceChildren(root);
   play('fanfare');
@@ -406,8 +433,7 @@ function dayTotalScreen(sum, { demo = false } = {}) {
 
 // ---- Start -------------------------------------------------------------------
 
-configureSound(config.sound);
-configureMusic(config.music);
+reloadConfig();
 titleScreen();
 if (params.has('demo')) {
   unlock();

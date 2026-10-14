@@ -51,9 +51,15 @@ export const CONFIG = {
   // 'jobs' (no how-to cards) or 'skip' (straight to the shop).
   setup: 'full',
 
+  // After the shift: the drink check (with its bonus coins) and the badges
+  // can each be skipped in the settings.
+  afterShift: { inspect: true, badges: true },
+
   level: 1,                  // order level, 1 to 8
   registerMode: 'easy',      // easy | medium | hard
   callMode: 'normal',        // easy | normal | hard
+
+  language: 'en',            // 'en' (English) or 'zh' (Mandarin, traditional characters)
 
   sound: { volume: 0.8, voice: true },
   music: { on: true, volume: 0.6, song: 'bubbly' },   // song: the first day's pick

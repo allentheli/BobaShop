@@ -36,7 +36,7 @@ export function openCatalog(host, { getSave, onSave, canBuy = false, bought = fa
 
   const swatch = (it) => {
     if (it.kind === 'things') return h('img', { class: 'decor-swatch-img', src: it.file, alt: '' });
-    if (it.kind === 'sign') return h('div', { class: `sign swatch-sign ${it.id}` }, h('div', { class: 'sign-face sign-open' }, 'Open'));
+    if (it.kind === 'sign') return h('div', { class: `sign swatch-sign ${it.id}` }, h('div', { class: 'sign-face sign-open' }, t('ui.open')));
     return h('div', { class: `decor-swatch ${it.kind} ${it.id}` });
   };
 

@@ -1,4 +1,5 @@
 // Closing: the boss inspects drinks, then stars, badges and the cleanup song.
+// The inspection and the badges can be skipped in the settings.
 //
 // day.closing keeps where we are, so closing the app halfway picks up at
 // the same step:
@@ -9,7 +10,7 @@
 import { BOSS, CUSTOMERS, ICONS } from './assets.js';
 import { MENU } from './menu.js';
 import { starsFor, badgesFor } from './logic.js';
-import { t, line, orderSentence } from './text.js';
+import { t, line, orderSentence, lookupList } from './text.js';
 import { speak, stopSpeaking, play } from './audio.js';
 import { createCharacter, setExpression, setTalking, act } from './character.js';
 import { h, icon, onTap, wait, nextButton, apronSvg } from './ui.js';
@@ -42,6 +43,10 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone, shop
   const say = bossSayer(boss, alive);
 
   function go(step) {
+    // Steps a parent switched off in the settings are passed over.
+    const after = config.afterShift || {};
+    if (step === 'inspect' && after.inspect === false) step = 'stars';
+    if (step === 'badges' && after.badges === false) step = shop ? 'decorate' : 'cleanup';
     c.step = step;
     onChange();
     stopSpeaking();
@@ -144,11 +149,11 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone, shop
       h('div', { class: 'parent-label' }, t('ui.dayTotal')),
       h('div', { class: 'total-coins' }, icon('coin', 'total-coin'), h('span', {}, String(money))),
       h('div', { class: 'total-detail' },
-        h('span', {}, `${t('ui.fromSales')}: ${day.summary.sales}`),
-        h('span', {}, `${t('ui.fromTips')}: ${day.summary.tips}`),
-        h('span', {}, `${t('ui.bonus')}: ${money - day.summary.money}`),
-        day.summary.refunds ? h('span', { class: 'refund-note' }, `${t('ui.refunds')}: −${day.summary.refunds}`) : null,
-        h('span', {}, `${t('ui.drinksServed')}: ${day.summary.drinks}`)),
+        h('span', {}, t('ui.stat', { label: t('ui.fromSales'), n: day.summary.sales })),
+        h('span', {}, t('ui.stat', { label: t('ui.fromTips'), n: day.summary.tips })),
+        h('span', {}, t('ui.stat', { label: t('ui.bonus'), n: money - day.summary.money })),
+        day.summary.refunds ? h('span', { class: 'refund-note' }, t('ui.stat', { label: t('ui.refunds'), n: `−${day.summary.refunds}` })) : null,
+        h('span', {}, t('ui.stat', { label: t('ui.drinksServed'), n: day.summary.drinks }))),
       starRow,
       next);
     play('fanfare');
@@ -237,6 +242,9 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone, shop
   }
 
   // ---- 4. Cleanup song --------------------------------------------------------
+  // Four cards: dough into the tubs, tea sheets onto their piles, cups and
+  // lids stacked, ice and sugar back in their bowls. The boss reads each
+  // one; tapping a card says it again.
 
   async function cleanup() {
     const doughs = [
@@ -244,23 +252,51 @@ export function closingScreen({ app, day, config, onChange, onBank, onDone, shop
       { id: 'white', color: '#fbfbf3' },
       { id: 'red', color: '#e0434f' },
     ];
-    const lanes = doughs.map((d, k) => h('div', { class: 'tub-lane', style: { '--dough': d.color, animationDelay: `${k * 2.2}s` } },
+    const lanes = doughs.map((d, k) => h('div', { class: 'tub-lane', style: { '--dough': d.color } },
       h('div', { class: 'dough', style: { animationDelay: `${0.4 + k * 0.7}s` } }),
       h('div', { class: 'tub' }, h('div', { class: 'tub-lid' }), h('div', { class: 'tub-band' }))));
+    const pics = [
+      h('div', { class: 'clean-pic tubs' }, h('div', { class: 'tub-row' }, ...lanes)),
+      h('div', { class: 'clean-pic' }, ...['tea.milk', 'tea.matcha', 'tea.taro'].map((k) => icon(k, 'clean-icon'))),
+      h('div', { class: 'clean-pic' }, icon('cups', 'clean-icon big'), icon('lids', 'clean-icon big')),
+      h('div', { class: 'clean-pic' }, icon('ice.lots', 'clean-icon big'), icon('sugar.lots', 'clean-icon big')),
+    ];
+    const steps = lookupList('cleanupSteps');
+    const cards = pics.map((pic) => h('button', { class: 'btn clean-card' }, pic));
     const done = h('button', { class: 'btn big done-btn' }, icon('check'), h('span', { class: 'label' }, t('ui.done')));
-    main.replaceChildren(h('div', { class: 'parent-label' }, t('ui.cleanup')), h('div', { class: 'tub-row' }, ...lanes), done);
+    main.replaceChildren(h('div', { class: 'parent-label' }, t('ui.cleanup')), h('div', { class: 'clean-row' }, ...cards), done);
     play('song');
     let finished = false;
+    let auto = true;   // the boss reads the cards until someone taps one
+    let speaking = null;
+    const highlight = (card) => { speaking = card; cards.forEach((x) => x.classList.toggle('speaking', x === card)); };
+    cards.forEach((card, i) => onTap(card, async () => {
+      if (finished) return;
+      auto = false;
+      stopSpeaking();
+      highlight(card);
+      await say(steps[i] || '');
+      if (speaking === card) highlight(null);
+    }));
     onTap(done, async () => {
       if (finished) return;
       finished = true;
       stopSpeaking();
+      highlight(null);
       setExpression(boss, 'happy');
       act(boss, 'hop');
       await say(line('say.bye'));
       if (alive()) onDone({ money: dayMoney(day, config), stars: starsFor(dayMoney(day, config), config.starGoals), badges: c.badges || [] });
     });
     await say(line('say.cleanup'));
+    for (let i = 0; i < cards.length && auto && !finished && alive(); i++) {
+      highlight(cards[i]);
+      await say(steps[i] || '');
+    }
+    if (auto && !finished && alive()) {
+      highlight(null);
+      await say(line('say.cleanupSong'));
+    }
   }
 
   go(c.step || 'inspect');

@@ -1,6 +1,6 @@
-# Boba Shop
+# Boba Shop Frenzy (手搖癮)
 
-Boba Shop is a team game for 2 to 4 kids, about 5 to 8 years old. They run a pretend bubble tea shop at a real table and build drinks by hand from cups, Play-Doh and small pieces. This app runs on one iPad at the table. It plays the shop's boss and its customers, and it keeps the clock, the money and the score.
+Boba Shop Frenzy (in Chinese, 手搖癮) is a team game for 2 to 4 kids, about 5 to 8 years old. They run a pretend bubble tea shop at a real table and build drinks by hand from cups, Play-Doh and small pieces. This app runs on one iPad at the table. It plays the shop's boss and its customers, and it keeps the clock, the money and the score.
 
 The full game design is in `boba-shop-handoff.md`. The build plan is in `boba-shop-claude-code.md`.
 
@@ -15,13 +15,15 @@ A whole day runs from the title screen and back:
    - **Inspection:** the boss replays up to 3 random orders. Compare each one to the real cup and tap Right or Not right. A right cup earns a bonus coin, and a wrong one gets a silly face.
    - **Stars:** the day's money (with bonuses) against the goals. The money also goes into the savings jar shown on the title screen.
    - **Badges:** the boss asks whether any topping bowl ran empty. Then come "perfect day", "perfect register" and "never ran out", plus an empty fourth slot for the tea maker's badge.
-   - **Cleanup song:** dough goes into its matching tub. Tap Done to return to the title screen.
+   - **Cleanup:** four picture cards, read out one by one: dough into its matching tub, the tea sheets back on their red, green and purple piles, the cups and lids stacked, and the ice and sugar cubes back in their bowls. Tap a card to hear it again. Then the cleanup song, and Done returns to the title screen.
 
 **Saving:** the day is saved after every step. If the app is closed in the middle of a day, the title screen shows a big **Continue** button. **New day** starts over; when a day is in progress it needs a second tap, so a stray tap cannot wipe it.
 
 **How to make:** after jobs are given out, the boss walks the team through the station cards from the printed sheet (boba pearls, coconut jelly, gummy hearts, how much topping, tea, ice, sugar, finish the drink). Each step lights up on the card as the boss reads it. Cards for things not in today's orders (like ice at level 1) are left out. The arrows go back and forward, tapping the card repeats a step, and "Got it!" moves on. Before opening also has a "How to make" button to watch them again.
 
-**Skipping:** hold **Skip** (top right) during Meet the boss or Before opening to go straight to the shop. In the settings, "Before the shift" can be set to Full, Jobs only (no how-to cards), or Skip to the shop.
+**Skipping:** hold **Skip** (top right) during Meet the boss or Before opening to go straight to the shop. In the settings, "Before the shift" can be set to Full, Jobs only (no how-to cards), or Skip to the shop. "After the shift" can skip the drink check (then there are no bonus coins) and the badges.
+
+**Language:** tap **English** or **中文** at the top of the title screen (also in the settings). In Chinese, everything on screen is in traditional characters and the boss and customers speak Mandarin with the iPad's Taiwan Mandarin voice (Meijia). The order words are the ones a Taiwan tea shop uses: 去冰 / 少冰 / 多冰 for ice and 無糖 / 半糖 / 全糖 for sugar, and the how-to cards explain each one (少冰 is 2 ice cubes, 半糖 is 1 sugar). The pictures on the printed station cards stay in English.
 
 **Decorating the shop:** the money from each day goes into the savings jar. At closing, after the badges, the day's decorator (it rotates between aprons, like the jobs) opens the decoration shop and may buy one thing: wall patterns, floors, counter colors, the sign, or things like a plant, a clock, string lights, a picture, balloons, a rug or a sleepy shop kitty. Tap once to see it in the little shop, tap again to buy. Every price is shown in coins; there are no mystery prizes, and decorations only change the look. Bought decorations show in the shop during play, and the next day a customer notices the new one. The coin button on the title screen shows the jar and lets you switch between decorations you already own.
 
@@ -61,7 +63,7 @@ The app needs to be hosted on the web once. After that it works offline.
 2. On the iPad, open **Safari** and go to the address GitHub gives you (it looks like `https://allentheli.github.io/BobaShop/`).
 3. Tap the **Share** button (the square with an arrow pointing up).
 4. Tap **Add to Home Screen**, then **Add**.
-5. Open Boba Shop from the Home Screen icon, turn the iPad sideways, and turn the sound up.
+5. Open Boba Shop Frenzy from the Home Screen icon, turn the iPad sideways, and turn the sound up.
 
 Always open it from the Home Screen icon. Safari can delete saved data for websites that have not been used for a while, and the Home Screen app is protected better.
 
@@ -101,6 +103,6 @@ Handy addresses for testing:
 ## For developers
 
 - Plain HTML, CSS and JavaScript modules with no build step. Open `index.html` through any web server.
-- `js/config.js` holds every number that can be tuned. `js/strings.js` holds every word and spoken line. `js/assets.js` lists every picture and sound. `js/menu.js` is the menu.
+- `js/config.js` holds every number that can be tuned. `js/strings.js` holds every English word and spoken line, and `js/strings-zh.js` the same in Chinese; `npm test` checks the two have the same lines. `js/assets.js` lists every picture and sound. `js/menu.js` is the menu.
 - `js/logic.js` (orders, prices, tips, stars, hints, inspection, badges), `js/shift.js` (the shift), `js/jobs.js` (jobs and rotation) and `js/storage.js` (saving) have no screen code and are covered by tests. Run them with `npm test` (needs Node 20 or newer, no packages to install).
 - `sw.js` keeps the app working offline. After adding, removing or changing any file, run `node tools/sw-files.mjs`: it rewrites the file list and the `VERSION` (made from the files' contents) so iPads pick up the change. `npm test` fails if this was forgotten.

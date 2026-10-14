@@ -1,5 +1,12 @@
 # Changelog
 
+## Name, Chinese, cleanup (October 14, 2026)
+
+- New name: Boba Shop Frenzy, and 手搖癮 in Chinese.
+- New: Chinese (Mandarin, traditional characters). Switch on the title screen or in the settings. The boss and customers speak Mandarin.
+- New: the cleanup has four cards: dough, tea sheets, cups and lids, ice and sugar.
+- New: "After the shift" setting to skip the drink check and the badges.
+
 ## Check-up (October 14, 2026)
 
 - Fixed: the app could get stuck waiting for the voice (the register, Before opening, or a served customer not leaving), especially after the iPad was locked.

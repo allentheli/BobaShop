@@ -4,6 +4,7 @@
 
 import { DEFAULTS } from './decor.js';
 import { h } from './ui.js';
+import { t } from './text.js';
 
 // els: { wall, floor, counter, sign, things, counterThings }
 // look: from shopLook() in js/decor.js. newId: a just-bought thing to pop in.
@@ -37,7 +38,7 @@ export function miniShop(scale = 0.4) {
   const things = h('div', { class: 'decor-things' });
   const counterThings = h('div', { class: 'decor-things' });
   const sign = h('div', { class: 'sign mini-sign' },
-    h('div', { class: 'sign-face sign-open' }, 'Open'));
+    h('div', { class: 'sign-face sign-open' }, t('ui.open')));
   const counter = h('div', { class: 'counter mini-counter' }, counterThings);
   const stage = h('div', { class: 'mini-stage' },
     wall, floor,

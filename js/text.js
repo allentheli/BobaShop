@@ -34,8 +34,17 @@ export function t(path, vars = {}) {
 export function line(path, vars = {}, rng = Math.random) {
   const v = lookup(path);
   if (v == null) return '';
-  return fill(pick(v, rng), vars);
+  return spoken(fill(pick(v, rng), vars));
 }
+
+// In Mandarin, 2 before a counting word is said 兩 ("2個" -> "兩個"), but
+// not as an order number (第2天 stays "di er tian").
+function spoken(s) {
+  if (lang !== 'zh') return s;
+  return s.replace(/(^|[^\d第])2(個|顆|杯|張|勺|天|位|人)/g, (_, before, word) => `${before}兩${word}`);
+}
+
+export function getLanguage() { return lang; }
 
 export function menuWord(detailId, optionId) {
   return lookup(`menu.${detailId}.${optionId}`) ?? optionId;
@@ -57,7 +66,7 @@ export function orderSentence(order, rng = Math.random) {
 }
 
 export function drinkPhrase(order) {
-  const P = (k, vars) => fill(lookup(`orderParts.${k}`), vars);
+  const P = (k, vars = {}) => fill(lookup(`orderParts.${k}`), vars);
   let tea = menuWord('tea', order.tea);
   if (order.brew === 'yes') tea = P('brewed', { tea });
   let topping = menuWord('topping', order.topping);
@@ -66,7 +75,7 @@ export function drinkPhrase(order) {
     if (order.extra === 'yes') topping = P('extra', { topping });
   }
   let s = order.size ? P('sized', { size: menuWord('size', order.size), tea }) : P('unsized', { tea });
-  s += ' ' + P('topping', { topping });
+  s += P('join') + (order.topping === 'none' ? P('noTopping') : P('topping', { topping }));
   const extras = [];
   if (order.ice) extras.push(menuWord('ice', order.ice));
   if (order.sugar) extras.push(menuWord('sugar', order.sugar));

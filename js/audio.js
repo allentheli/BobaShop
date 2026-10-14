@@ -11,6 +11,32 @@ let voiceOn = true;
 let muted = false;
 const files = {};
 let chosenVoice = null;
+let speechLang = 'en';
+
+// The voice for each language: the first of `names` the iPad has, then any
+// voice whose language matches `langs` (in that order).
+const VOICES = {
+  en: { names: ['Samantha', 'Karen', 'Moira', 'Tessa', 'Google US English', 'Daniel'], langs: [/^en[-_]US/i, /^en/i], fallback: 'en-US' },
+  // Mandarin as spoken in Taiwan (Meijia on iPad); a mainland Mandarin voice
+  // if that is missing. Never Cantonese (zh-HK).
+  zh: { names: ['Meijia', 'Mei-Jia', '美佳', 'Google 國語'], langs: [/^zh[-_]TW/i, /^zh[-_]Hant/i, /^zh[-_]CN/i, /^cmn/i], fallback: 'zh-TW' },
+};
+
+export function setSpeechLanguage(l) {
+  if (!VOICES[l] || l === speechLang) return;
+  speechLang = l;
+  stopSpeaking();
+  chosenVoice = null;
+  pickVoice();
+}
+
+// Roughly how long a line takes to say, in milliseconds per character:
+// a Chinese character takes about as long as a short English word.
+const CJK = /[\u3000-\u9fff\uf900-\ufaff\uff00-\uffef]/g;
+function speechLength(text, perLetter) {
+  const cjk = (text.match(CJK) || []).length;
+  return (text.length - cjk) * perLetter + cjk * perLetter * 3;
+}
 
 export function configureSound({ volume: v, voice }) {
   if (typeof v === 'number') volume = v;
@@ -80,11 +106,12 @@ export function resetSpeech() {
 function pickVoice() {
   if (!('speechSynthesis' in window)) return;
   const choose = () => {
+    const want = VOICES[speechLang];
     const voices = speechSynthesis.getVoices();
-    const en = voices.filter((v) => /^en/i.test(v.lang));
-    const pref = ['Samantha', 'Karen', 'Moira', 'Tessa', 'Google US English', 'Daniel'];
-    chosenVoice = pref.map((n) => en.find((v) => v.name.includes(n))).find(Boolean)
-      || en.find((v) => v.localService) || en[0] || null;
+    const matching = (re) => voices.filter((v) => re.test(v.lang));
+    const all = want.langs.flatMap(matching);
+    chosenVoice = want.names.map((n) => all.find((v) => v.name.includes(n))).find(Boolean)
+      || all.find((v) => v.localService) || all[0] || null;
   };
   choose();
   if (!chosenVoice) speechSynthesis.onvoiceschanged = choose;
@@ -106,7 +133,7 @@ export function speak(text, { pitch = 1, rate = 1, onStart, onEnd, interrupt = f
     const done = () => { if (resolved) return; resolved = true; onEnd && onEnd(); resolve(); };
     if (!text || muted || !voiceOn || !('speechSynthesis' in window)) {
       onStart && onStart();
-      setTimeout(done, text ? Math.min(2500, 300 + text.length * 45) : 0);
+      setTimeout(done, text ? Math.min(2500, 300 + speechLength(text, 45)) : 0);
       return;
     }
     if (interrupt) stopSpeaking();
@@ -123,7 +150,7 @@ function pump() {
   if (!chosenVoice) pickVoice();
   const u = new SpeechSynthesisUtterance(item.text);
   if (chosenVoice) u.voice = chosenVoice;
-  u.lang = chosenVoice ? chosenVoice.lang : 'en-US';
+  u.lang = chosenVoice ? chosenVoice.lang : VOICES[speechLang].fallback;
   u.pitch = item.pitch;
   u.rate = item.rate;
   u.volume = Math.max(0.1, volume);
@@ -139,7 +166,7 @@ function pump() {
     pump();
   };
   current = { item, finish };
-  const guard = setTimeout(finish, 1500 + item.text.length * 110);
+  const guard = setTimeout(finish, 1500 + speechLength(item.text, 110));
   u.onstart = () => { if (!finished && item.onStart) item.onStart(); };
   u.onend = finish;
   u.onerror = finish;
