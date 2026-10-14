@@ -2,8 +2,8 @@
 // the pause menu during a day. Settings are stored as overrides of
 // js/config.js in save.settings.
 //
-// The order level and the cup counts start with the next day, so a shift
-// never changes halfway. Everything else takes effect right away.
+// Every setting takes effect right away, even in the middle of a day:
+// customers who have not paid yet get an order that fits a new level.
 
 import { MENU } from './menu.js';
 import { APRONS } from './jobs.js';
@@ -31,7 +31,7 @@ const ALL_JOBS = ['cashier', 'manager', 'topping', 'tea', 'maker', 'front'];
 // onChange(): called after every change (the caller saves and reloads config)
 // onReset(kind): 'day' or 'everything'; onDemo(): start the demo (or null)
 // onClose(): the panel was closed
-export function openSettings({ host, save, getConfig, onChange, onReset, onDemo = null, onClose, dayRunning = false, onRestore = null }) {
+export function openSettings({ host, save, getConfig, onChange, onReset, onDemo = null, onClose, onRestore = null }) {
   const st = save.settings;
   const body = h('div', { class: 'settings-body scroll' });
   const closeBtn = h('button', { class: 'btn settings-close' });
@@ -92,7 +92,6 @@ export function openSettings({ host, save, getConfig, onChange, onReset, onDemo 
     heading.textContent = t('parent.title');
     closeBtn.textContent = t('parent.done');
     const levels = lookupList('parent.levels');
-    const nextDay = dayRunning ? t('parent.nextDay') : '';
     const enabled = c.enabledDetails || {};
     const isOn = (tg) => (enabled[tg.id] !== undefined ? enabled[tg.id] : c.level >= tg.level);
     const custom = Object.keys(enabled).length > 0;
@@ -157,7 +156,7 @@ export function openSettings({ host, save, getConfig, onChange, onReset, onDemo 
     body.replaceChildren(
       section(t('parent.language'), null,
         choices(LANGUAGES, c.language, (v) => set('language', v))),
-      section(t('parent.levelTitle'), t('parent.levelNote') + nextDay,
+      section(t('parent.levelTitle'), t('parent.levelNote'),
         choices(levels.map((_, i) => [i + 1, String(i + 1)]), custom ? null : c.level, (v) => { st.level = v; st.enabledDetails = {}; onChange(); draw(); }),
         h('p', { class: 'settings-note strong' }, custom ? t('parent.custom') : t('parent.levelSummary', { n: c.level, list: levels.slice(0, c.level).join(t('parent.levelJoin')) })),
         toggles),
@@ -166,7 +165,7 @@ export function openSettings({ host, save, getConfig, onChange, onReset, onDemo 
       section(t('parent.afterTitle'), t('parent.afterNote'),
         choices([[true, t('parent.inspectOn')], [false, t('parent.inspectOff')]], c.afterShift.inspect, (v) => set('afterShift', { ...c.afterShift, inspect: v })),
         choices([[true, t('parent.badgesOn')], [false, t('parent.badgesOff')]], c.afterShift.badges, (v) => set('afterShift', { ...c.afterShift, badges: v }))),
-      section(t('parent.cupsTitle'), t('parent.cupsNote') + nextDay,
+      section(t('parent.cupsTitle'), t('parent.cupsNote'),
         h('div', { class: 'cup-row' },
           h('div', { class: 'cup-field' }, h('span', {}, t('parent.small')), stepper(c.cups.small, 0, 99, (v) => set('cups', { ...c.cups, small: v }))),
           h('div', { class: 'cup-field' }, h('span', {}, t('parent.large')), stepper(c.cups.large, 0, 99, (v) => set('cups', { ...c.cups, large: v }))))),

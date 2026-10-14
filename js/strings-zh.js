@@ -78,7 +78,6 @@ export const ZH = {
     title: '家長設定',
     done: '完成',
     language: '語言 · Language',
-    nextDay: '從下一天開始。',
     levelTitle: '點餐等級',
     levelNote: '每升一級，點餐就多一個細節。',
     levels: ['茶和配料', '+ 杯子大小', '+ 多加配料', '+ 冰塊', '+ 糖', '+ 現做配料', '+ 排隊更長', '+ 現泡的茶'],

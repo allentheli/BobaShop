@@ -78,7 +78,6 @@ export const STRINGS = {
       title: 'Parent settings',
       done: 'Done',
       language: 'Language · 語言',
-      nextDay: ' Starts with the next day.',
       levelTitle: 'Order level',
       levelNote: 'Each level adds one detail to the orders.',
       levels: ['Tea and topping', '+ cup size', '+ extra topping', '+ ice', '+ sugar', '+ fresh topping', '+ a longer line', '+ freshly brewed tea'],

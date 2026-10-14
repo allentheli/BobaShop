@@ -41,6 +41,7 @@ export class Shift {
     this.countsCups = activeDetails(menu, config.level, config.enabledDetails).some((d) => d.id === 'size')
       && Object.values(config.cups || {}).some((n) => n > 0);
     this.cupsLeft = { ...config.cups };
+    this.cupsStart = { ...config.cups };   // to follow a change in the settings
   }
 
   get lineLimit() {
@@ -98,17 +99,23 @@ export class Shift {
     this.people = this.people.filter((p) => !(p.place === 'gone' && p.placeTime > 3));
   }
 
-  arrive() {
-    const type = this.pickCustomerType();
-    const order = generateOrder(this.menu, {
+  // A new order under the current rules, or null when no cup is left for it.
+  // `cupsFree` may be given to count a customer's own promised cup as free.
+  newOrder(cupsFree = this.cupsFree) {
+    return generateOrder(this.menu, {
       level: this.config.level,
       enabled: this.config.enabledDetails,
       owned: this.config.owned,
       bias: this.config.bias,
       previous: this.lastOrder,
-      cupsLeft: this.countsCups ? this.cupsFree : undefined,
+      cupsLeft: this.countsCups ? cupsFree : undefined,
       rng: this.rng,
     });
+  }
+
+  arrive() {
+    const type = this.pickCustomerType();
+    const order = this.newOrder();
     if (!order) return null;   // every cup is already promised
     this.lastOrder = order;
     const look = this.looks ? makeLook(type, this.looks.accessories, this.rng, this.looks.nameCount) : null;
@@ -242,13 +249,41 @@ export class Shift {
       registerMistakes: this.registerMistakes,
       rungUp: this.rungUp,
       cupsLeft: this.cupsLeft,
+      cupsStart: this.cupsStart,
       closedBecause: this.closedBecause,
       refunds: this.refunds,
     };
   }
 
+  // After a parent changed the order level or details in the middle of the
+  // shift: customers who have not paid yet (in line or at the counter) get a
+  // new order that fits, so the register and the orders always agree.
+  // Customers who already paid keep theirs (their drink is being made).
+  // Returns the customers whose order changed.
+  refitOrders() {
+    const want = activeDetails(this.menu, this.config.level, this.config.enabledDetails).map((d) => d.id).sort().join();
+    const changed = [];
+    for (const p of this.people) {
+      if (p.place !== 'line' && p.place !== 'counter') continue;
+      if (Object.keys(p.order).sort().join() === want) continue;
+      const free = this.cupsFree;
+      if (p.order.size && free[p.order.size] !== undefined) free[p.order.size]++;
+      const order = this.newOrder(free);
+      // No cup left for them: they quietly go (the screen is not drawn yet).
+      if (!order) { this.people = this.people.filter((q) => q !== p); continue; }
+      p.order = order;
+      if (p.place === 'counter') {
+        p.pays = payWith(price(order, this.config.prices), this.config.payCoins);
+        p.registerWrong = false;
+      }
+      changed.push(p);
+    }
+    return changed;
+  }
+
   // Rebuild a saved shift. Customers whose kind no longer exists come back
-  // as the first kind.
+  // as the first kind. If the cup counts were changed in the settings, the
+  // cups already used still count.
   static restore(data, opts) {
     const s = new Shift(opts);
     for (const k of ['time', 'closed', 'nextArrival', 'nextOrderNumber', 'lastOrder', 'sales', 'tips', 'registerMistakes', 'rungUp', 'cupsLeft', 'closedBecause', 'refunds']) {
@@ -260,6 +295,13 @@ export class Shift {
       type: opts.customers.find((c) => c.id === p.type) || opts.customers[0],
     }));
     nextId = Math.max(nextId, ...s.people.map((p) => p.id + 1));
+    if (data.cupsStart && data.cupsLeft) {
+      for (const size of Object.keys(s.cupsStart)) {
+        const used = (data.cupsStart[size] ?? 0) - (data.cupsLeft[size] ?? 0);
+        s.cupsLeft[size] = Math.max(0, s.cupsStart[size] - used);
+      }
+    }
+    s.refitOrders();
     return s;
   }
 

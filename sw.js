@@ -8,7 +8,7 @@
 //
 // Do not edit VERSION or FILES by hand: run `node tools/sw-files.mjs`.
 
-const VERSION = 'boba-957b3200c9be';
+const VERSION = 'boba-238a9cee4165';
 const FILES = [
   './',
   'index.html',

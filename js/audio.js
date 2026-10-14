@@ -97,7 +97,33 @@ export function unlock() {
 // Keep sound working after the iPad was locked, a call came in, or Siri
 // spoke. Called when the app comes back and on every tap.
 export function resume() {
+  if (!asleep && ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
+}
+
+// When the app is minimized or the iPad is locked, all sound stops: the
+// music pauses and the voice waits (a line that was cut off is said again).
+// Everything comes back when the app does. (The iPad would otherwise keep
+// playing, because the app asks to be heard even on silent.)
+let asleep = false;
+let hiddenAt = 0;
+function sleepSound() {
+  asleep = true;
+  hiddenAt = Date.now();
+  if (ctx && ctx.state === 'running') ctx.suspend().catch(() => {});
+  holdSpeech();
+}
+function wakeSound() {
+  asleep = false;
   if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
+  // iPad Safari's voice often stops working after a long break: start it fresh.
+  if (Date.now() - hiddenAt > 2000 && 'speechSynthesis' in window) {
+    speechSynthesis.cancel();
+    pickVoice();
+  }
+  pump();
+}
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => { if (document.hidden) sleepSound(); else wakeSound(); });
 }
 
 // The iPad can pause the app's sound by itself (the screen was locked, a
@@ -105,18 +131,13 @@ export function resume() {
 // this often; it tries to start the sound again, at most once a second.
 let lastWake = 0;
 export function keepSoundAwake() {
-  if (!ctx || ctx.state === 'running' || ctx.state === 'closed') return;
+  if (asleep || !ctx || ctx.state === 'running' || ctx.state === 'closed') return;
   const now = performance.now();
   if (now - lastWake < 1000) return;
   lastWake = now;
   ctx.resume().catch(() => {});
 }
 
-// iPad Safari can leave speech stuck after the screen was locked.
-export function resetSpeech() {
-  stopSpeaking();
-  pickVoice();
-}
 
 function pickVoice() {
   if (!('speechSynthesis' in window)) return;
@@ -158,7 +179,7 @@ export function speak(text, { pitch = 1, rate = 1, onStart, onEnd, interrupt = f
 }
 
 function pump() {
-  if (speaking || queue.length === 0) return;
+  if (asleep || speaking || queue.length === 0) return;
   const item = queue.shift();
   speaking = true;
   setTalkingState(true);
@@ -180,12 +201,28 @@ function pump() {
     item.done();
     pump();
   };
-  current = { item, finish };
+  // Cut off when the app is minimized: said again (from the start) on return.
+  const hold = () => {
+    if (finished) return;
+    finished = true;
+    clearTimeout(guard);
+    current = null;
+    speaking = false;
+    queue.unshift(item);
+  };
+  current = { item, finish, hold };
   const guard = setTimeout(finish, 1500 + speechLength(item.text, 110));
   u.onstart = () => { if (!finished && item.onStart) item.onStart(); };
   u.onend = finish;
   u.onerror = finish;
   speechSynthesis.speak(u);
+}
+
+function holdSpeech() {
+  const was = current;
+  if (was) was.hold();
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  setTalkingState(false);
 }
 
 // Stop all talking now. Every line that was waiting is finished (not

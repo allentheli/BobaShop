@@ -246,3 +246,51 @@ test('busy crowd with three drinks in progress: a longer line', () => {
   assert.equal(shift.waiting.length, 3);
   assert.equal(shift.line.length, 5);
 });
+
+// A parent changes the order level in the middle of the shift: the shift is
+// saved and picked up again with the new settings.
+function reopenWith(shift, overrides) {
+  const config = { ...structuredClone(CONFIG), ...overrides };
+  const data = JSON.parse(JSON.stringify(shift.toJSON()));
+  return Shift.restore(data, { config, menu: MENU, customers: CUSTOMERS });
+}
+
+test('raising the level mid-shift gives unpaid customers orders that fit, and the register agrees', () => {
+  const { shift, config } = make({ level: 1, arrivalEvery: 5, drinksInProgress: 1 });
+  run(shift, 3);
+  assert.ok(shift.ringUp(price(shift.counter.order, config.prices)));   // order 1 paid at level 1
+  run(shift, 20);
+  const paidOrder = { ...shift.waiting[0].order };
+  assert.equal(paidOrder.size, undefined);
+  assert.ok(shift.line.length >= 1);
+  const later = reopenWith(shift, { level: 5, arrivalEvery: 5, drinksInProgress: 1 });
+  for (const p of later.people.filter((q) => q.place === 'line' || q.place === 'counter')) {
+    for (const d of ['tea', 'topping', 'size', 'extra', 'ice', 'sugar']) assert.ok(d in p.order, `${d} missing`);
+  }
+  // The customer who already paid keeps their order.
+  assert.deepEqual(later.waiting[0].order, paidOrder);
+  // New arrivals follow the new level too.
+  run(later, 30);
+  const last = later.people[later.people.length - 1];
+  assert.ok('sugar' in last.order);
+});
+
+test('lowering the level mid-shift: the customer at the counter can still be charged', () => {
+  const { shift } = make({ level: 6 });
+  run(shift, 3);
+  assert.ok(shift.counter.order.size);
+  const later = reopenWith(shift, { level: 1 });
+  const c = later.counter;
+  assert.deepEqual(Object.keys(c.order).sort(), ['tea', 'topping']);
+  assert.ok(later.ringUp(CONFIG.prices.base));
+});
+
+test('changing the cup counts mid-shift keeps the cups already used', () => {
+  const { shift, config } = make({ level: 2, cups: { small: 6, large: 6 } });
+  run(shift, 3);
+  const size = shift.counter.order.size;
+  shift.ringUp(price(shift.counter.order, config.prices));
+  assert.equal(shift.cupsLeft[size], 5);
+  const later = reopenWith(shift, { level: 2, cups: { small: 20, large: 20 } });
+  assert.equal(later.cupsLeft[size], 19);
+});

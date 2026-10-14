@@ -51,7 +51,7 @@ A whole day runs from the title screen and back:
 
 - **Backup and restore:** save the whole shop (settings, savings jar, stars, history, decorations, the day in progress) as a file, or copy it as a text code. Load it on this or another iPad to bring the shop back; the app shows what is in the backup and asks twice before replacing anything.
 
-The order level and cup counts start with the next day. Everything else changes right away.
+Every setting changes right away, even in the middle of a day. If the order level or details change during the shift, customers who have not paid yet get a new order that fits (the one at the counter says it again); customers already waiting for their drink keep theirs.
 
 The order pictures match the printed order ticket: the same pictures, on the same row colors and numbers (1 Cup, 2 Tea, 3 Topping, 4 Ice, 5 Sugar, 6 Notes). Freshly brewed tea is not on the ticket, so the cashier writes it on the Notes line.
 

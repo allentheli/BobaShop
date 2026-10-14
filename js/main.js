@@ -8,7 +8,7 @@ import { BOSS, CUSTOMERS, ICONS, ACCESSORIES } from './assets.js';
 import { MENU } from './menu.js';
 import { starsFor, pickHint, pickInspection, makeLook } from './logic.js';
 import { t, line, setLanguage } from './text.js';
-import { unlock, speak, stopSpeaking, configureSound, setMuted, play, resume, resetSpeech, setSpeechLanguage } from './audio.js';
+import { unlock, speak, stopSpeaking, configureSound, setMuted, play, setSpeechLanguage } from './audio.js';
 import { createCharacter, setTalking, act, setExpression } from './character.js';
 import { h, icon, onTap, wait } from './ui.js';
 import { startOpen } from './open.js';
@@ -63,15 +63,6 @@ for (const ev of ['gesturestart', 'gesturechange', 'dblclick', 'contextmenu']) {
 }
 // Scrolling is allowed only inside panels marked .scroll (the settings).
 document.addEventListener('touchmove', (e) => { if (!e.target.closest('.scroll')) e.preventDefault(); }, { passive: false });
-// Coming back after the iPad was locked or another app was used: wake the
-// sound up, and clear any speech Safari left stuck.
-let hiddenAt = 0;
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { hiddenAt = Date.now(); return; }
-  resume();
-  if (Date.now() - hiddenAt > 2000) resetSpeech();
-});
-
 // ---- Offline support --------------------------------------------------------
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:' && !params.has('nosw')) {
@@ -208,7 +199,6 @@ function settingsPanel(host, { onClose = () => {}, withDemo = false } = {}) {
     host,
     save,
     getConfig: () => config,
-    dayRunning: !!save.day,
     onChange: () => { persist(); reloadConfig(); },
     onReset: (kind) => {
       if (kind === 'day') save.day = null;
@@ -253,7 +243,6 @@ function newDay() {
   // changing them in the settings never changes a shift halfway.
   save.day = {
     phase: 'meet', number: save.days + 1, startedAt: Date.now(), song: daySong(),
-    level: config.level, cups: { ...config.cups }, enabled: { ...(config.enabledDetails || {}) },
   };
   if (config.setup === 'skip') skipToShop();
   else { persist(); showPhase(); }
@@ -271,15 +260,6 @@ function setPhase(phase) {
   persist();
   stopSpeaking();
   showPhase();
-}
-
-// The order rules for a day: the level, details and cups it started with.
-function dayRules(day) {
-  return {
-    level: day.level ?? config.level,
-    enabledDetails: day.enabled ?? config.enabledDetails ?? {},
-    cups: day.cups ?? config.cups,
-  };
 }
 
 function showPhase() {
@@ -303,7 +283,7 @@ function showPhase() {
     case 'howto':
       howtoScreen({
         app,
-        cards: cardsFor(MENU, { level: dayRules(day).level, enabled: dayRules(day).enabledDetails, owned: config.owned }),
+        cards: cardsFor(MENU, { level: config.level, enabled: config.enabledDetails, owned: config.owned }),
         at: day.howto || { card: 0, step: 0 },
         onProgress: (at) => { day.howto = at; persist(); },
         onDone: () => setPhase('before'),
@@ -321,7 +301,7 @@ function showPhase() {
     case 'open':
       stopShift = startOpen({
         app,
-        config: { ...structuredClone(config), ...(config.crowds[config.crowd] || {}), bias: day.hint, ...dayRules(day) },
+        config: { ...structuredClone(config), ...(config.crowds[config.crowd] || {}), bias: day.hint },
         pause: pauseOptions(),
         music: { song: day.song || config.music.song, onPick: (id) => { day.song = id; rememberSong(id); persist(); } },
         decor: save.decorations,

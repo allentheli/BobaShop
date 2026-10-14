@@ -76,7 +76,7 @@ Choices made while building that the build instructions did not settle. One line
 - Patience bars (Allen's decision, changing the "no harsh countdown" rule): a bar over each waiting customer, green then yellow at the warning point then a pulsing red. No numbers. It can be hidden in the settings.
 - A sad face with a tear and a soft "aww" sound when a customer leaves; never a frown at the team.
 - The pause button needs a 1-second hold. It freezes the clock and every customer's patience. "End the shift" needs a second tap.
-- Settings opened during a shift take effect when the settings close (the shift restarts from its save, in the same state). The order level and cup counts wait for the next day.
+- Settings opened during a shift take effect when the settings close (the shift restarts from its save, in the same state). (Since October 14 this includes the order level and cups; see the end.)
 - Hard register: the customer pays with the smallest coin bigger than the price (5, 10 or 20), shown in the order bubble, and says it aloud.
 - Medium and hard registers have a number pad with two-digit entry and a price list next to the register.
 - Hard call mode hides the repeat button; the customer only says hello.
@@ -115,7 +115,7 @@ Choices made while building that the build instructions did not settle. One line
 - Spoken lines always finish: if the voice stalls, is stopped, or the app goes to the background, every waiting line counts as said, so no screen can wait forever. After the app has been hidden for more than 2 seconds the voice is reset, because Safari's voice often stops working after that.
 - Taps are counted per button, not for the whole screen, so two kids can tap different things at once. A button ignores taps in its first quarter second, so a tap meant for the old screen does not land on the new one.
 - The pause menu pauses every screen of the day, not only the shift. Keep playing redraws the screen from the saved step.
-- A day's order level, order details and cup counts are fixed when the day starts. Changing them in the settings applies from the next day, so the register and the customers always agree.
+- (Replaced the same day, see "Settings mid-day" below.) A day's order level, order details and cup counts were fixed when the day started.
 - Lowering "drinks in progress" during a shift lets the extra waiting customers finish; new ones wait until there is room.
 - If the shift ends early (or the sun sets) while paid customers are still waiting, the shop keeps their coins. Refunds are only for customers who give up.
 - 0 and 0 cups means "don't count cups", even when orders have sizes.
@@ -149,3 +149,8 @@ Choices made while building that the build instructions did not settle. One line
 
 - "No music" on the radio used to be remembered for every following day, so one tap on it silenced the music for good. Now it lasts for that day only; a new day plays the last real song picked. Music off for good is the parent setting.
 - The iPad can pause a web app's sound by itself (screen locked, a call, Siri, another app). While music is on, the player checks many times a second and asks for the sound back at most once a second, and also when the voice stops talking. Missed notes are skipped, not played all at once.
+
+## Settings mid-day and sound when minimized (October 14, 2026)
+
+- Allen wants a level change to work right away, so the per-day rules from the check-up are gone: the order level, details and cup counts follow the settings at once. When the shift picks up again after the settings close, customers in line or at the counter whose order no longer fits get a new one (the counter customer says it again, and pays again in hard mode); customers who already paid keep their order. A changed cup count keeps the cups already used. This replaces "A day's order level, order details and cup counts are fixed when the day starts" above.
+- Asking to play through the silent switch also let the iPad keep playing when the app was minimized. Now all sound stops when the app is hidden: the music pauses, the voice waits, and a line that was cut off is said again from the start when the app comes back.

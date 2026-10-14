@@ -2,6 +2,8 @@
 
 ## Name, Chinese, cleanup (October 14, 2026)
 
+- Fixed: music and voices kept playing when the app was minimized. Now all sound pauses and comes back with the app.
+- Fixed: changing the order level, details or cups during a day now applies right away, in the orders and the register.
 - Fixed: after anyone picked "No music" on the radio, every later day started without music. Now it lasts for that day only.
 - Fixed: the music now tries to start again if the iPad paused the app's sound (after the screen was locked, a call, or Siri).
 - Changed: no more long holds. Parents, Pause, Settings in the pause menu, and Skip all work with a normal tap.
